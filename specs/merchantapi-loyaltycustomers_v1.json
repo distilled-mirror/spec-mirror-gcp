@@ -1,54 +1,9 @@
 {
-  "protocol": "rest",
-  "id": "merchantapi:loyaltycustomers_v1",
-  "version_module": true,
-  "discoveryVersion": "v1",
-  "title": "Merchant API",
-  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
-  "name": "merchantapi",
-  "version": "loyaltycustomers_v1",
-  "basePath": "",
+  "batchPath": "batch",
   "ownerName": "Google",
-  "fullyEncodeReservedExpansion": true,
-  "resources": {
-    "accounts": {
-      "resources": {
-        "loyaltyCustomers": {
-          "methods": {
-            "manage": {
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "request": {
-                "$ref": "ManageLoyaltyCustomerMatchRequest"
-              },
-              "response": {
-                "$ref": "ManageLoyaltyCustomerMatchResponse"
-              },
-              "parameters": {
-                "parent": {
-                  "description": "Required. The parent account where this loyalty customer will be handled. Format: `accounts/{account}`",
-                  "type": "string",
-                  "location": "path",
-                  "required": true,
-                  "pattern": "^accounts/[^/]+$"
-                }
-              },
-              "httpMethod": "POST",
-              "path": "loyaltyCustomers/v1/{+parent}/loyaltyCustomers:manage",
-              "flatPath": "loyaltyCustomers/v1/accounts/{accountsId}/loyaltyCustomers:manage",
-              "id": "merchantapi.accounts.loyaltyCustomers.manage",
-              "description": "Manages (inserts, updates, or removes) a customer's loyalty tier information. This method serves as a single interface for all changes to a customer's loyalty status. The specific action (insert, update, or remove) is determined by the current state of the merchant-to-customer association and the `loyalty_tier` value provided in the request. **Operation Logic:** * **Upsert (Insert/Update):** Providing any valid tier other than `NON_MEMBER` will associate the customer with that tier. If an association already exists, it will be updated; otherwise, a new one will be created. * **Removal:** Setting `loyalty_tier` to `NON_MEMBER` will remove any existing loyalty association for the customer. **Privacy Note:** To protect user privacy, this method consistently returns a `200 OK` status with a default `LoyaltyCustomer` response if the customer's identifier cannot be matched to a Google account or if the user has not opted into loyalty personalization.",
-              "parameterOrder": [
-                "parent"
-              ]
-            }
-          }
-        }
-      }
-    }
-  },
+  "name": "merchantapi",
   "kind": "discovery#restDescription",
+  "revision": "20260826",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -59,77 +14,108 @@
     }
   },
   "schemas": {
-    "UserIdentifier": {
+    "ManageLoyaltyCustomerMatchRequest": {
       "type": "object",
-      "id": "UserIdentifier",
-      "description": "The user identifiers associated with the customer. At least one of the fields within this message must be provided.",
+      "description": "Request message for the ManageLoyaltyCustomerMatch method.",
       "properties": {
-        "address": {
-          "description": "Optional. The customer’s physical address.",
-          "$ref": "AddressInfo"
-        },
-        "phoneNumber": {
-          "description": "Optional. The customer's phone number, in [E.164 format](https://support.google.com/google-ads/answer/16355235) (e.g., \"+16502530000\").",
-          "type": "string"
-        },
-        "emailAddress": {
-          "description": "Optional. The customer’s email address.",
-          "type": "string"
+        "loyaltyCustomer": {
+          "$ref": "LoyaltyCustomer",
+          "description": "Required. The loyalty customer to insert, update, or remove."
         }
-      }
+      },
+      "id": "ManageLoyaltyCustomerMatchRequest"
+    },
+    "AddressInfo": {
+      "properties": {
+        "familyName": {
+          "type": "string",
+          "description": "Optional. The family name of the customer."
+        },
+        "givenName": {
+          "description": "Optional. The given name of the customer.",
+          "type": "string"
+        },
+        "regionCode": {
+          "type": "string",
+          "description": "Optional. The Unicode country/region code (CLDR) of the customer, such as \"US\" or \"CH\". This field is case-insensitive. For more information, see https://cldr.unicode.org/ and https://www.unicode.org/cldr/charts/latest/supplemental/territory_containment_un_m_49.html."
+        },
+        "state": {
+          "description": "Optional. The state or province of the customer.",
+          "type": "string"
+        },
+        "city": {
+          "description": "Optional. The city of the customer.",
+          "type": "string"
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Optional. The postal code (zip code) of the customer. **Format Rules:** * **United States:** 5-digit zip codes (e.g., \"94108\")."
+        }
+      },
+      "id": "AddressInfo",
+      "description": "Represents a customer’s physical address.",
+      "type": "object"
+    },
+    "ManageLoyaltyCustomerMatchResponse": {
+      "description": "Response message for the ManageLoyaltyCustomerMatch method.",
+      "id": "ManageLoyaltyCustomerMatchResponse",
+      "properties": {
+        "loyaltyCustomer": {
+          "$ref": "LoyaltyCustomer",
+          "description": "The loyalty customer that was inserted, updated, or removed. If the customer's identifier cannot be matched to a Google account or if the user has not opted into loyalty personalization, this field will contain a default `LoyaltyCustomer` instance."
+        }
+      },
+      "type": "object"
     },
     "ProductStatusChangeMessage": {
       "description": "The message that the merchant will receive to notify about product status change event",
       "id": "ProductStatusChangeMessage",
       "properties": {
+        "expirationTime": {
+          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
+          "format": "google-datetime",
+          "type": "string"
+        },
         "attribute": {
-          "type": "string",
-          "enum": [
-            "ATTRIBUTE_UNSPECIFIED",
-            "STATUS"
-          ],
           "description": "The attribute in the resource that changed, in this case it will be always `Status`.",
+          "type": "string",
           "enumDescriptions": [
             "Unspecified attribute",
             "Status of the changed entity"
-          ]
-        },
-        "changes": {
-          "items": {
-            "$ref": "ProductChange"
-          },
-          "type": "array",
-          "description": "A message to describe the change that happened to the product"
-        },
-        "resourceType": {
-          "type": "string",
-          "enum": [
-            "RESOURCE_UNSPECIFIED",
-            "PRODUCT",
-            "ACCOUNT_SERVICE"
           ],
-          "description": "The resource that changed, in this case it will always be `Product`.",
-          "enumDescriptions": [
-            "Unspecified resource",
-            "Resource type : product",
-            "Account service"
+          "enum": [
+            "ATTRIBUTE_UNSPECIFIED",
+            "STATUS"
           ]
-        },
-        "account": {
-          "type": "string",
-          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`"
-        },
-        "resource": {
-          "description": "The product name. Format: `accounts/{account}/products/{product}`",
-          "type": "string"
         },
         "managingAccount": {
           "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`",
           "type": "string"
         },
-        "expirationTime": {
-          "format": "google-datetime",
-          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
+        "resourceType": {
+          "description": "The resource that changed, in this case it will always be `Product`.",
+          "type": "string",
+          "enumDescriptions": [
+            "Unspecified resource",
+            "Resource type : product",
+            "Account service"
+          ],
+          "enum": [
+            "RESOURCE_UNSPECIFIED",
+            "PRODUCT",
+            "ACCOUNT_SERVICE"
+          ]
+        },
+        "resourceId": {
+          "type": "string",
+          "description": "The product id."
+        },
+        "resource": {
+          "type": "string",
+          "description": "The product name. Format: `accounts/{account}/products/{product}`"
+        },
+        "account": {
+          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`",
           "type": "string"
         },
         "eventTime": {
@@ -137,24 +123,41 @@
           "type": "string",
           "format": "google-datetime"
         },
-        "resourceId": {
-          "description": "The product id.",
-          "type": "string"
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "ProductChange"
+          },
+          "description": "A message to describe the change that happened to the product"
         }
       },
       "type": "object"
     },
     "LoyaltyCustomer": {
       "description": "Represents a customer’s loyalty information. Represents loyalty customer data in `ManageLoyaltyCustomerMatch` API, but is not a resource that can be retrieved or listed by other methods.",
-      "type": "object",
       "properties": {
+        "userIdentifier": {
+          "description": "Required. The identifiers for the customer.",
+          "$ref": "UserIdentifier"
+        },
         "pointBalance": {
-          "format": "int64",
           "description": "Optional. The point balance of the loyalty customer.",
+          "format": "int64",
           "type": "string"
         },
         "loyaltyTier": {
           "description": "Required. The tier label of the loyalty tier the customer belongs to.",
+          "enum": [
+            "LOYALTY_TIER_UNSPECIFIED",
+            "TIER1",
+            "TIER2",
+            "TIER3",
+            "TIER4",
+            "TIER5",
+            "TIER6",
+            "TIER7",
+            "NON_MEMBER"
+          ],
           "enumDescriptions": [
             "Loyalty tier unspecified.",
             "Loyalty tier 1.",
@@ -166,134 +169,37 @@
             "Loyalty tier 7.",
             "Disassociates the user from any loyalty tier. Only set to “NON_MEMBER” when the intent is to remove the user association from Google organic loyalty customer match experience."
           ],
-          "type": "string",
-          "enum": [
-            "LOYALTY_TIER_UNSPECIFIED",
-            "TIER1",
-            "TIER2",
-            "TIER3",
-            "TIER4",
-            "TIER5",
-            "TIER6",
-            "TIER7",
-            "NON_MEMBER"
-          ]
-        },
-        "userIdentifier": {
-          "$ref": "UserIdentifier",
-          "description": "Required. The identifiers for the customer."
+          "type": "string"
         }
       },
-      "id": "LoyaltyCustomer"
-    },
-    "AddressInfo": {
-      "id": "AddressInfo",
-      "properties": {
-        "familyName": {
-          "type": "string",
-          "description": "Optional. The family name of the customer."
-        },
-        "city": {
-          "description": "Optional. The city of the customer.",
-          "type": "string"
-        },
-        "givenName": {
-          "description": "Optional. The given name of the customer.",
-          "type": "string"
-        },
-        "postalCode": {
-          "type": "string",
-          "description": "Optional. The postal code (zip code) of the customer. **Format Rules:** * **United States:** 5-digit zip codes (e.g., \"94108\")."
-        },
-        "state": {
-          "type": "string",
-          "description": "Optional. The state or province of the customer."
-        },
-        "regionCode": {
-          "type": "string",
-          "description": "Optional. The Unicode country/region code (CLDR) of the customer, such as \"US\" or \"CH\". This field is case-insensitive. For more information, see https://cldr.unicode.org/ and https://www.unicode.org/cldr/charts/latest/supplemental/territory_containment_un_m_49.html."
-        }
-      },
-      "description": "Represents a customer’s physical address.",
+      "id": "LoyaltyCustomer",
       "type": "object"
     },
-    "ManageLoyaltyCustomerMatchRequest": {
-      "description": "Request message for the ManageLoyaltyCustomerMatch method.",
-      "type": "object",
+    "UserIdentifier": {
+      "id": "UserIdentifier",
       "properties": {
-        "loyaltyCustomer": {
-          "$ref": "LoyaltyCustomer",
-          "description": "Required. The loyalty customer to insert, update, or remove."
+        "phoneNumber": {
+          "description": "Optional. The customer's phone number, in [E.164 format](https://support.google.com/google-ads/answer/16355235) (e.g., \"+16502530000\").",
+          "type": "string"
+        },
+        "emailAddress": {
+          "description": "Optional. The customer’s email address.",
+          "type": "string"
+        },
+        "address": {
+          "description": "Optional. The customer’s physical address.",
+          "$ref": "AddressInfo"
         }
       },
-      "id": "ManageLoyaltyCustomerMatchRequest"
-    },
-    "ManageLoyaltyCustomerMatchResponse": {
       "type": "object",
-      "properties": {
-        "loyaltyCustomer": {
-          "$ref": "LoyaltyCustomer",
-          "description": "The loyalty customer that was inserted, updated, or removed. If the customer's identifier cannot be matched to a Google account or if the user has not opted into loyalty personalization, this field will contain a default `LoyaltyCustomer` instance."
-        }
-      },
-      "id": "ManageLoyaltyCustomerMatchResponse",
-      "description": "Response message for the ManageLoyaltyCustomerMatch method."
+      "description": "The user identifiers associated with the customer. At least one of the fields within this message must be provided."
     },
     "ProductChange": {
       "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
       "id": "ProductChange",
-      "type": "object",
       "properties": {
-        "oldValue": {
-          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
-          "type": "string"
-        },
         "reportingContext": {
-          "enumDeprecated": [
-            false,
-            false,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false
-          ],
-          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
-          "enum": [
-            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
-            "SHOPPING_ADS",
-            "DISCOVERY_ADS",
-            "DEMAND_GEN_ADS",
-            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
-            "VIDEO_ADS",
-            "DISPLAY_ADS",
-            "LOCAL_INVENTORY_ADS",
-            "VEHICLE_INVENTORY_ADS",
-            "FREE_LISTINGS",
-            "FREE_LISTINGS_UCP_CHECKOUT",
-            "FREE_LOCAL_LISTINGS",
-            "FREE_LOCAL_VEHICLE_LISTINGS",
-            "YOUTUBE_AFFILIATE",
-            "YOUTUBE_SHOPPING",
-            "CLOUD_RETAIL",
-            "LOCAL_CLOUD_RETAIL",
-            "PRODUCT_REVIEWS",
-            "MERCHANT_REVIEWS",
-            "YOUTUBE_CHECKOUT"
-          ],
+          "type": "string",
           "enumDescriptions": [
             "Not specified.",
             "[Shopping ads](https://support.google.com/merchants/answer/6149970).",
@@ -316,107 +222,201 @@
             "[Merchant Reviews](https://developers.google.com/merchant-review-feeds).",
             "YouTube Checkout ."
           ],
-          "type": "string"
-        },
-        "newValue": {
-          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
-          "type": "string"
+          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
+          "enumDeprecated": [
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "enum": [
+            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
+            "SHOPPING_ADS",
+            "DISCOVERY_ADS",
+            "DEMAND_GEN_ADS",
+            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
+            "VIDEO_ADS",
+            "DISPLAY_ADS",
+            "LOCAL_INVENTORY_ADS",
+            "VEHICLE_INVENTORY_ADS",
+            "FREE_LISTINGS",
+            "FREE_LISTINGS_UCP_CHECKOUT",
+            "FREE_LOCAL_LISTINGS",
+            "FREE_LOCAL_VEHICLE_LISTINGS",
+            "YOUTUBE_AFFILIATE",
+            "YOUTUBE_SHOPPING",
+            "CLOUD_RETAIL",
+            "LOCAL_CLOUD_RETAIL",
+            "PRODUCT_REVIEWS",
+            "MERCHANT_REVIEWS",
+            "YOUTUBE_CHECKOUT"
+          ]
         },
         "regionCode": {
           "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format.",
           "type": "string"
+        },
+        "oldValue": {
+          "type": "string",
+          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
+        },
+        "newValue": {
+          "type": "string",
+          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
         }
-      }
+      },
+      "type": "object"
     }
   },
-  "canonicalName": "Merchant",
-  "revision": "20260821",
+  "basePath": "",
+  "documentationLink": "https://developers.google.com/merchant/api",
+  "fullyEncodeReservedExpansion": true,
+  "baseUrl": "https://merchantapi.googleapis.com/",
+  "title": "Merchant API",
+  "ownerDomain": "google.com",
+  "version": "loyaltycustomers_v1",
+  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
+  "servicePath": "",
   "parameters": {
-    "uploadType": {
+    "access_token": {
       "location": "query",
       "type": "string",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
+      "description": "OAuth access token."
     },
     "upload_protocol": {
-      "location": "query",
       "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
-      "type": "string"
-    },
-    "key": {
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
       "type": "string",
       "location": "query"
     },
-    "$.xgafv": {
-      "enum": [
-        "1",
-        "2"
-      ],
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "location": "query",
-      "type": "string",
-      "description": "V1 error format."
-    },
     "alt": {
-      "location": "query",
-      "type": "string",
-      "default": "json",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
       "enumDescriptions": [
         "Responses with Content-Type of application/json",
         "Media download with context-dependent Content-Type",
         "Responses with Content-Type of application/x-protobuf"
       ],
-      "description": "Data format for response.",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ]
-    },
-    "access_token": {
       "location": "query",
-      "description": "OAuth access token.",
+      "default": "json",
+      "description": "Data format for response.",
       "type": "string"
     },
-    "quotaUser": {
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
-      "location": "query"
-    },
     "callback": {
+      "description": "JSONP",
       "location": "query",
-      "type": "string",
-      "description": "JSONP"
+      "type": "string"
     },
-    "fields": {
-      "location": "query",
+    "key": {
       "type": "string",
-      "description": "Selector specifying which fields to include in a partial response."
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "description": "Returns response with indentations and line breaks.",
-      "location": "query",
-      "default": "true"
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "location": "query"
     },
     "oauth_token": {
       "description": "OAuth 2.0 token for the current user.",
       "type": "string",
       "location": "query"
+    },
+    "prettyPrint": {
+      "location": "query",
+      "default": "true",
+      "type": "boolean",
+      "description": "Returns response with indentations and line breaks."
+    },
+    "quotaUser": {
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "type": "string",
+      "location": "query"
+    },
+    "$.xgafv": {
+      "location": "query",
+      "type": "string",
+      "description": "V1 error format.",
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "uploadType": {
+      "location": "query",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "type": "string"
+    },
+    "fields": {
+      "type": "string",
+      "location": "query",
+      "description": "Selector specifying which fields to include in a partial response."
     }
   },
-  "description": "Programmatically manage your Merchant Center Accounts.",
   "icons": {
     "x32": "http://www.google.com/images/icons/product/search-32.gif",
     "x16": "http://www.google.com/images/icons/product/search-16.gif"
   },
-  "servicePath": "",
-  "ownerDomain": "google.com",
-  "baseUrl": "https://merchantapi.googleapis.com/",
-  "batchPath": "batch",
+  "discoveryVersion": "v1",
+  "description": "Programmatically manage your Merchant Center Accounts.",
   "rootUrl": "https://merchantapi.googleapis.com/",
-  "documentationLink": "https://developers.google.com/merchant/api"
+  "canonicalName": "Merchant",
+  "version_module": true,
+  "protocol": "rest",
+  "id": "merchantapi:loyaltycustomers_v1",
+  "resources": {
+    "accounts": {
+      "resources": {
+        "loyaltyCustomers": {
+          "methods": {
+            "manage": {
+              "path": "loyaltyCustomers/v1/{+parent}/loyaltyCustomers:manage",
+              "request": {
+                "$ref": "ManageLoyaltyCustomerMatchRequest"
+              },
+              "id": "merchantapi.accounts.loyaltyCustomers.manage",
+              "parameterOrder": [
+                "parent"
+              ],
+              "flatPath": "loyaltyCustomers/v1/accounts/{accountsId}/loyaltyCustomers:manage",
+              "response": {
+                "$ref": "ManageLoyaltyCustomerMatchResponse"
+              },
+              "parameters": {
+                "parent": {
+                  "required": true,
+                  "pattern": "^accounts/[^/]+$",
+                  "description": "Required. The parent account where this loyalty customer will be handled. Format: `accounts/{account}`",
+                  "location": "path",
+                  "type": "string"
+                }
+              },
+              "description": "Manages (inserts, updates, or removes) a customer's loyalty tier information. This method serves as a single interface for all changes to a customer's loyalty status. The specific action (insert, update, or remove) is determined by the current state of the merchant-to-customer association and the `loyalty_tier` value provided in the request. **Operation Logic:** * **Upsert (Insert/Update):** Providing any valid tier other than `NON_MEMBER` will associate the customer with that tier. If an association already exists, it will be updated; otherwise, a new one will be created. * **Removal:** Setting `loyalty_tier` to `NON_MEMBER` will remove any existing loyalty association for the customer. **Privacy Note:** To protect user privacy, this method consistently returns a `200 OK` status with a default `LoyaltyCustomer` response if the customer's identifier cannot be matched to a Google account or if the user has not opted into loyalty personalization.",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "httpMethod": "POST"
+            }
+          }
+        }
+      }
+    }
+  }
 }
