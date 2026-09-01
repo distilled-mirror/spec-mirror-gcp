@@ -1,63 +1,338 @@
 {
-  "fullyEncodeReservedExpansion": true,
-  "title": "Looker (Google Cloud core) API",
+  "servicePath": "",
+  "version_module": true,
   "baseUrl": "https://looker.googleapis.com/",
+  "id": "looker:v1",
+  "icons": {
+    "x32": "http://www.google.com/images/icons/product/search-32.gif",
+    "x16": "http://www.google.com/images/icons/product/search-16.gif"
+  },
+  "kind": "discovery#restDescription",
+  "description": "",
+  "title": "Looker (Google Cloud core) API",
+  "protocol": "rest",
   "ownerName": "Google",
-  "documentationLink": "https://cloud.google.com/looker/docs/reference/rest/",
   "schemas": {
-    "Instance": {
+    "ExportMetadata": {
+      "id": "ExportMetadata",
+      "type": "object",
       "properties": {
-        "maintenanceSchedule": {
-          "$ref": "MaintenanceSchedule",
-          "description": "Maintenance schedule for this instance."
+        "exportEncryptionKey": {
+          "description": "Encryption key that was used to encrypt the export artifacts.",
+          "$ref": "ExportMetadataEncryptionKey"
         },
-        "maintenanceWindow": {
-          "description": "Maintenance window for this instance.",
-          "$ref": "MaintenanceWindow"
+        "source": {
+          "enumDescriptions": [
+            "Source not specified",
+            "Source of export is Looker Core",
+            "Source of export is Looker Original"
+          ],
+          "enum": [
+            "SOURCE_UNSPECIFIED",
+            "LOOKER_CORE",
+            "LOOKER_ORIGINAL"
+          ],
+          "type": "string",
+          "description": "The source type of the migration."
+        },
+        "lookerVersion": {
+          "description": "Version of instance when the export was created.",
+          "type": "string"
+        },
+        "lookerPlatformEdition": {
+          "description": "Platform edition of the exported instance.",
+          "type": "string"
+        },
+        "lookerInstance": {
+          "description": "Name of the exported instance. Format: projects/{project}/locations/{location}/instances/{instance}",
+          "type": "string"
+        },
+        "lookerEncryptionKey": {
+          "type": "string",
+          "description": "Looker encryption key, encrypted with the provided export encryption key. This value will only be populated if the looker instance uses Looker managed encryption instead of CMEK."
+        },
+        "esaSourceDatasetId": {
+          "type": "string",
+          "description": "Source BigQuery dataset (formatted as `project_id:dataset_id`) for O2C Elite System Activity (ESA) direct dataset migration."
+        },
+        "filePaths": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of files created as part of export artifact (excluding the metadata). The paths are relative to the folder containing the metadata."
+        }
+      },
+      "description": "ExportMetadata represents the metadata of the exported artifacts. The metadata.json file in export artifact can be parsed as this message"
+    },
+    "ListLocationsResponse": {
+      "properties": {
+        "locations": {
+          "description": "A list of locations that matches the specified filter in the request.",
+          "items": {
+            "$ref": "Location"
+          },
+          "type": "array"
+        },
+        "nextPageToken": {
+          "description": "The standard List next-page token.",
+          "type": "string"
+        }
+      },
+      "description": "The response message for Locations.ListLocations.",
+      "id": "ListLocationsResponse",
+      "type": "object"
+    },
+    "InstanceBackup": {
+      "description": "The details of a backup resource.",
+      "type": "object",
+      "properties": {
+        "state": {
+          "description": "Output only. The current state of the backup.",
+          "enumDescriptions": [
+            "The state of the backup is unknown.",
+            "The backup is being created.",
+            "The backup is being deleted.",
+            "The backup is active and ready to use.",
+            "The backup failed."
+          ],
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "CREATING",
+            "DELETING",
+            "ACTIVE",
+            "FAILED"
+          ],
+          "type": "string",
+          "readOnly": true
         },
         "name": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. Format: `projects/{project}/locations/{location}/instances/{instance}`."
+          "description": "Immutable. The relative resource name of the backup, in the following form: `projects/{project_number}/locations/{location_id}/instances/{instance_id}/backups/{backup}`",
+          "type": "string"
         },
-        "publicIpEnabled": {
-          "description": "Whether public IP is enabled on the Looker instance.",
+        "createTime": {
+          "type": "string",
+          "description": "Output only. The time when the backup was started.",
+          "readOnly": true,
+          "format": "google-datetime"
+        },
+        "expireTime": {
+          "description": "Output only. The time when the backup will be deleted.",
+          "format": "google-datetime",
+          "readOnly": true,
+          "type": "string"
+        },
+        "encryptionConfig": {
+          "$ref": "EncryptionConfig",
+          "description": "Output only. Current status of the CMEK encryption",
+          "readOnly": true
+        }
+      },
+      "id": "InstanceBackup"
+    },
+    "ListOperationsResponse": {
+      "properties": {
+        "operations": {
+          "description": "A list of operations that matches the specified filter in the request.",
+          "type": "array",
+          "items": {
+            "$ref": "Operation"
+          }
+        },
+        "unreachable": {
+          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "The standard List next-page token."
+        }
+      },
+      "type": "object",
+      "id": "ListOperationsResponse",
+      "description": "The response message for Operations.ListOperations."
+    },
+    "ExportEncryptionConfig": {
+      "id": "ExportEncryptionConfig",
+      "properties": {
+        "kmsKeyName": {
+          "description": "Required. Name of the CMEK key in KMS.",
+          "type": "string"
+        }
+      },
+      "description": "Configuration for Encryption - e.g. CMEK.",
+      "type": "object"
+    },
+    "PeriodicExportConfig": {
+      "id": "PeriodicExportConfig",
+      "properties": {
+        "kmsKey": {
+          "type": "string",
+          "description": "Required. Name of the CMEK key in KMS. Format: projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}"
+        },
+        "startTime": {
+          "description": "Required. Time in UTC to start the periodic export job.",
+          "$ref": "TimeOfDay"
+        },
+        "gcsUri": {
+          "type": "string",
+          "description": "Required. Cloud Storage bucket URI for periodic export. Format: gs://{bucket_name}"
+        }
+      },
+      "description": "Configuration for periodic export.",
+      "type": "object"
+    },
+    "UndeleteInstanceRequest": {
+      "description": "Request options for undeleting an instance.",
+      "properties": {},
+      "type": "object",
+      "id": "UndeleteInstanceRequest"
+    },
+    "Date": {
+      "properties": {
+        "day": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant."
+        },
+        "month": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day."
+        },
+        "year": {
+          "type": "integer",
+          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.",
+          "format": "int32"
+        }
+      },
+      "id": "Date",
+      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp",
+      "type": "object"
+    },
+    "UserMetadata": {
+      "id": "UserMetadata",
+      "description": "Metadata about users for a Looker instance.",
+      "properties": {
+        "additionalStandardUserCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Optional. The number of additional standard users the instance owner has purchased."
+        },
+        "additionalViewerUserCount": {
+          "description": "Optional. The number of additional viewer users the instance owner has purchased.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "additionalDeveloperUserCount": {
+          "description": "Optional. The number of additional developer users the instance owner has purchased.",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "CustomDomain": {
+      "id": "CustomDomain",
+      "properties": {
+        "domain": {
+          "description": "Domain name.",
+          "type": "string"
+        },
+        "state": {
+          "enumDescriptions": [
+            "Unspecified state.",
+            "DNS record is not created.",
+            "DNS record is created.",
+            "Calling SLM to update.",
+            "ManagedCertificate is ready.",
+            "ManagedCertificate is not ready.",
+            "Status is not known."
+          ],
+          "description": "Domain state.",
+          "type": "string",
+          "enum": [
+            "CUSTOM_DOMAIN_STATE_UNSPECIFIED",
+            "UNVERIFIED",
+            "VERIFIED",
+            "MODIFYING",
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        }
+      },
+      "description": "Custom domain information.",
+      "type": "object"
+    },
+    "MaintenanceSchedule": {
+      "id": "MaintenanceSchedule",
+      "type": "object",
+      "description": "Published upcoming future maintenance schedule.",
+      "properties": {
+        "startTime": {
+          "format": "google-datetime",
+          "description": "The scheduled start time for the maintenance.",
+          "type": "string"
+        },
+        "endTime": {
+          "format": "google-datetime",
+          "type": "string",
+          "description": "The scheduled end time for the maintenance."
+        }
+      }
+    },
+    "Empty": {
+      "properties": {},
+      "type": "object",
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "id": "Empty"
+    },
+    "Instance": {
+      "properties": {
+        "controlledEgressEnabled": {
+          "description": "Optional. Whether controlled egress is enabled on the Looker instance.",
           "type": "boolean"
         },
-        "ingressPublicIp": {
+        "encryptionConfig": {
+          "description": "Encryption configuration (CMEK). Only set if CMEK has been enabled on the instance.",
+          "$ref": "EncryptionConfig"
+        },
+        "classType": {
+          "type": "string",
+          "description": "Optional. Storage class of the instance.",
+          "enum": [
+            "CLASS_TYPE_UNSPECIFIED",
+            "R1",
+            "P1"
+          ],
+          "enumDescriptions": [
+            "Unspecified storage class.",
+            "Filestore.",
+            "PD SSD."
+          ]
+        },
+        "lookerUri": {
+          "description": "Output only. Looker instance URI which can be used to access the Looker Instance UI.",
+          "readOnly": true,
+          "type": "string"
+        },
+        "suspendedTime": {
+          "description": "Output only. The time when the Looker instance was suspended (soft deleted).",
           "readOnly": true,
           "type": "string",
-          "description": "Output only. Public Ingress IP (IPv4)."
+          "format": "google-datetime"
         },
         "denyMaintenancePeriod": {
           "description": "Maintenance denial period for this instance.",
           "$ref": "DenyMaintenancePeriod"
         },
-        "satisfiesPzi": {
-          "type": "boolean",
-          "description": "Output only. Reserved for future use.",
-          "readOnly": true
-        },
-        "fipsEnabled": {
-          "type": "boolean",
-          "description": "Optional. Whether FIPS is enabled on the Looker instance."
-        },
         "platformEdition": {
           "type": "string",
-          "enumDescriptions": [
-            "Represents an unspecified platform edition.",
-            "Represents the Looker Core Trial edition.",
-            "Represents the Looker Core Standard edition.",
-            "Represents the Looker Core Standard Annual edition.",
-            "Represents the Looker Core Enterprise Annual edition.",
-            "Represents the Looker Core Embed Annual edition.",
-            "Represents the Looker Core Nonprod Standard Annual edition.",
-            "Represents the Looker Core Nonprod Enterprise Annual edition.",
-            "Represents the Looker Core Nonprod Embed Annual edition.",
-            "Represents the Looker Core Trial Standard edition.",
-            "Represents the Looker Core Trial Enterprise edition.",
-            "Represents the Looker Core Trial Embed edition."
-          ],
+          "description": "Platform edition.",
           "enum": [
             "PLATFORM_EDITION_UNSPECIFIED",
             "LOOKER_CORE_TRIAL",
@@ -72,183 +347,117 @@
             "LOOKER_CORE_TRIAL_ENTERPRISE",
             "LOOKER_CORE_TRIAL_EMBED"
           ],
-          "description": "Platform edition."
-        },
-        "ingressIpAllowlistConfig": {
-          "description": "Optional. Ingress IP allowlist configuration for the Looker instance.",
-          "$ref": "IngressIpAllowlistConfig"
-        },
-        "suspendedTime": {
-          "format": "google-datetime",
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The time when the Looker instance was suspended (soft deleted)."
-        },
-        "releaseChannel": {
           "enumDescriptions": [
-            "Unspecified release channel.",
-            "Rapid: Most frequent updates.",
-            "Regular: Balanced, default for production.",
-            "Stable: Least frequent, for maximum stability."
-          ],
-          "description": "Optional. The selected release channel for the instance.",
-          "type": "string",
-          "enum": [
-            "RELEASE_CHANNEL_UNSPECIFIED",
-            "RAPID",
-            "REGULAR",
-            "STABLE"
+            "Represents an unspecified platform edition.",
+            "Represents the Looker Core Trial edition.",
+            "Represents the Looker Core Standard edition.",
+            "Represents the Looker Core Standard Annual edition.",
+            "Represents the Looker Core Enterprise Annual edition.",
+            "Represents the Looker Core Embed Annual edition.",
+            "Represents the Looker Core Nonprod Standard Annual edition.",
+            "Represents the Looker Core Nonprod Enterprise Annual edition.",
+            "Represents the Looker Core Nonprod Embed Annual edition.",
+            "Represents the Looker Core Trial Standard edition.",
+            "Represents the Looker Core Trial Enterprise edition.",
+            "Represents the Looker Core Trial Embed edition."
           ]
         },
-        "classType": {
-          "type": "string",
-          "enum": [
-            "CLASS_TYPE_UNSPECIFIED",
-            "R1",
-            "P1"
-          ],
-          "description": "Optional. Storage class of the instance.",
-          "enumDescriptions": [
-            "Unspecified storage class.",
-            "Filestore.",
-            "PD SSD."
-          ]
+        "acceleratedSecurityPatchEnabled": {
+          "type": "boolean",
+          "description": "Optional. Accelerated security patch enabled for the instance."
         },
-        "createTime": {
-          "format": "google-datetime",
-          "description": "Output only. The time when the Looker instance provisioning was first requested.",
+        "ingressPrivateIp": {
+          "description": "Output only. Private Ingress IP (IPv4).",
           "readOnly": true,
           "type": "string"
         },
-        "userMetadata": {
-          "$ref": "UserMetadata",
-          "description": "Optional. User metadata."
+        "lastDenyMaintenancePeriod": {
+          "$ref": "DenyMaintenancePeriod",
+          "description": "Output only. Last computed maintenance denial period for this instance.",
+          "readOnly": true
         },
-        "adminSettings": {
-          "description": "Looker Instance Admin settings.",
-          "$ref": "AdminSettings"
+        "updateTime": {
+          "description": "Output only. The time when the Looker instance was last updated.",
+          "readOnly": true,
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "privateIpEnabled": {
+          "description": "Whether private IP is enabled on the Looker instance.",
+          "type": "boolean"
+        },
+        "fipsEnabled": {
+          "type": "boolean",
+          "description": "Optional. Whether FIPS is enabled on the Looker instance."
+        },
+        "createTime": {
+          "type": "string",
+          "readOnly": true,
+          "format": "google-datetime",
+          "description": "Output only. The time when the Looker instance provisioning was first requested."
+        },
+        "maintenanceSchedule": {
+          "$ref": "MaintenanceSchedule",
+          "description": "Maintenance schedule for this instance."
+        },
+        "satisfiesPzs": {
+          "readOnly": true,
+          "description": "Output only. Reserved for future use.",
+          "type": "boolean"
+        },
+        "egressPublicIp": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Public Egress IP (IPv4)."
+        },
+        "customDomain": {
+          "description": "Custom domain configuration for the instance.",
+          "$ref": "CustomDomain"
+        },
+        "pscConfig": {
+          "$ref": "PscConfig",
+          "description": "Optional. PSC configuration. Used when `psc_enabled` is true."
+        },
+        "maintenanceWindow": {
+          "$ref": "MaintenanceWindow",
+          "description": "Maintenance window for this instance."
+        },
+        "ingressPublicIp": {
+          "type": "string",
+          "description": "Output only. Public Ingress IP (IPv4).",
+          "readOnly": true
         },
         "softDeleteReason": {
-          "readOnly": true,
+          "type": "string",
+          "enumDescriptions": [
+            "Soft delete reason is unspecified. This is the default value.",
+            "Instance is soft deleted due to billing account issues.",
+            "Instance is soft deleted due to trial expiration.",
+            "Instance is soft deleted by the customer."
+          ],
           "enum": [
             "SOFT_DELETE_REASON_UNSPECIFIED",
             "BILLING_ACCOUNT_ISSUE",
             "TRIAL_EXPIRED",
             "CUSTOMER_REQUEST"
           ],
-          "type": "string",
           "description": "Output only. The reason for the instance being in a soft-deleted state.",
-          "enumDescriptions": [
-            "Soft delete reason is unspecified. This is the default value.",
-            "Instance is soft deleted due to billing account issues.",
-            "Instance is soft deleted due to trial expiration.",
-            "Instance is soft deleted by the customer."
-          ]
-        },
-        "oauthConfig": {
-          "description": "Looker instance OAuth login settings.",
-          "$ref": "OAuthConfig"
-        },
-        "periodicExportConfig": {
-          "description": "Optional. Configuration for periodic export.",
-          "$ref": "PeriodicExportConfig"
-        },
-        "catalogIntegrationOptOut": {
-          "description": "Optional. Indicates whether catalog integration is disabled for the Looker instance.",
-          "type": "boolean"
-        },
-        "linkedLspProjectNumber": {
-          "description": "Optional. Linked Google Cloud Project Number for Looker Studio Pro.",
-          "format": "int64",
-          "type": "string"
-        },
-        "controlledEgressConfig": {
-          "$ref": "ControlledEgressConfig",
-          "description": "Optional. Controlled egress configuration."
-        },
-        "egressPublicIp": {
-          "readOnly": true,
-          "description": "Output only. Public Egress IP (IPv4).",
-          "type": "string"
-        },
-        "consumerNetwork": {
-          "type": "string",
-          "description": "Network name in the consumer project. Format: `projects/{project}/global/networks/{network}`. Note that the consumer network may be in a different GCP project than the consumer project that is hosting the Looker Instance."
-        },
-        "lookerUri": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. Looker instance URI which can be used to access the Looker Instance UI."
-        },
-        "satisfiesPzs": {
-          "readOnly": true,
-          "type": "boolean",
-          "description": "Output only. Reserved for future use."
-        },
-        "updateTime": {
-          "type": "string",
-          "format": "google-datetime",
-          "description": "Output only. The time when the Looker instance was last updated.",
           "readOnly": true
-        },
-        "pscEnabled": {
-          "type": "boolean",
-          "description": "Optional. Whether to use Private Service Connect (PSC) for private IP connectivity. If true, neither `public_ip_enabled` nor `private_ip_enabled` can be true."
-        },
-        "customDomain": {
-          "description": "Custom domain configuration for the instance.",
-          "$ref": "CustomDomain"
-        },
-        "encryptionConfig": {
-          "description": "Encryption configuration (CMEK). Only set if CMEK has been enabled on the instance.",
-          "$ref": "EncryptionConfig"
         },
         "geminiEnabled": {
-          "type": "boolean",
-          "description": "Optional. Whether Gemini feature is enabled on the Looker instance or not."
-        },
-        "pscConfig": {
-          "description": "Optional. PSC configuration. Used when `psc_enabled` is true.",
-          "$ref": "PscConfig"
-        },
-        "controlledEgressEnabled": {
-          "description": "Optional. Whether controlled egress is enabled on the Looker instance.",
+          "description": "Optional. Whether Gemini feature is enabled on the Looker instance or not.",
           "type": "boolean"
         },
-        "acceleratedSecurityPatchEnabled": {
-          "type": "boolean",
-          "description": "Optional. Accelerated security patch enabled for the instance."
+        "ingressIpAllowlistConfig": {
+          "description": "Optional. Ingress IP allowlist configuration for the Looker instance.",
+          "$ref": "IngressIpAllowlistConfig"
         },
-        "privateIpEnabled": {
-          "type": "boolean",
-          "description": "Whether private IP is enabled on the Looker instance."
-        },
-        "reservedRange": {
+        "name": {
           "type": "string",
-          "description": "Name of a reserved IP address range within the Instance.consumer_network, to be used for private services access connection. May or may not be specified in a create request."
-        },
-        "lastDenyMaintenancePeriod": {
           "readOnly": true,
-          "$ref": "DenyMaintenancePeriod",
-          "description": "Output only. Last computed maintenance denial period for this instance."
-        },
-        "ingressPrivateIp": {
-          "type": "string",
-          "description": "Output only. Private Ingress IP (IPv4).",
-          "readOnly": true
+          "description": "Output only. Format: `projects/{project}/locations/{location}/instances/{instance}`."
         },
         "state": {
-          "enumDescriptions": [
-            "State is unspecified.",
-            "Instance is active and ready for use.",
-            "Instance provisioning is in progress.",
-            "Instance is in a failed state.",
-            "Instance was suspended.",
-            "Instance update is in progress.",
-            "Instance delete is in progress.",
-            "Instance is being exported.",
-            "Instance is importing data."
-          ],
           "enum": [
             "STATE_UNSPECIFIED",
             "ACTIVE",
@@ -260,94 +469,196 @@
             "EXPORTING",
             "IMPORTING"
           ],
+          "type": "string",
           "readOnly": true,
           "description": "Output only. The state of the instance.",
-          "type": "string"
-        },
-        "lookerVersion": {
-          "description": "Output only. The Looker version that the instance is using.",
-          "readOnly": true,
-          "type": "string"
-        }
-      },
-      "description": "A Looker instance.",
-      "id": "Instance",
-      "type": "object"
-    },
-    "PeriodicExportConfig": {
-      "id": "PeriodicExportConfig",
-      "description": "Configuration for periodic export.",
-      "type": "object",
-      "properties": {
-        "kmsKey": {
-          "type": "string",
-          "description": "Required. Name of the CMEK key in KMS. Format: projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}"
-        },
-        "gcsUri": {
-          "type": "string",
-          "description": "Required. Cloud Storage bucket URI for periodic export. Format: gs://{bucket_name}"
-        },
-        "startTime": {
-          "description": "Required. Time in UTC to start the periodic export job.",
-          "$ref": "TimeOfDay"
-        }
-      }
-    },
-    "ExportMetadata": {
-      "description": "ExportMetadata represents the metadata of the exported artifacts. The metadata.json file in export artifact can be parsed as this message",
-      "properties": {
-        "esaSourceDatasetId": {
-          "description": "Source BigQuery dataset (formatted as `project_id:dataset_id`) for O2C Elite System Activity (ESA) direct dataset migration.",
-          "type": "string"
-        },
-        "lookerPlatformEdition": {
-          "description": "Platform edition of the exported instance.",
-          "type": "string"
-        },
-        "lookerVersion": {
-          "type": "string",
-          "description": "Version of instance when the export was created."
-        },
-        "exportEncryptionKey": {
-          "description": "Encryption key that was used to encrypt the export artifacts.",
-          "$ref": "ExportMetadataEncryptionKey"
-        },
-        "lookerEncryptionKey": {
-          "description": "Looker encryption key, encrypted with the provided export encryption key. This value will only be populated if the looker instance uses Looker managed encryption instead of CMEK.",
-          "type": "string"
-        },
-        "source": {
           "enumDescriptions": [
-            "Source not specified",
-            "Source of export is Looker Core",
-            "Source of export is Looker Original"
-          ],
-          "description": "The source type of the migration.",
-          "type": "string",
-          "enum": [
-            "SOURCE_UNSPECIFIED",
-            "LOOKER_CORE",
-            "LOOKER_ORIGINAL"
+            "State is unspecified.",
+            "Instance is active and ready for use.",
+            "Instance provisioning is in progress.",
+            "Instance is in a failed state.",
+            "Instance was suspended.",
+            "Instance update is in progress.",
+            "Instance delete is in progress.",
+            "Instance is being exported.",
+            "Instance is importing data."
           ]
         },
-        "filePaths": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of files created as part of export artifact (excluding the metadata). The paths are relative to the folder containing the metadata."
+        "userMetadata": {
+          "description": "Optional. User metadata.",
+          "$ref": "UserMetadata"
         },
-        "lookerInstance": {
-          "description": "Name of the exported instance. Format: projects/{project}/locations/{location}/instances/{instance}",
+        "catalogIntegrationOptOut": {
+          "description": "Optional. Indicates whether catalog integration is disabled for the Looker instance.",
+          "type": "boolean"
+        },
+        "lookerVersion": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. The Looker version that the instance is using."
+        },
+        "oauthConfig": {
+          "description": "Looker instance OAuth login settings.",
+          "$ref": "OAuthConfig"
+        },
+        "satisfiesPzi": {
+          "readOnly": true,
+          "type": "boolean",
+          "description": "Output only. Reserved for future use."
+        },
+        "periodicExportConfig": {
+          "$ref": "PeriodicExportConfig",
+          "description": "Optional. Configuration for periodic export."
+        },
+        "releaseChannel": {
+          "enumDescriptions": [
+            "Unspecified release channel.",
+            "Rapid: Most frequent updates.",
+            "Regular: Balanced, default for production.",
+            "Stable: Least frequent, for maximum stability."
+          ],
+          "enum": [
+            "RELEASE_CHANNEL_UNSPECIFIED",
+            "RAPID",
+            "REGULAR",
+            "STABLE"
+          ],
+          "type": "string",
+          "description": "Optional. The selected release channel for the instance."
+        },
+        "controlledEgressConfig": {
+          "description": "Optional. Controlled egress configuration.",
+          "$ref": "ControlledEgressConfig"
+        },
+        "consumerNetwork": {
+          "description": "Network name in the consumer project. Format: `projects/{project}/global/networks/{network}`. Note that the consumer network may be in a different GCP project than the consumer project that is hosting the Looker Instance.",
+          "type": "string"
+        },
+        "publicIpEnabled": {
+          "type": "boolean",
+          "description": "Whether public IP is enabled on the Looker instance."
+        },
+        "linkedLspProjectNumber": {
+          "type": "string",
+          "format": "int64",
+          "description": "Optional. Linked Google Cloud Project Number for Looker Studio Pro."
+        },
+        "pscEnabled": {
+          "description": "Optional. Whether to use Private Service Connect (PSC) for private IP connectivity. If true, neither `public_ip_enabled` nor `private_ip_enabled` can be true.",
+          "type": "boolean"
+        },
+        "adminSettings": {
+          "description": "Looker Instance Admin settings.",
+          "$ref": "AdminSettings"
+        },
+        "reservedRange": {
+          "type": "string",
+          "description": "Name of a reserved IP address range within the Instance.consumer_network, to be used for private services access connection. May or may not be specified in a create request."
+        }
+      },
+      "id": "Instance",
+      "description": "A Looker instance.",
+      "type": "object"
+    },
+    "EncryptionConfig": {
+      "id": "EncryptionConfig",
+      "type": "object",
+      "properties": {
+        "kmsKeyNameVersion": {
+          "type": "string",
+          "description": "Output only. Full name and version of the CMEK key currently in use to encrypt Looker data. Format: `projects/{project}/locations/{location}/keyRings/{ring}/cryptoKeys/{key}/cryptoKeyVersions/{version}`. Empty if CMEK is not configured in this instance.",
+          "readOnly": true
+        },
+        "kmsKeyState": {
+          "enumDescriptions": [
+            "CMEK status not specified.",
+            "CMEK key is currently valid.",
+            "CMEK key is currently revoked (instance should in restricted mode)."
+          ],
+          "type": "string",
+          "enum": [
+            "KMS_KEY_STATE_UNSPECIFIED",
+            "VALID",
+            "REVOKED"
+          ],
+          "readOnly": true,
+          "description": "Output only. Status of the CMEK key."
+        },
+        "kmsKeyName": {
+          "type": "string",
+          "description": "Name of the CMEK key in KMS (input parameter)."
+        }
+      },
+      "description": "Encryption configuration (i.e. CMEK)."
+    },
+    "OperationMetadata": {
+      "description": "Represents the metadata of the long-running operation.",
+      "properties": {
+        "requestedCancellation": {
+          "description": "Identifies whether the user has requested cancellation of the operation. Operations that have successfully been cancelled have Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.",
+          "type": "boolean"
+        },
+        "target": {
+          "description": "Server-defined resource path for the target of the operation.",
+          "type": "string"
+        },
+        "verb": {
+          "type": "string",
+          "description": "Name of the verb executed by the operation."
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Human-readable status of the operation, if any."
+        },
+        "endTime": {
+          "type": "string",
+          "format": "google-datetime",
+          "description": "The time the operation finished running."
+        },
+        "createTime": {
+          "description": "The time the operation was created.",
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "apiVersion": {
+          "description": "API version used to start the operation.",
           "type": "string"
         }
       },
-      "id": "ExportMetadata",
+      "id": "OperationMetadata",
       "type": "object"
     },
-    "ListInstanceBackupsResponse": {
+    "Status": {
+      "properties": {
+        "message": {
+          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "description": "Properties of the object. Contains field @type with type URL.",
+              "type": "any"
+            }
+          },
+          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use."
+        },
+        "code": {
+          "format": "int32",
+          "description": "The status code, which should be an enum value of google.rpc.Code.",
+          "type": "integer"
+        }
+      },
       "type": "object",
-      "description": "Response from listing Looker instance backups.",
+      "id": "Status",
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
+    },
+    "ListInstancesResponse": {
+      "id": "ListInstancesResponse",
+      "description": "Response from ListInstances.",
+      "type": "object",
       "properties": {
         "unreachable": {
           "type": "array",
@@ -356,478 +667,259 @@
           },
           "description": "Locations that could not be reached."
         },
-        "instanceBackups": {
-          "type": "array",
+        "instances": {
+          "description": "The list of instances matching the request filters, up to the requested `pageSize`.",
           "items": {
-            "$ref": "InstanceBackup"
+            "$ref": "Instance"
           },
-          "description": "The list of instances matching the request filters, up to the requested `page_size`."
+          "type": "array"
         },
         "nextPageToken": {
-          "description": "If provided, a page token that can look up the next `page_size` results. If empty, the results list is exhausted.",
-          "type": "string"
-        }
-      },
-      "id": "ListInstanceBackupsResponse"
-    },
-    "DenyMaintenancePeriod": {
-      "type": "object",
-      "properties": {
-        "startDate": {
-          "description": "Required. Start date of the deny maintenance period.",
-          "$ref": "Date"
-        },
-        "endDate": {
-          "$ref": "Date",
-          "description": "Required. End date of the deny maintenance period."
-        },
-        "time": {
-          "description": "Required. Time in UTC when the period starts and ends.",
-          "$ref": "TimeOfDay"
-        }
-      },
-      "description": "Specifies the maintenance denial period.",
-      "id": "DenyMaintenancePeriod"
-    },
-    "EncryptionConfig": {
-      "properties": {
-        "kmsKeyName": {
-          "description": "Name of the CMEK key in KMS (input parameter).",
-          "type": "string"
-        },
-        "kmsKeyState": {
-          "readOnly": true,
-          "enum": [
-            "KMS_KEY_STATE_UNSPECIFIED",
-            "VALID",
-            "REVOKED"
-          ],
-          "description": "Output only. Status of the CMEK key.",
-          "type": "string",
-          "enumDescriptions": [
-            "CMEK status not specified.",
-            "CMEK key is currently valid.",
-            "CMEK key is currently revoked (instance should in restricted mode)."
-          ]
-        },
-        "kmsKeyNameVersion": {
-          "description": "Output only. Full name and version of the CMEK key currently in use to encrypt Looker data. Format: `projects/{project}/locations/{location}/keyRings/{ring}/cryptoKeys/{key}/cryptoKeyVersions/{version}`. Empty if CMEK is not configured in this instance.",
-          "type": "string",
-          "readOnly": true
-        }
-      },
-      "description": "Encryption configuration (i.e. CMEK).",
-      "id": "EncryptionConfig",
-      "type": "object"
-    },
-    "Operation": {
-      "id": "Operation",
-      "description": "This resource represents a long-running operation that is the result of a network API call.",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
-        },
-        "error": {
-          "description": "The error result of the operation in case of failure or cancellation.",
-          "$ref": "Status"
-        },
-        "response": {
-          "type": "object",
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          },
-          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`."
-        },
-        "done": {
-          "type": "boolean",
-          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available."
-        },
-        "metadata": {
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "InstanceBackup": {
-      "properties": {
-        "name": {
-          "description": "Immutable. The relative resource name of the backup, in the following form: `projects/{project_number}/locations/{location_id}/instances/{instance_id}/backups/{backup}`",
-          "type": "string"
-        },
-        "encryptionConfig": {
-          "readOnly": true,
-          "$ref": "EncryptionConfig",
-          "description": "Output only. Current status of the CMEK encryption"
-        },
-        "createTime": {
-          "description": "Output only. The time when the backup was started.",
-          "readOnly": true,
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "state": {
-          "enum": [
-            "STATE_UNSPECIFIED",
-            "CREATING",
-            "DELETING",
-            "ACTIVE",
-            "FAILED"
-          ],
-          "readOnly": true,
-          "description": "Output only. The current state of the backup.",
-          "enumDescriptions": [
-            "The state of the backup is unknown.",
-            "The backup is being created.",
-            "The backup is being deleted.",
-            "The backup is active and ready to use.",
-            "The backup failed."
-          ],
-          "type": "string"
-        },
-        "expireTime": {
-          "readOnly": true,
-          "format": "google-datetime",
-          "type": "string",
-          "description": "Output only. The time when the backup will be deleted."
-        }
-      },
-      "type": "object",
-      "id": "InstanceBackup",
-      "description": "The details of a backup resource."
-    },
-    "CancelOperationRequest": {
-      "type": "object",
-      "id": "CancelOperationRequest",
-      "properties": {},
-      "description": "The request message for Operations.CancelOperation."
-    },
-    "CustomDomain": {
-      "id": "CustomDomain",
-      "description": "Custom domain information.",
-      "properties": {
-        "domain": {
-          "description": "Domain name.",
-          "type": "string"
-        },
-        "state": {
-          "description": "Domain state.",
-          "type": "string",
-          "enum": [
-            "CUSTOM_DOMAIN_STATE_UNSPECIFIED",
-            "UNVERIFIED",
-            "VERIFIED",
-            "MODIFYING",
-            "AVAILABLE",
-            "UNAVAILABLE",
-            "UNKNOWN"
-          ],
-          "enumDescriptions": [
-            "Unspecified state.",
-            "DNS record is not created.",
-            "DNS record is created.",
-            "Calling SLM to update.",
-            "ManagedCertificate is ready.",
-            "ManagedCertificate is not ready.",
-            "Status is not known."
-          ]
-        }
-      },
-      "type": "object"
-    },
-    "AdminSettings": {
-      "id": "AdminSettings",
-      "properties": {
-        "allowedEmailDomains": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "Email domain allowlist for the instance."
-        }
-      },
-      "description": "Looker instance Admin settings fields.",
-      "type": "object"
-    },
-    "Location": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`",
-          "type": "string"
-        },
-        "metadata": {
-          "description": "Service-specific metadata. For example the available capacity at the given location.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          }
-        },
-        "locationId": {
-          "description": "The canonical id for this location. For example: `\"us-east1\"`.",
-          "type": "string"
-        },
-        "labels": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
-          "type": "object"
-        },
-        "displayName": {
-          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\".",
-          "type": "string"
-        }
-      },
-      "description": "A resource that represents a Google Cloud location.",
-      "id": "Location"
-    },
-    "IngressIpAllowlistRule": {
-      "id": "IngressIpAllowlistRule",
-      "type": "object",
-      "description": "Ingress IP allowlist rule.",
-      "properties": {
-        "description": {
-          "description": "Optional. Description for the IP range.",
-          "type": "string"
-        },
-        "ipRange": {
-          "description": "Optional. The IP range to allow ingress traffic from.",
+          "description": "If provided, a page token that can look up the next `pageSize` results. If empty, the results list is exhausted.",
           "type": "string"
         }
       }
     },
+    "IngressIpAllowlistRule": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Optional. Description for the IP range."
+        },
+        "ipRange": {
+          "type": "string",
+          "description": "Optional. The IP range to allow ingress traffic from."
+        }
+      },
+      "id": "IngressIpAllowlistRule",
+      "description": "Ingress IP allowlist rule.",
+      "type": "object"
+    },
     "RestoreInstanceRequest": {
-      "type": "object",
-      "description": "Request options for restoring an instance",
       "properties": {
         "backup": {
           "description": "Required. Backup being used to restore the instance Format: projects/{project}/locations/{location}/instances/{instance}/backups/{backup}",
           "type": "string"
         }
       },
-      "id": "RestoreInstanceRequest"
+      "description": "Request options for restoring an instance",
+      "id": "RestoreInstanceRequest",
+      "type": "object"
     },
-    "Status": {
-      "id": "Status",
-      "properties": {
-        "code": {
-          "format": "int32",
-          "description": "The status code, which should be an enum value of google.rpc.Code.",
-          "type": "integer"
-        },
-        "message": {
-          "type": "string",
-          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client."
-        },
-        "details": {
-          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": {
-              "description": "Properties of the object. Contains field @type with type URL.",
-              "type": "any"
-            }
-          }
-        }
-      },
+    "CancelOperationRequest": {
       "type": "object",
-      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
+      "id": "CancelOperationRequest",
+      "description": "The request message for Operations.CancelOperation.",
+      "properties": {}
     },
-    "PscConfig": {
+    "AdminSettings": {
       "properties": {
-        "allowedVpcs": {
+        "allowedEmailDomains": {
           "type": "array",
-          "description": "Optional. List of VPCs that are allowed ingress into looker. Format: projects/{project}/global/networks/{network}",
+          "description": "Email domain allowlist for the instance.",
           "items": {
             "type": "string"
           }
+        }
+      },
+      "description": "Looker instance Admin settings fields.",
+      "type": "object",
+      "id": "AdminSettings"
+    },
+    "DenyMaintenancePeriod": {
+      "type": "object",
+      "id": "DenyMaintenancePeriod",
+      "description": "Specifies the maintenance denial period.",
+      "properties": {
+        "time": {
+          "description": "Required. Time in UTC when the period starts and ends.",
+          "$ref": "TimeOfDay"
+        },
+        "endDate": {
+          "description": "Required. End date of the deny maintenance period.",
+          "$ref": "Date"
+        },
+        "startDate": {
+          "$ref": "Date",
+          "description": "Required. Start date of the deny maintenance period."
+        }
+      }
+    },
+    "PscConfig": {
+      "id": "PscConfig",
+      "properties": {
+        "serviceAttachments": {
+          "type": "array",
+          "items": {
+            "$ref": "ServiceAttachment"
+          },
+          "description": "Optional. List of egress service attachment configurations."
+        },
+        "allowedVpcs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Optional. List of VPCs that are allowed ingress into looker. Format: projects/{project}/global/networks/{network}"
         },
         "lookerServiceAttachmentUri": {
           "type": "string",
           "readOnly": true,
           "description": "Output only. URI of the Looker service attachment."
-        },
-        "serviceAttachments": {
-          "description": "Optional. List of egress service attachment configurations.",
-          "items": {
-            "$ref": "ServiceAttachment"
-          },
-          "type": "array"
         }
       },
-      "description": "Information for Private Service Connect (PSC) setup for a Looker instance.",
-      "id": "PscConfig",
+      "type": "object",
+      "description": "Information for Private Service Connect (PSC) setup for a Looker instance."
+    },
+    "ExportMetadataEncryptionKey": {
+      "properties": {
+        "version": {
+          "description": "Version of the CMEK.",
+          "type": "string"
+        },
+        "cmek": {
+          "type": "string",
+          "description": "Name of the CMEK."
+        }
+      },
+      "description": "Encryption key details for the exported artifact.",
+      "id": "ExportMetadataEncryptionKey",
       "type": "object"
     },
-    "UserMetadata": {
-      "properties": {
-        "additionalViewerUserCount": {
-          "description": "Optional. The number of additional viewer users the instance owner has purchased.",
-          "format": "int32",
-          "type": "integer"
-        },
-        "additionalStandardUserCount": {
-          "description": "Optional. The number of additional standard users the instance owner has purchased.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "additionalDeveloperUserCount": {
-          "format": "int32",
-          "description": "Optional. The number of additional developer users the instance owner has purchased.",
-          "type": "integer"
-        }
-      },
-      "description": "Metadata about users for a Looker instance.",
-      "type": "object",
-      "id": "UserMetadata"
-    },
     "ImportInstanceRequest": {
+      "type": "object",
       "id": "ImportInstanceRequest",
+      "description": "Requestion options for importing looker data to an Instance",
       "properties": {
         "gcsUri": {
           "description": "Path to the import folder in Google Cloud Storage, in the form `gs://bucketName/folderName`.",
           "type": "string"
         }
-      },
-      "description": "Requestion options for importing looker data to an Instance",
-      "type": "object"
+      }
     },
-    "UndeleteInstanceRequest": {
-      "properties": {},
-      "id": "UndeleteInstanceRequest",
+    "ServiceAttachment": {
+      "id": "ServiceAttachment",
       "type": "object",
-      "description": "Request options for undeleting an instance."
-    },
-    "Empty": {
-      "properties": {},
-      "type": "object",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
-      "id": "Empty"
-    },
-    "ControlledEgressConfig": {
-      "type": "object",
+      "description": "Service attachment configuration.",
       "properties": {
-        "egressFqdns": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Optional. List of fully qualified domain names to be added to the allowlist for outbound traffic."
-        },
-        "marketplaceEnabled": {
-          "description": "Optional. Whether marketplace is enabled.",
-          "type": "boolean"
-        },
-        "webProxyIps": {
-          "readOnly": true,
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Output only. The list of IP addresses used by Secure Web Proxy for outbound traffic."
-        }
-      },
-      "id": "ControlledEgressConfig",
-      "description": "Controlled egress configuration."
-    },
-    "Date": {
-      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp",
-      "id": "Date",
-      "properties": {
-        "month": {
-          "format": "int32",
-          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.",
-          "type": "integer"
-        },
-        "day": {
-          "format": "int32",
-          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.",
-          "type": "integer"
-        },
-        "year": {
-          "format": "int32",
-          "type": "integer",
-          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year."
-        }
-      },
-      "type": "object"
-    },
-    "ListInstancesResponse": {
-      "description": "Response from ListInstances.",
-      "properties": {
-        "instances": {
-          "type": "array",
-          "description": "The list of instances matching the request filters, up to the requested `pageSize`.",
-          "items": {
-            "$ref": "Instance"
-          }
-        },
-        "unreachable": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Locations that could not be reached.",
-          "type": "array"
-        },
-        "nextPageToken": {
+        "connectionStatus": {
+          "enumDescriptions": [
+            "Connection status is unspecified.",
+            "Connection is established and functioning normally.",
+            "Connection is not established (Looker tenant project hasn't been allowlisted).",
+            "Connection is not established (Looker tenant project is explicitly in reject list).",
+            "Issue with target service attachment, e.g. NAT subnet is exhausted.",
+            "Target service attachment does not exist. This status is a terminal state."
+          ],
+          "enum": [
+            "UNKNOWN",
+            "ACCEPTED",
+            "PENDING",
+            "REJECTED",
+            "NEEDS_ATTENTION",
+            "CLOSED"
+          ],
+          "description": "Output only. Connection status.",
           "type": "string",
-          "description": "If provided, a page token that can look up the next `pageSize` results. If empty, the results list is exhausted."
-        }
-      },
-      "id": "ListInstancesResponse",
-      "type": "object"
-    },
-    "ExportEncryptionConfig": {
-      "id": "ExportEncryptionConfig",
-      "properties": {
-        "kmsKeyName": {
-          "description": "Required. Name of the CMEK key in KMS.",
-          "type": "string"
-        }
-      },
-      "description": "Configuration for Encryption - e.g. CMEK.",
-      "type": "object"
-    },
-    "ExportInstanceRequest": {
-      "description": "Request options for exporting data of an Instance.",
-      "type": "object",
-      "properties": {
-        "encryptionConfig": {
-          "$ref": "ExportEncryptionConfig",
-          "description": "Required. Encryption configuration (CMEK). For CMEK enabled instances it should be same as looker CMEK."
+          "readOnly": true
         },
-        "gcsUri": {
-          "description": "The path to the folder in Google Cloud Storage where the export will be stored. The URI is in the form `gs://bucketName/folderName`.",
-          "type": "string"
-        }
-      },
-      "id": "ExportInstanceRequest"
-    },
-    "ExportMetadataEncryptionKey": {
-      "description": "Encryption key details for the exported artifact.",
-      "id": "ExportMetadataEncryptionKey",
-      "type": "object",
-      "properties": {
-        "cmek": {
-          "description": "Name of the CMEK.",
+        "failureReason": {
+          "readOnly": true,
+          "description": "Output only. Reason the service attachment creation failed. This value will only be populated if the service attachment encounters an issue during provisioning.",
           "type": "string"
         },
-        "version": {
-          "description": "Version of the CMEK.",
+        "localFqdns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. List of fully qualified domain names that will be used in the private DNS record created for the service attachment."
+        },
+        "localFqdn": {
+          "type": "string",
+          "description": "Optional. Fully qualified domain name that will be used in the private DNS record created for the service attachment."
+        },
+        "targetServiceAttachmentUri": {
+          "description": "Required. URI of the service attachment to connect to. Format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment}",
           "type": "string"
         }
       }
     },
+    "IngressIpAllowlistConfig": {
+      "description": "Ingress IP allowlist configuration.",
+      "properties": {
+        "googleServicesEnabled": {
+          "type": "boolean",
+          "description": "Optional. Whether google service connections are enabled for the instance."
+        },
+        "enabled": {
+          "description": "Optional. Whether ingress IP allowlist functionality is enabled on the Looker instance.",
+          "type": "boolean"
+        },
+        "allowlistRules": {
+          "description": "Optional. List of IP range rules to allow ingress traffic.",
+          "items": {
+            "$ref": "IngressIpAllowlistRule"
+          },
+          "type": "array"
+        }
+      },
+      "id": "IngressIpAllowlistConfig",
+      "type": "object"
+    },
+    "ExportInstanceRequest": {
+      "properties": {
+        "gcsUri": {
+          "type": "string",
+          "description": "The path to the folder in Google Cloud Storage where the export will be stored. The URI is in the form `gs://bucketName/folderName`."
+        },
+        "encryptionConfig": {
+          "description": "Required. Encryption configuration (CMEK). For CMEK enabled instances it should be same as looker CMEK.",
+          "$ref": "ExportEncryptionConfig"
+        }
+      },
+      "description": "Request options for exporting data of an Instance.",
+      "type": "object",
+      "id": "ExportInstanceRequest"
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
+        },
+        "response": {
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          }
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "type": "object",
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any."
+        },
+        "error": {
+          "description": "The error result of the operation in case of failure or cancellation.",
+          "$ref": "Status"
+        },
+        "done": {
+          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
+          "type": "boolean"
+        }
+      },
+      "id": "Operation",
+      "description": "This resource represents a long-running operation that is the result of a network API call."
+    },
     "TimeOfDay": {
+      "id": "TimeOfDay",
+      "description": "Represents a time of day. The date and time zone are either not significant or are specified elsewhere. An API may choose to allow leap seconds. Related types are google.type.Date and `google.protobuf.Timestamp`.",
       "properties": {
         "hours": {
           "type": "integer",
@@ -835,13 +927,13 @@
           "format": "int32"
         },
         "nanos": {
-          "type": "integer",
+          "description": "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999.",
           "format": "int32",
-          "description": "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+          "type": "integer"
         },
         "minutes": {
-          "description": "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.",
           "type": "integer",
+          "description": "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.",
           "format": "int32"
         },
         "seconds": {
@@ -850,42 +942,12 @@
           "format": "int32"
         }
       },
-      "id": "TimeOfDay",
-      "description": "Represents a time of day. The date and time zone are either not significant or are specified elsewhere. An API may choose to allow leap seconds. Related types are google.type.Date and `google.protobuf.Timestamp`.",
-      "type": "object"
-    },
-    "MaintenanceSchedule": {
-      "type": "object",
-      "properties": {
-        "startTime": {
-          "format": "google-datetime",
-          "description": "The scheduled start time for the maintenance.",
-          "type": "string"
-        },
-        "endTime": {
-          "description": "The scheduled end time for the maintenance.",
-          "type": "string",
-          "format": "google-datetime"
-        }
-      },
-      "description": "Published upcoming future maintenance schedule.",
-      "id": "MaintenanceSchedule"
-    },
-    "RestartInstanceRequest": {
-      "properties": {},
-      "id": "RestartInstanceRequest",
-      "description": "Request options for restarting an instance.",
       "type": "object"
     },
     "MaintenanceWindow": {
-      "type": "object",
+      "description": "Specifies the recurring maintenance window.",
       "properties": {
-        "startTime": {
-          "description": "Required. Time in UTC when the period starts. Maintenance will be scheduled within 60 minutes.",
-          "$ref": "TimeOfDay"
-        },
         "dayOfWeek": {
-          "type": "string",
           "enum": [
             "DAY_OF_WEEK_UNSPECIFIED",
             "MONDAY",
@@ -906,48 +968,16 @@
             "Saturday",
             "Sunday"
           ],
-          "description": "Required. Day of the week for this MaintenanceWindow (in UTC)."
+          "description": "Required. Day of the week for this MaintenanceWindow (in UTC).",
+          "type": "string"
+        },
+        "startTime": {
+          "$ref": "TimeOfDay",
+          "description": "Required. Time in UTC when the period starts. Maintenance will be scheduled within 60 minutes."
         }
       },
-      "id": "MaintenanceWindow",
-      "description": "Specifies the recurring maintenance window."
-    },
-    "OperationMetadata": {
-      "id": "OperationMetadata",
-      "description": "Represents the metadata of the long-running operation.",
       "type": "object",
-      "properties": {
-        "endTime": {
-          "type": "string",
-          "format": "google-datetime",
-          "description": "The time the operation finished running."
-        },
-        "requestedCancellation": {
-          "description": "Identifies whether the user has requested cancellation of the operation. Operations that have successfully been cancelled have Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.",
-          "type": "boolean"
-        },
-        "apiVersion": {
-          "description": "API version used to start the operation.",
-          "type": "string"
-        },
-        "statusMessage": {
-          "type": "string",
-          "description": "Human-readable status of the operation, if any."
-        },
-        "target": {
-          "type": "string",
-          "description": "Server-defined resource path for the target of the operation."
-        },
-        "createTime": {
-          "description": "The time the operation was created.",
-          "type": "string",
-          "format": "google-datetime"
-        },
-        "verb": {
-          "description": "Name of the verb executed by the operation.",
-          "type": "string"
-        }
-      }
+      "id": "MaintenanceWindow"
     },
     "OAuthConfig": {
       "properties": {
@@ -955,209 +985,755 @@
           "description": "Optional. Whether to use the shared OAuth client. Instances specifying this field do not need to provide client_id and client_secret.",
           "type": "boolean"
         },
-        "clientId": {
-          "type": "string",
-          "description": "Input only. Client ID from an external OAuth application. This is an input-only field, and thus will not be set in any responses."
-        },
         "clientSecret": {
           "description": "Input only. Client secret from an external OAuth application. This is an input-only field, and thus will not be set in any responses.",
           "type": "string"
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Input only. Client ID from an external OAuth application. This is an input-only field, and thus will not be set in any responses."
         }
       },
       "id": "OAuthConfig",
       "description": "Looker instance OAuth login settings.",
       "type": "object"
     },
-    "ServiceAttachment": {
-      "id": "ServiceAttachment",
-      "description": "Service attachment configuration.",
+    "ControlledEgressConfig": {
+      "id": "ControlledEgressConfig",
       "properties": {
-        "localFqdns": {
+        "egressFqdns": {
           "items": {
             "type": "string"
           },
-          "description": "Optional. List of fully qualified domain names that will be used in the private DNS record created for the service attachment.",
-          "type": "array"
+          "type": "array",
+          "description": "Optional. List of fully qualified domain names to be added to the allowlist for outbound traffic."
         },
-        "connectionStatus": {
-          "enum": [
-            "UNKNOWN",
-            "ACCEPTED",
-            "PENDING",
-            "REJECTED",
-            "NEEDS_ATTENTION",
-            "CLOSED"
-          ],
-          "enumDescriptions": [
-            "Connection status is unspecified.",
-            "Connection is established and functioning normally.",
-            "Connection is not established (Looker tenant project hasn't been allowlisted).",
-            "Connection is not established (Looker tenant project is explicitly in reject list).",
-            "Issue with target service attachment, e.g. NAT subnet is exhausted.",
-            "Target service attachment does not exist. This status is a terminal state."
-          ],
-          "type": "string",
+        "marketplaceEnabled": {
+          "type": "boolean",
+          "description": "Optional. Whether marketplace is enabled."
+        },
+        "webProxyIps": {
+          "items": {
+            "type": "string"
+          },
           "readOnly": true,
-          "description": "Output only. Connection status."
-        },
-        "targetServiceAttachmentUri": {
-          "type": "string",
-          "description": "Required. URI of the service attachment to connect to. Format: projects/{project}/regions/{region}/serviceAttachments/{service_attachment}"
-        },
-        "localFqdn": {
-          "description": "Optional. Fully qualified domain name that will be used in the private DNS record created for the service attachment.",
-          "type": "string"
-        },
-        "failureReason": {
-          "type": "string",
-          "description": "Output only. Reason the service attachment creation failed. This value will only be populated if the service attachment encounters an issue during provisioning.",
-          "readOnly": true
+          "type": "array",
+          "description": "Output only. The list of IP addresses used by Secure Web Proxy for outbound traffic."
         }
       },
+      "description": "Controlled egress configuration.",
       "type": "object"
     },
-    "ListOperationsResponse": {
+    "RestartInstanceRequest": {
+      "properties": {},
+      "description": "Request options for restarting an instance.",
       "type": "object",
+      "id": "RestartInstanceRequest"
+    },
+    "Location": {
+      "description": "A resource that represents a Google Cloud location.",
+      "properties": {
+        "metadata": {
+          "description": "Service-specific metadata. For example the available capacity at the given location.",
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string",
+          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`"
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
+          "type": "object"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "The canonical id for this location. For example: `\"us-east1\"`."
+        },
+        "displayName": {
+          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\".",
+          "type": "string"
+        }
+      },
+      "id": "Location",
+      "type": "object"
+    },
+    "ListInstanceBackupsResponse": {
       "properties": {
         "nextPageToken": {
-          "description": "The standard List next-page token.",
+          "description": "If provided, a page token that can look up the next `page_size` results. If empty, the results list is exhausted.",
           "type": "string"
         },
-        "operations": {
+        "instanceBackups": {
+          "description": "The list of instances matching the request filters, up to the requested `page_size`.",
           "type": "array",
-          "description": "A list of operations that matches the specified filter in the request.",
           "items": {
-            "$ref": "Operation"
+            "$ref": "InstanceBackup"
           }
         },
         "unreachable": {
           "items": {
             "type": "string"
           },
-          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations.",
+          "description": "Locations that could not be reached.",
           "type": "array"
         }
       },
-      "description": "The response message for Operations.ListOperations.",
-      "id": "ListOperationsResponse"
-    },
-    "ListLocationsResponse": {
-      "description": "The response message for Locations.ListLocations.",
-      "properties": {
-        "locations": {
-          "type": "array",
-          "description": "A list of locations that matches the specified filter in the request.",
-          "items": {
-            "$ref": "Location"
-          }
-        },
-        "nextPageToken": {
-          "description": "The standard List next-page token.",
-          "type": "string"
-        }
-      },
+      "description": "Response from listing Looker instance backups.",
       "type": "object",
-      "id": "ListLocationsResponse"
-    },
-    "IngressIpAllowlistConfig": {
-      "type": "object",
-      "description": "Ingress IP allowlist configuration.",
-      "id": "IngressIpAllowlistConfig",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "Optional. Whether ingress IP allowlist functionality is enabled on the Looker instance."
-        },
-        "allowlistRules": {
-          "type": "array",
-          "description": "Optional. List of IP range rules to allow ingress traffic.",
-          "items": {
-            "$ref": "IngressIpAllowlistRule"
-          }
-        },
-        "googleServicesEnabled": {
-          "type": "boolean",
-          "description": "Optional. Whether google service connections are enabled for the instance."
-        }
-      }
+      "id": "ListInstanceBackupsResponse"
     }
   },
-  "servicePath": "",
-  "parameters": {
-    "access_token": {
-      "location": "query",
-      "type": "string",
-      "description": "OAuth access token."
-    },
-    "quotaUser": {
-      "type": "string",
-      "location": "query",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "alt": {
-      "type": "string",
-      "default": "json",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "location": "query",
-      "description": "Data format for response."
-    },
-    "key": {
-      "type": "string",
-      "location": "query",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
-    },
-    "upload_protocol": {
-      "location": "query",
-      "type": "string",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    },
-    "uploadType": {
-      "location": "query",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
-      "type": "string"
-    },
-    "callback": {
-      "location": "query",
-      "description": "JSONP",
-      "type": "string"
-    },
-    "fields": {
-      "location": "query",
-      "type": "string",
-      "description": "Selector specifying which fields to include in a partial response."
-    },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "location": "query",
-      "type": "string"
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "default": "true",
-      "location": "query",
-      "description": "Returns response with indentations and line breaks."
-    },
-    "$.xgafv": {
-      "description": "V1 error format.",
-      "type": "string",
-      "location": "query",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "enum": [
-        "1",
-        "2"
-      ]
+  "batchPath": "batch",
+  "revision": "20260819",
+  "resources": {
+    "projects": {
+      "resources": {
+        "locations": {
+          "methods": {
+            "get": {
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "httpMethod": "GET",
+              "parameterOrder": [
+                "name"
+              ],
+              "id": "looker.projects.locations.get",
+              "response": {
+                "$ref": "Location"
+              },
+              "parameters": {
+                "name": {
+                  "required": true,
+                  "pattern": "^projects/[^/]+/locations/[^/]+$",
+                  "location": "path",
+                  "type": "string",
+                  "description": "Resource name for the location."
+                }
+              },
+              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}",
+              "description": "Gets information about a location.",
+              "path": "v1/{+name}"
+            },
+            "list": {
+              "id": "looker.projects.locations.list",
+              "httpMethod": "GET",
+              "description": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "parameterOrder": [
+                "name"
+              ],
+              "path": "v1/{+name}/locations",
+              "flatPath": "v1/projects/{projectsId}/locations",
+              "response": {
+                "$ref": "ListLocationsResponse"
+              },
+              "parameters": {
+                "extraLocationTypes": {
+                  "location": "query",
+                  "type": "string",
+                  "repeated": true,
+                  "description": "Optional. Do not use this field unless explicitly documented otherwise. This is primarily for internal usage."
+                },
+                "filter": {
+                  "location": "query",
+                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).",
+                  "type": "string"
+                },
+                "name": {
+                  "required": true,
+                  "pattern": "^projects/[^/]+$",
+                  "description": "The resource that owns the locations collection, if applicable.",
+                  "type": "string",
+                  "location": "path"
+                },
+                "pageToken": {
+                  "type": "string",
+                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page.",
+                  "location": "query"
+                },
+                "pageSize": {
+                  "location": "query",
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The maximum number of results to return. If not set, the service selects a default."
+                }
+              }
+            }
+          },
+          "resources": {
+            "instances": {
+              "methods": {
+                "create": {
+                  "httpMethod": "POST",
+                  "description": "Creates a new Instance in a given project and location.",
+                  "path": "v1/{+parent}/instances",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "request": {
+                    "$ref": "Instance"
+                  },
+                  "id": "looker.projects.locations.instances.create",
+                  "parameters": {
+                    "parent": {
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "description": "Required. Format: `projects/{project}/locations/{location}`.",
+                      "location": "path"
+                    },
+                    "instanceId": {
+                      "description": "Required. The unique instance identifier. Must contain only lowercase letters, numbers, or hyphens, with the first character a letter and the last a letter or a number. 63 characters maximum.",
+                      "type": "string",
+                      "location": "query"
+                    }
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ]
+                },
+                "restore": {
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "request": {
+                    "$ref": "RestoreInstanceRequest"
+                  },
+                  "path": "v1/{+name}:restore",
+                  "httpMethod": "POST",
+                  "description": "Restore Looker instance.",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "id": "looker.projects.locations.instances.restore",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:restore",
+                  "parameters": {
+                    "name": {
+                      "required": true,
+                      "description": "Required. Instance being restored Format: projects/{project}/locations/{location}/instances/{instance}",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "location": "path",
+                      "type": "string"
+                    }
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ]
+                },
+                "get": {
+                  "path": "v1/{+name}",
+                  "httpMethod": "GET",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
+                  "response": {
+                    "$ref": "Instance"
+                  },
+                  "id": "looker.projects.locations.instances.get",
+                  "description": "Gets details of a single Instance.",
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "required": true,
+                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "location": "path"
+                    }
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ]
+                },
+                "list": {
+                  "path": "v1/{+parent}/instances",
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "parameters": {
+                    "showDeleted": {
+                      "description": "Optional. Whether to include deleted instances in the response.",
+                      "type": "boolean",
+                      "location": "query"
+                    },
+                    "parent": {
+                      "type": "string",
+                      "description": "Required. Format: `projects/{project}/locations/{location}`.",
+                      "required": true,
+                      "location": "path",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$"
+                    },
+                    "pageSize": {
+                      "type": "integer",
+                      "description": "The maximum number of instances to return. If unspecified at most 256 will be returned. The maximum possible value is 2048.",
+                      "format": "int32",
+                      "location": "query"
+                    },
+                    "pageToken": {
+                      "location": "query",
+                      "description": "A page token received from a previous ListInstancesRequest.",
+                      "type": "string"
+                    }
+                  },
+                  "id": "looker.projects.locations.instances.list",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
+                  "response": {
+                    "$ref": "ListInstancesResponse"
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "GET",
+                  "description": "Lists Instances in a given project and location."
+                },
+                "export": {
+                  "id": "looker.projects.locations.instances.export",
+                  "httpMethod": "POST",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:export",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "path": "v1/{+name}:export",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "parameters": {
+                    "name": {
+                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
+                      "location": "path",
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "required": true
+                    }
+                  },
+                  "description": "Export instance.",
+                  "request": {
+                    "$ref": "ExportInstanceRequest"
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ]
+                },
+                "restart": {
+                  "path": "v1/{+name}:restart",
+                  "request": {
+                    "$ref": "RestartInstanceRequest"
+                  },
+                  "httpMethod": "POST",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "description": "Restart instance.",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:restart",
+                  "id": "looker.projects.locations.instances.restart",
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
+                      "type": "string",
+                      "required": true
+                    }
+                  }
+                },
+                "undelete": {
+                  "description": "Undeletes Looker instance.",
+                  "path": "v1/{+name}:undelete",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "POST",
+                  "id": "looker.projects.locations.instances.undelete",
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "required": true,
+                      "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}",
+                      "location": "path",
+                      "type": "string"
+                    }
+                  },
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:undelete",
+                  "request": {
+                    "$ref": "UndeleteInstanceRequest"
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ]
+                },
+                "import": {
+                  "httpMethod": "POST",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "id": "looker.projects.locations.instances.import",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "description": "Import instance.",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "request": {
+                    "$ref": "ImportInstanceRequest"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:import",
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`."
+                    }
+                  },
+                  "path": "v1/{+name}:import"
+                },
+                "patch": {
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "required": true,
+                      "type": "string",
+                      "description": "Output only. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "location": "path"
+                    },
+                    "updateMask": {
+                      "location": "query",
+                      "type": "string",
+                      "format": "google-fieldmask",
+                      "description": "Required. Field mask used to specify the fields to be overwritten in the Instance resource by the update. The fields specified in the mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask."
+                    }
+                  },
+                  "request": {
+                    "$ref": "Instance"
+                  },
+                  "path": "v1/{+name}",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
+                  "httpMethod": "PATCH",
+                  "description": "Update Instance.",
+                  "id": "looker.projects.locations.instances.patch",
+                  "response": {
+                    "$ref": "Operation"
+                  }
+                },
+                "delete": {
+                  "parameters": {
+                    "name": {
+                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
+                      "required": true,
+                      "location": "path",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "type": "string"
+                    },
+                    "force": {
+                      "location": "query",
+                      "description": "Whether to force cascading delete.",
+                      "type": "boolean"
+                    }
+                  },
+                  "path": "v1/{+name}",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "DELETE",
+                  "description": "Delete instance.",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "id": "looker.projects.locations.instances.delete",
+                  "parameterOrder": [
+                    "name"
+                  ]
+                }
+              },
+              "resources": {
+                "backups": {
+                  "methods": {
+                    "create": {
+                      "parameterOrder": [
+                        "parent"
+                      ],
+                      "id": "looker.projects.locations.instances.backups.create",
+                      "httpMethod": "POST",
+                      "description": "Backup Looker instance.",
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups",
+                      "response": {
+                        "$ref": "Operation"
+                      },
+                      "parameters": {
+                        "parent": {
+                          "location": "path",
+                          "type": "string",
+                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                          "required": true,
+                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}"
+                        }
+                      },
+                      "request": {
+                        "$ref": "InstanceBackup"
+                      },
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
+                      "path": "v1/{+parent}/backups"
+                    },
+                    "list": {
+                      "description": "List backups of Looker instance.",
+                      "parameters": {
+                        "parent": {
+                          "required": true,
+                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}.",
+                          "type": "string",
+                          "location": "path"
+                        },
+                        "orderBy": {
+                          "type": "string",
+                          "description": "Sort results. Default order is \"create_time desc\". Other supported fields are \"state\" and \"expire_time\". https://google.aip.dev/132#ordering",
+                          "location": "query"
+                        },
+                        "pageToken": {
+                          "type": "string",
+                          "description": "A page token received from a previous ListInstances request.",
+                          "location": "query"
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "description": "The maximum number of instances to return.",
+                          "location": "query",
+                          "format": "int32"
+                        }
+                      },
+                      "parameterOrder": [
+                        "parent"
+                      ],
+                      "response": {
+                        "$ref": "ListInstanceBackupsResponse"
+                      },
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups",
+                      "id": "looker.projects.locations.instances.backups.list",
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
+                      "httpMethod": "GET",
+                      "path": "v1/{+parent}/backups"
+                    },
+                    "delete": {
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
+                      "httpMethod": "DELETE",
+                      "parameterOrder": [
+                        "name"
+                      ],
+                      "parameters": {
+                        "name": {
+                          "required": true,
+                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+/backups/[^/]+$",
+                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}/backups/{backup}",
+                          "type": "string",
+                          "location": "path"
+                        }
+                      },
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups/{backupsId}",
+                      "path": "v1/{+name}",
+                      "response": {
+                        "$ref": "Operation"
+                      },
+                      "id": "looker.projects.locations.instances.backups.delete",
+                      "description": "Delete backup."
+                    },
+                    "get": {
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
+                      "id": "looker.projects.locations.instances.backups.get",
+                      "httpMethod": "GET",
+                      "response": {
+                        "$ref": "InstanceBackup"
+                      },
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups/{backupsId}",
+                      "path": "v1/{+name}",
+                      "parameters": {
+                        "name": {
+                          "type": "string",
+                          "location": "path",
+                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+/backups/[^/]+$",
+                          "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}/backups/{backup}`.",
+                          "required": true
+                        }
+                      },
+                      "description": "",
+                      "parameterOrder": [
+                        "name"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "operations": {
+              "methods": {
+                "delete": {
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "type": "string",
+                      "description": "The name of the operation resource to be deleted.",
+                      "required": true
+                    }
+                  },
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
+                  "path": "v1/{+name}",
+                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
+                  "id": "looker.projects.locations.operations.delete",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "httpMethod": "DELETE",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ]
+                },
+                "get": {
+                  "id": "looker.projects.locations.operations.get",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "GET",
+                  "path": "v1/{+name}",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "required": true,
+                      "location": "path",
+                      "type": "string",
+                      "description": "The name of the operation resource."
+                    }
+                  }
+                },
+                "cancel": {
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "request": {
+                    "$ref": "CancelOperationRequest"
+                  },
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "location": "path",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "required": true,
+                      "description": "The name of the operation resource to be cancelled."
+                    }
+                  },
+                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "id": "looker.projects.locations.operations.cancel",
+                  "path": "v1/{+name}:cancel",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "POST"
+                },
+                "list": {
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations",
+                  "response": {
+                    "$ref": "ListOperationsResponse"
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
+                  "parameters": {
+                    "filter": {
+                      "type": "string",
+                      "location": "query",
+                      "description": "The standard list filter."
+                    },
+                    "pageSize": {
+                      "location": "query",
+                      "format": "int32",
+                      "type": "integer",
+                      "description": "The standard list page size."
+                    },
+                    "pageToken": {
+                      "type": "string",
+                      "description": "The standard list page token.",
+                      "location": "query"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the operation's parent resource.",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "location": "path"
+                    },
+                    "returnPartialSuccess": {
+                      "location": "query",
+                      "type": "boolean",
+                      "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation."
+                    }
+                  },
+                  "id": "looker.projects.locations.operations.list",
+                  "path": "v1/{+name}/operations",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "GET"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "auth": {
@@ -1169,667 +1745,91 @@
       }
     }
   },
+  "rootUrl": "https://looker.googleapis.com/",
+  "ownerDomain": "google.com",
+  "discoveryVersion": "v1",
+  "canonicalName": "Looker",
+  "fullyEncodeReservedExpansion": true,
+  "mtlsRootUrl": "https://looker.mtls.googleapis.com/",
   "version": "v1",
-  "resources": {
-    "projects": {
-      "resources": {
-        "locations": {
-          "methods": {
-            "list": {
-              "parameters": {
-                "pageToken": {
-                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page.",
-                  "location": "query",
-                  "type": "string"
-                },
-                "filter": {
-                  "type": "string",
-                  "location": "query",
-                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160)."
-                },
-                "pageSize": {
-                  "description": "The maximum number of results to return. If not set, the service selects a default.",
-                  "location": "query",
-                  "format": "int32",
-                  "type": "integer"
-                },
-                "name": {
-                  "pattern": "^projects/[^/]+$",
-                  "required": true,
-                  "type": "string",
-                  "location": "path",
-                  "description": "The resource that owns the locations collection, if applicable."
-                },
-                "extraLocationTypes": {
-                  "description": "Optional. Do not use this field unless explicitly documented otherwise. This is primarily for internal usage.",
-                  "location": "query",
-                  "repeated": true,
-                  "type": "string"
-                }
-              },
-              "path": "v1/{+name}/locations",
-              "response": {
-                "$ref": "ListLocationsResponse"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "description": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
-              "parameterOrder": [
-                "name"
-              ],
-              "id": "looker.projects.locations.list",
-              "flatPath": "v1/projects/{projectsId}/locations",
-              "httpMethod": "GET"
-            },
-            "get": {
-              "id": "looker.projects.locations.get",
-              "parameters": {
-                "name": {
-                  "required": true,
-                  "description": "Resource name for the location.",
-                  "type": "string",
-                  "location": "path",
-                  "pattern": "^projects/[^/]+/locations/[^/]+$"
-                }
-              },
-              "path": "v1/{+name}",
-              "parameterOrder": [
-                "name"
-              ],
-              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "description": "Gets information about a location.",
-              "response": {
-                "$ref": "Location"
-              },
-              "httpMethod": "GET"
-            }
-          },
-          "resources": {
-            "instances": {
-              "methods": {
-                "patch": {
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "type": "string",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "description": "Output only. Format: `projects/{project}/locations/{location}/instances/{instance}`."
-                    },
-                    "updateMask": {
-                      "type": "string",
-                      "format": "google-fieldmask",
-                      "description": "Required. Field mask used to specify the fields to be overwritten in the Instance resource by the update. The fields specified in the mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask.",
-                      "location": "query"
-                    }
-                  },
-                  "description": "Update Instance.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "id": "looker.projects.locations.instances.patch",
-                  "path": "v1/{+name}",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "request": {
-                    "$ref": "Instance"
-                  },
-                  "httpMethod": "PATCH"
-                },
-                "undelete": {
-                  "id": "looker.projects.locations.instances.undelete",
-                  "httpMethod": "POST",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "description": "Undeletes Looker instance.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "request": {
-                    "$ref": "UndeleteInstanceRequest"
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:undelete",
-                  "parameters": {
-                    "name": {
-                      "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}",
-                      "type": "string",
-                      "location": "path",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    }
-                  },
-                  "path": "v1/{+name}:undelete"
-                },
-                "restore": {
-                  "request": {
-                    "$ref": "RestoreInstanceRequest"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "description": "Restore Looker instance.",
-                  "httpMethod": "POST",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "description": "Required. Instance being restored Format: projects/{project}/locations/{location}/instances/{instance}",
-                      "required": true,
-                      "location": "path"
-                    }
-                  },
-                  "id": "looker.projects.locations.instances.restore",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:restore",
-                  "path": "v1/{+name}:restore",
-                  "parameterOrder": [
-                    "name"
-                  ]
-                },
-                "create": {
-                  "request": {
-                    "$ref": "Instance"
-                  },
-                  "parameterOrder": [
-                    "parent"
-                  ],
-                  "parameters": {
-                    "parent": {
-                      "location": "path",
-                      "type": "string",
-                      "description": "Required. Format: `projects/{project}/locations/{location}`.",
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "required": true
-                    },
-                    "instanceId": {
-                      "location": "query",
-                      "type": "string",
-                      "description": "Required. The unique instance identifier. Must contain only lowercase letters, numbers, or hyphens, with the first character a letter and the last a letter or a number. 63 characters maximum."
-                    }
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "id": "looker.projects.locations.instances.create",
-                  "httpMethod": "POST",
-                  "description": "Creates a new Instance in a given project and location.",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "path": "v1/{+parent}/instances"
-                },
-                "import": {
-                  "path": "v1/{+name}:import",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "type": "string",
-                      "required": true,
-                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    }
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:import",
-                  "request": {
-                    "$ref": "ImportInstanceRequest"
-                  },
-                  "httpMethod": "POST",
-                  "id": "looker.projects.locations.instances.import",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "description": "Import instance."
-                },
-                "restart": {
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "required": true,
-                      "type": "string",
-                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    }
-                  },
-                  "id": "looker.projects.locations.instances.restart",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "path": "v1/{+name}:restart",
-                  "description": "Restart instance.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "request": {
-                    "$ref": "RestartInstanceRequest"
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:restart",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "httpMethod": "POST"
-                },
-                "list": {
-                  "path": "v1/{+parent}/instances",
-                  "httpMethod": "GET",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
-                  "parameterOrder": [
-                    "parent"
-                  ],
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "ListInstancesResponse"
-                  },
-                  "description": "Lists Instances in a given project and location.",
-                  "parameters": {
-                    "pageToken": {
-                      "location": "query",
-                      "type": "string",
-                      "description": "A page token received from a previous ListInstancesRequest."
-                    },
-                    "showDeleted": {
-                      "description": "Optional. Whether to include deleted instances in the response.",
-                      "type": "boolean",
-                      "location": "query"
-                    },
-                    "parent": {
-                      "required": true,
-                      "location": "path",
-                      "description": "Required. Format: `projects/{project}/locations/{location}`.",
-                      "type": "string",
-                      "pattern": "^projects/[^/]+/locations/[^/]+$"
-                    },
-                    "pageSize": {
-                      "format": "int32",
-                      "description": "The maximum number of instances to return. If unspecified at most 256 will be returned. The maximum possible value is 2048.",
-                      "type": "integer",
-                      "location": "query"
-                    }
-                  },
-                  "id": "looker.projects.locations.instances.list"
-                },
-                "delete": {
-                  "parameters": {
-                    "force": {
-                      "description": "Whether to force cascading delete.",
-                      "type": "boolean",
-                      "location": "query"
-                    },
-                    "name": {
-                      "location": "path",
-                      "required": true,
-                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "type": "string"
-                    }
-                  },
-                  "description": "Delete instance.",
-                  "path": "v1/{+name}",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "id": "looker.projects.locations.instances.delete",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "httpMethod": "DELETE"
-                },
-                "export": {
-                  "httpMethod": "POST",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "path": "v1/{+name}:export",
-                  "id": "looker.projects.locations.instances.export",
-                  "request": {
-                    "$ref": "ExportInstanceRequest"
-                  },
-                  "description": "Export instance.",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:export",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
-                      "location": "path",
-                      "required": true,
-                      "type": "string"
-                    }
-                  }
-                },
-                "get": {
-                  "path": "v1/{+name}",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "httpMethod": "GET",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "type": "string",
-                      "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}`.",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    }
-                  },
-                  "id": "looker.projects.locations.instances.get",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Instance"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "description": "Gets details of a single Instance."
-                }
-              },
-              "resources": {
-                "backups": {
-                  "methods": {
-                    "list": {
-                      "parameters": {
-                        "pageSize": {
-                          "location": "query",
-                          "type": "integer",
-                          "description": "The maximum number of instances to return.",
-                          "format": "int32"
-                        },
-                        "orderBy": {
-                          "type": "string",
-                          "location": "query",
-                          "description": "Sort results. Default order is \"create_time desc\". Other supported fields are \"state\" and \"expire_time\". https://google.aip.dev/132#ordering"
-                        },
-                        "parent": {
-                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                          "required": true,
-                          "location": "path",
-                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}.",
-                          "type": "string"
-                        },
-                        "pageToken": {
-                          "description": "A page token received from a previous ListInstances request.",
-                          "type": "string",
-                          "location": "query"
-                        }
-                      },
-                      "id": "looker.projects.locations.instances.backups.list",
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
-                      "parameterOrder": [
-                        "parent"
-                      ],
-                      "response": {
-                        "$ref": "ListInstanceBackupsResponse"
-                      },
-                      "path": "v1/{+parent}/backups",
-                      "httpMethod": "GET",
-                      "description": "List backups of Looker instance.",
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups"
-                    },
-                    "create": {
-                      "httpMethod": "POST",
-                      "id": "looker.projects.locations.instances.backups.create",
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups",
-                      "request": {
-                        "$ref": "InstanceBackup"
-                      },
-                      "description": "Backup Looker instance.",
-                      "parameterOrder": [
-                        "parent"
-                      ],
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
-                      "response": {
-                        "$ref": "Operation"
-                      },
-                      "parameters": {
-                        "parent": {
-                          "location": "path",
-                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}",
-                          "type": "string",
-                          "required": true,
-                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                        }
-                      },
-                      "path": "v1/{+parent}/backups"
-                    },
-                    "get": {
-                      "httpMethod": "GET",
-                      "id": "looker.projects.locations.instances.backups.get",
-                      "parameterOrder": [
-                        "name"
-                      ],
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
-                      "response": {
-                        "$ref": "InstanceBackup"
-                      },
-                      "path": "v1/{+name}",
-                      "description": "",
-                      "parameters": {
-                        "name": {
-                          "description": "Required. Format: `projects/{project}/locations/{location}/instances/{instance}/backups/{backup}`.",
-                          "type": "string",
-                          "location": "path",
-                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+/backups/[^/]+$",
-                          "required": true
-                        }
-                      },
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups/{backupsId}"
-                    },
-                    "delete": {
-                      "parameterOrder": [
-                        "name"
-                      ],
-                      "httpMethod": "DELETE",
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
-                      "response": {
-                        "$ref": "Operation"
-                      },
-                      "id": "looker.projects.locations.instances.backups.delete",
-                      "path": "v1/{+name}",
-                      "description": "Delete backup.",
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}/backups/{backupsId}",
-                      "parameters": {
-                        "name": {
-                          "location": "path",
-                          "description": "Required. Format: projects/{project}/locations/{location}/instances/{instance}/backups/{backup}",
-                          "required": true,
-                          "type": "string",
-                          "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+/backups/[^/]+$"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "operations": {
-              "methods": {
-                "get": {
-                  "id": "looker.projects.locations.operations.get",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "httpMethod": "GET",
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "description": "The name of the operation resource.",
-                      "required": true
-                    }
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "path": "v1/{+name}"
-                },
-                "list": {
-                  "path": "v1/{+name}/operations",
-                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
-                  "id": "looker.projects.locations.operations.list",
-                  "response": {
-                    "$ref": "ListOperationsResponse"
-                  },
-                  "parameters": {
-                    "pageSize": {
-                      "type": "integer",
-                      "description": "The standard list page size.",
-                      "location": "query",
-                      "format": "int32"
-                    },
-                    "name": {
-                      "location": "path",
-                      "type": "string",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "description": "The name of the operation's parent resource."
-                    },
-                    "pageToken": {
-                      "type": "string",
-                      "location": "query",
-                      "description": "The standard list page token."
-                    },
-                    "filter": {
-                      "location": "query",
-                      "description": "The standard list filter.",
-                      "type": "string"
-                    },
-                    "returnPartialSuccess": {
-                      "type": "boolean",
-                      "location": "query",
-                      "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation."
-                    }
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "httpMethod": "GET",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations"
-                },
-                "cancel": {
-                  "response": {
-                    "$ref": "Empty"
-                  },
-                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
-                  "request": {
-                    "$ref": "CancelOperationRequest"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "path": "v1/{+name}:cancel",
-                  "parameters": {
-                    "name": {
-                      "description": "The name of the operation resource to be cancelled.",
-                      "type": "string",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "location": "path",
-                      "required": true
-                    }
-                  },
-                  "id": "looker.projects.locations.operations.cancel",
-                  "httpMethod": "POST",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
-                  "parameterOrder": [
-                    "name"
-                  ]
-                },
-                "delete": {
-                  "path": "v1/{+name}",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "httpMethod": "DELETE",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "description": "The name of the operation resource to be deleted.",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "type": "string"
-                    }
-                  },
-                  "id": "looker.projects.locations.operations.delete",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "Empty"
-                  },
-                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`."
-                }
-              }
-            }
-          }
-        }
-      }
+  "parameters": {
+    "callback": {
+      "description": "JSONP",
+      "type": "string",
+      "location": "query"
+    },
+    "quotaUser": {
+      "type": "string",
+      "location": "query",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "uploadType": {
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "location": "query"
+    },
+    "fields": {
+      "description": "Selector specifying which fields to include in a partial response.",
+      "type": "string",
+      "location": "query"
+    },
+    "upload_protocol": {
+      "location": "query",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "type": "string"
+    },
+    "$.xgafv": {
+      "description": "V1 error format.",
+      "location": "query",
+      "enum": [
+        "1",
+        "2"
+      ],
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "type": "string"
+    },
+    "oauth_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user."
+    },
+    "prettyPrint": {
+      "type": "boolean",
+      "default": "true",
+      "location": "query",
+      "description": "Returns response with indentations and line breaks."
+    },
+    "alt": {
+      "location": "query",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "type": "string",
+      "default": "json",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "description": "Data format for response."
+    },
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "location": "query",
+      "type": "string"
+    },
+    "access_token": {
+      "description": "OAuth access token.",
+      "location": "query",
+      "type": "string"
     }
   },
-  "canonicalName": "Looker",
   "name": "looker",
-  "batchPath": "batch",
-  "description": "",
-  "version_module": true,
-  "mtlsRootUrl": "https://looker.mtls.googleapis.com/",
-  "kind": "discovery#restDescription",
-  "rootUrl": "https://looker.googleapis.com/",
-  "discoveryVersion": "v1",
-  "id": "looker:v1",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "basePath": "",
-  "ownerDomain": "google.com",
-  "revision": "20260819",
-  "protocol": "rest"
+  "documentationLink": "https://cloud.google.com/looker/docs/reference/rest/",
+  "basePath": ""
 }
