@@ -1,1247 +1,11 @@
 {
+  "basePath": "",
   "fullyEncodeReservedExpansion": true,
-  "batchPath": "batch",
-  "description": "",
-  "servicePath": "",
-  "name": "trafficdirector",
-  "ownerName": "Google",
   "title": "Traffic Director API",
-  "schemas": {
-    "SemanticVersion": {
-      "description": "Envoy uses SemVer (https://semver.org/). Major/minor versions indicate expected behaviors and APIs, the patch version field is used only for security fixes and can be generally ignored.",
-      "id": "SemanticVersion",
-      "properties": {
-        "minorNumber": {
-          "type": "integer",
-          "format": "uint32"
-        },
-        "patch": {
-          "type": "integer",
-          "format": "uint32"
-        },
-        "majorNumber": {
-          "type": "integer",
-          "format": "uint32"
-        }
-      },
-      "type": "object"
-    },
-    "BuildVersion": {
-      "type": "object",
-      "id": "BuildVersion",
-      "description": "BuildVersion combines SemVer version of extension with free-form build information (i.e. 'alpha', 'private-build') as a set of strings.",
-      "properties": {
-        "version": {
-          "description": "SemVer version of extension.",
-          "$ref": "SemanticVersion"
-        },
-        "metadata": {
-          "description": "Free-form build information. Envoy defines several well known keys in the source/common/version/version.h file",
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object."
-          }
-        }
-      }
-    },
-    "DynamicCluster": {
-      "description": "Describes a dynamically loaded cluster via the CDS API. [#next-free-field: 6]",
-      "properties": {
-        "versionInfo": {
-          "type": "string",
-          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the cluster was loaded. In the future, discrete per-cluster versions may be supported by the API."
-        },
-        "clientStatus": {
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ],
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ],
-          "description": "The client status of this resource. [#not-implemented-hide:]",
-          "type": "string"
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "The timestamp when the Cluster was last updated.",
-          "format": "google-datetime"
-        },
-        "cluster": {
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The cluster config.",
-          "type": "object"
-        },
-        "errorState": {
-          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
-          "$ref": "UpdateFailureState"
-        }
-      },
-      "type": "object",
-      "id": "DynamicCluster"
-    },
-    "PathSegment": {
-      "description": "Specifies the segment in a path to retrieve value from Struct.",
-      "properties": {
-        "key": {
-          "description": "If specified, use the key to retrieve the value in a Struct.",
-          "type": "string"
-        }
-      },
-      "id": "PathSegment",
-      "type": "object"
-    },
-    "DynamicListener": {
-      "description": "Describes a dynamically loaded listener via the LDS API. [#next-free-field: 7]",
-      "type": "object",
-      "id": "DynamicListener",
-      "properties": {
-        "warmingState": {
-          "description": "The listener state for any warming listener by this name. These are listeners that are currently undergoing warming in preparation to service data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the warming listeners should generally be discarded.",
-          "$ref": "DynamicListenerState"
-        },
-        "clientStatus": {
-          "type": "string",
-          "description": "The client status of this resource. [#not-implemented-hide:]",
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ],
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ]
-        },
-        "drainingState": {
-          "description": "The listener state for any draining listener by this name. These are listeners that are currently undergoing draining in preparation to stop servicing data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the draining listeners should generally be discarded.",
-          "$ref": "DynamicListenerState"
-        },
-        "errorState": {
-          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty.",
-          "$ref": "UpdateFailureState"
-        },
-        "activeState": {
-          "description": "The listener state for any active listener by this name. These are listeners that are available to service data plane traffic.",
-          "$ref": "DynamicListenerState"
-        },
-        "name": {
-          "description": "The name or unique id of this listener, pulled from the DynamicListenerState config.",
-          "type": "string"
-        }
-      }
-    },
-    "Extension": {
-      "properties": {
-        "disabled": {
-          "type": "boolean",
-          "description": "Indicates that the extension is present but was disabled via dynamic configuration."
-        },
-        "version": {
-          "$ref": "BuildVersion",
-          "description": "The version is a property of the extension and maintained independently of other extensions and the Envoy API. This field is not set when extension did not provide version information."
-        },
-        "name": {
-          "description": "This is the name of the Envoy filter as specified in the Envoy configuration, e.g. envoy.filters.http.router, com.acme.widget.",
-          "type": "string"
-        },
-        "typeDescriptor": {
-          "deprecated": true,
-          "description": "[#not-implemented-hide:] Type descriptor of extension configuration proto. [#comment:",
-          "type": "string"
-        },
-        "category": {
-          "description": "Category of the extension. Extension category names use reverse DNS notation. For instance \"envoy.filters.listener\" for Envoy's built-in listener filters or \"com.acme.filters.http\" for HTTP filters from acme.com vendor. [#comment:",
-          "type": "string"
-        },
-        "typeUrls": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "Type URLs of extension configuration protos."
-        }
-      },
-      "id": "Extension",
-      "type": "object",
-      "description": "Version and identification for an Envoy extension. [#next-free-field: 7]"
-    },
-    "DoubleMatcher": {
-      "description": "Specifies the way to match a double value.",
-      "properties": {
-        "range": {
-          "description": "If specified, the input double value must be in the range specified here. Note: The range is using half-open interval semantics [start, end).",
-          "$ref": "DoubleRange"
-        },
-        "exact": {
-          "description": "If specified, the input double value must be equal to the value specified here.",
-          "format": "double",
-          "type": "number"
-        }
-      },
-      "id": "DoubleMatcher",
-      "type": "object"
-    },
-    "ListenersConfigDump": {
-      "id": "ListenersConfigDump",
-      "properties": {
-        "dynamicListeners": {
-          "items": {
-            "$ref": "DynamicListener"
-          },
-          "type": "array",
-          "description": "State for any warming, active, or draining listeners."
-        },
-        "staticListeners": {
-          "items": {
-            "$ref": "StaticListener"
-          },
-          "description": "The statically loaded listener configs.",
-          "type": "array"
-        },
-        "versionInfo": {
-          "description": "This is the :ref:`version_info ` in the last processed LDS discovery response. If there are only static bootstrap listeners, this field will be \"\".",
-          "type": "string"
-        }
-      },
-      "description": "Envoy's listener manager fills this message with all currently known listeners. Listener configuration information can be used to recreate an Envoy configuration by populating all listeners as static listeners or by returning them in a LDS response.",
-      "type": "object"
-    },
-    "StaticCluster": {
-      "properties": {
-        "cluster": {
-          "description": "The cluster config.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          }
-        },
-        "lastUpdated": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "The timestamp when the Cluster was last updated."
-        }
-      },
-      "type": "object",
-      "id": "StaticCluster",
-      "description": "Describes a statically loaded cluster."
-    },
-    "StringMatcher": {
-      "type": "object",
-      "properties": {
-        "ignoreCase": {
-          "description": "If ``true``, indicates the exact/prefix/suffix/contains matching should be case insensitive. This has no effect for the ``safe_regex`` match. For example, the matcher ``data`` will match both input string ``Data`` and ``data`` if this option is set to ``true``.",
-          "type": "boolean"
-        },
-        "suffix": {
-          "description": "The input string must have the suffix specified here. .. note:: Empty suffix match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``xyz.abc``",
-          "type": "string"
-        },
-        "safeRegex": {
-          "$ref": "RegexMatcher",
-          "description": "The input string must match the regular expression specified here."
-        },
-        "exact": {
-          "description": "The input string must match exactly the string specified here. Examples: * ``abc`` only matches the value ``abc``.",
-          "type": "string"
-        },
-        "custom": {
-          "$ref": "TypedExtensionConfig",
-          "description": "Use an extension as the matcher type. [#extension-category: envoy.string_matcher]"
-        },
-        "contains": {
-          "description": "The input string must have the substring specified here. .. note:: Empty contains match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``xyz.abc.def``",
-          "type": "string"
-        },
-        "prefix": {
-          "type": "string",
-          "description": "The input string must have the prefix specified here. .. note:: Empty prefix match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``abc.xyz``"
-        }
-      },
-      "id": "StringMatcher",
-      "description": "Specifies the way to match a string. [#next-free-field: 9]"
-    },
-    "ListMatcher": {
-      "description": "Specifies the way to match a list value.",
-      "id": "ListMatcher",
-      "type": "object",
-      "properties": {
-        "oneOf": {
-          "description": "If specified, at least one of the values in the list must match the value specified.",
-          "$ref": "ValueMatcher"
-        }
-      }
-    },
-    "StaticRouteConfig": {
-      "id": "StaticRouteConfig",
-      "properties": {
-        "routeConfig": {
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          },
-          "description": "The route config.",
-          "type": "object"
-        },
-        "lastUpdated": {
-          "description": "The timestamp when the Route was last updated.",
-          "type": "string",
-          "format": "google-datetime"
-        }
-      },
-      "type": "object"
-    },
-    "UpdateFailureState": {
-      "id": "UpdateFailureState",
-      "properties": {
-        "versionInfo": {
-          "description": "This is the version of the rejected resource. [#not-implemented-hide:]",
-          "type": "string"
-        },
-        "details": {
-          "type": "string",
-          "description": "Details about the last failed update attempt."
-        },
-        "lastUpdateAttempt": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "Time of the latest failed update attempt."
-        },
-        "failedConfiguration": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "What the component configuration would have been if the update had succeeded. This field may not be populated by xDS clients due to storage overhead."
-        }
-      },
-      "type": "object"
-    },
-    "ContextParams": {
-      "properties": {
-        "params": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        }
-      },
-      "type": "object",
-      "id": "ContextParams",
-      "description": "Additional parameters that can be used to select resource variants. These include any global context parameters, per-resource type client feature capabilities and per-resource type functional attributes. All per-resource type attributes will be `xds.resource.` prefixed and some of these are documented below: `xds.resource.listening_address`: The value is \"IP:port\" (e.g. \"10.1.1.3:8080\") which is the listening address of a Listener. Used in a Listener resource query."
-    },
-    "OrMatcher": {
-      "id": "OrMatcher",
-      "description": "Specifies a list of alternatives for the match.",
-      "properties": {
-        "valueMatchers": {
-          "type": "array",
-          "items": {
-            "$ref": "ValueMatcher"
-          }
-        }
-      },
-      "type": "object"
-    },
-    "NodeMatcher": {
-      "type": "object",
-      "id": "NodeMatcher",
-      "description": "Specifies the way to match a Node. The match follows AND semantics.",
-      "properties": {
-        "nodeMetadatas": {
-          "items": {
-            "$ref": "StructMatcher"
-          },
-          "type": "array",
-          "description": "Specifies match criteria on the node metadata."
-        },
-        "nodeId": {
-          "description": "Specifies match criteria on the node id.",
-          "$ref": "StringMatcher"
-        }
-      }
-    },
-    "DoubleRange": {
-      "properties": {
-        "start": {
-          "description": "start of the range (inclusive)",
-          "format": "double",
-          "type": "number"
-        },
-        "end": {
-          "type": "number",
-          "description": "end of the range (exclusive)",
-          "format": "double"
-        }
-      },
-      "id": "DoubleRange",
-      "type": "object",
-      "description": "Specifies the double start and end of the range using half-open interval semantics [start, end)."
-    },
-    "NullMatch": {
-      "description": "NullMatch is an empty message to specify a null value.",
-      "id": "NullMatch",
-      "type": "object",
-      "properties": {}
-    },
-    "Locality": {
-      "description": "Identifies location of where either Envoy runs or where upstream hosts run.",
-      "type": "object",
-      "id": "Locality",
-      "properties": {
-        "region": {
-          "type": "string",
-          "description": "Region this :ref:`zone ` belongs to."
-        },
-        "zone": {
-          "description": "Defines the local service zone where Envoy is running. Though optional, it should be set if discovery service routing is used and the discovery service exposes :ref:`zone data `, either in this message or via :option:`--service-zone`. The meaning of zone is context dependent, e.g. `Availability Zone (AZ) `_ on AWS, `Zone `_ on GCP, etc.",
-          "type": "string"
-        },
-        "subZone": {
-          "description": "When used for locality of upstream hosts, this field further splits zone into smaller chunks of sub-zones so they can be load balanced independently.",
-          "type": "string"
-        }
-      }
-    },
-    "GoogleRE2": {
-      "properties": {
-        "maxProgramSize": {
-          "description": "This field controls the RE2 \"program size\" which is a rough estimate of how complex a compiled regex is to evaluate. A regex that has a program size greater than the configured value will fail to compile. In this case, the configured max program size can be increased or the regex can be simplified. If not specified, the default is 100. This field is deprecated; regexp validation should be performed on the management server instead of being done by each individual client. .. note:: Although this field is deprecated, the program size will still be checked against the global ``re2.max_program_size.error_level`` runtime value.",
-          "deprecated": true,
-          "format": "uint32",
-          "type": "integer"
-        }
-      },
-      "id": "GoogleRE2",
-      "description": "Google's `RE2 `_ regex engine. The regex string must adhere to the documented `syntax `_. The engine is designed to complete execution in linear time as well as limit the amount of memory used. Envoy supports program size checking via runtime. The runtime keys ``re2.max_program_size.error_level`` and ``re2.max_program_size.warn_level`` can be set to integers as the maximum program size or complexity that a compiled regex can have before an exception is thrown or a warning is logged, respectively. ``re2.max_program_size.error_level`` defaults to 100, and ``re2.max_program_size.warn_level`` has no default if unset (will not check/log a warning). Envoy emits two stats for tracking the program size of regexes: the histogram ``re2.program_size``, which records the program size, and the counter ``re2.exceeded_warn_level``, which is incremented each time the program size exceeds the warn level threshold.",
-      "type": "object"
-    },
-    "ClientStatusResponse": {
-      "type": "object",
-      "properties": {
-        "config": {
-          "description": "Client configs for the clients specified in the ClientStatusRequest.",
-          "type": "array",
-          "items": {
-            "$ref": "ClientConfig"
-          }
-        }
-      },
-      "id": "ClientStatusResponse"
-    },
-    "Node": {
-      "description": "Identifies a specific Envoy instance. The node identifier is presented to the management server, which may use this identifier to distinguish per Envoy configuration for serving. [#next-free-field: 13]",
-      "type": "object",
-      "properties": {
-        "metadata": {
-          "description": "Opaque metadata extending the node identifier. Envoy will pass this directly to the management server.",
-          "additionalProperties": {
-            "description": "Properties of the object.",
-            "type": "any"
-          },
-          "type": "object"
-        },
-        "dynamicParameters": {
-          "additionalProperties": {
-            "$ref": "ContextParams"
-          },
-          "description": "Map from xDS resource type URL to dynamic context parameters. These may vary at runtime (unlike other fields in this message). For example, the xDS client may have a shard identifier that changes during the lifetime of the xDS client. In Envoy, this would be achieved by updating the dynamic context on the Server::Instance's LocalInfo context provider. The shard ID dynamic parameter then appears in this field during future discovery requests.",
-          "type": "object"
-        },
-        "userAgentVersion": {
-          "description": "Free-form string that identifies the version of the entity requesting config. E.g. \"1.12.2\" or \"abcd1234\", or \"SpecialEnvoyBuild\"",
-          "type": "string"
-        },
-        "locality": {
-          "description": "Locality specifying where the Envoy instance is running.",
-          "$ref": "Locality"
-        },
-        "userAgentName": {
-          "description": "Free-form string that identifies the entity requesting config. E.g. \"envoy\" or \"grpc\"",
-          "type": "string"
-        },
-        "extensions": {
-          "description": "List of extensions and their versions supported by the node.",
-          "items": {
-            "$ref": "Extension"
-          },
-          "type": "array"
-        },
-        "userAgentBuildVersion": {
-          "description": "Structured version of the entity requesting config.",
-          "$ref": "BuildVersion"
-        },
-        "listeningAddresses": {
-          "items": {
-            "$ref": "Address"
-          },
-          "deprecated": true,
-          "type": "array",
-          "description": "Known listening ports on the node as a generic hint to the management server for filtering :ref:`listeners ` to be returned. For example, if there is a listener bound to port 80, the list can optionally contain the SocketAddress ``(0.0.0.0,80)``. The field is optional and just a hint."
-        },
-        "clientFeatures": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Client feature support list. These are well known features described in the Envoy API repository for a given major version of an API. Client features use reverse DNS naming scheme, for example ``com.acme.feature``. See :ref:`the list of features ` that xDS client may support.",
-          "type": "array"
-        },
-        "id": {
-          "type": "string",
-          "description": "An opaque node identifier for the Envoy node. This also provides the local service node name. It should be set if any of the following features are used: :ref:`statsd `, :ref:`CDS `, and :ref:`HTTP tracing `, either in this message or via :option:`--service-node`."
-        },
-        "cluster": {
-          "type": "string",
-          "description": "Defines the local service cluster name where Envoy is running. Though optional, it should be set if any of the following features are used: :ref:`statsd `, :ref:`health check cluster verification `, :ref:`runtime override directory `, :ref:`user agent addition `, :ref:`HTTP global rate limiting `, :ref:`CDS `, and :ref:`HTTP tracing `, either in this message or via :option:`--service-cluster`."
-        }
-      },
-      "id": "Node"
-    },
-    "PerXdsConfig": {
-      "type": "object",
-      "description": "Detailed config (per xDS) with status. [#next-free-field: 8]",
-      "id": "PerXdsConfig",
-      "properties": {
-        "routeConfig": {
-          "$ref": "RoutesConfigDump"
-        },
-        "status": {
-          "description": "Config status generated by management servers. Will not be present if the CSDS server is an xDS client.",
-          "type": "string",
-          "enumDescriptions": [
-            "Status info is not available/unknown.",
-            "Management server has sent the config to client and received ACK.",
-            "Config is not sent.",
-            "Management server has sent the config to client but hasn’t received ACK/NACK.",
-            "Management server has sent the config to client but received NACK. The attached config dump will be the latest config (the rejected one), since it is the persisted version in the management server."
-          ],
-          "enum": [
-            "UNKNOWN",
-            "SYNCED",
-            "NOT_SENT",
-            "STALE",
-            "ERROR"
-          ]
-        },
-        "clientStatus": {
-          "enum": [
-            "CLIENT_UNKNOWN",
-            "CLIENT_REQUESTED",
-            "CLIENT_ACKED",
-            "CLIENT_NACKED",
-            "CLIENT_RECEIVED_ERROR"
-          ],
-          "enumDescriptions": [
-            "Config status is not available/unknown.",
-            "Client requested the config but hasn't received any config from management server yet.",
-            "Client received the config and replied with ACK.",
-            "Client received the config and replied with NACK. Notably, the attached config dump is not the NACKed version, but the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty."
-          ],
-          "type": "string",
-          "deprecated": true,
-          "description": "Client config status is populated by xDS clients. Will not be present if the CSDS server is an xDS server. No matter what the client config status is, xDS clients should always dump the most recent accepted xDS config. .. attention:: This field is deprecated. Use :ref:`ClientResourceStatus ` for per-resource config status instead."
-        },
-        "endpointConfig": {
-          "$ref": "EndpointsConfigDump"
-        },
-        "scopedRouteConfig": {
-          "$ref": "ScopedRoutesConfigDump"
-        },
-        "clusterConfig": {
-          "$ref": "ClustersConfigDump"
-        },
-        "listenerConfig": {
-          "$ref": "ListenersConfigDump"
-        }
-      }
-    },
-    "Address": {
-      "id": "Address",
-      "properties": {
-        "envoyInternalAddress": {
-          "$ref": "EnvoyInternalAddress",
-          "description": "Specifies a user-space address handled by :ref:`internal listeners `."
-        },
-        "socketAddress": {
-          "$ref": "SocketAddress"
-        },
-        "pipe": {
-          "$ref": "Pipe"
-        }
-      },
-      "type": "object",
-      "description": "Addresses specify either a logical or physical address and port, which are used to tell Envoy where to bind/listen, connect to upstream and find management servers."
-    },
-    "SocketAddress": {
-      "type": "object",
-      "description": "[#next-free-field: 8]",
-      "id": "SocketAddress",
-      "properties": {
-        "protocol": {
-          "enum": [
-            "TCP",
-            "UDP"
-          ],
-          "type": "string",
-          "enumDescriptions": [
-            "",
-            ""
-          ]
-        },
-        "ipv4Compat": {
-          "type": "boolean",
-          "description": "When binding to an IPv6 address above, this enables `IPv4 compatibility `_. Binding to ``::`` will allow both IPv4 and IPv6 connections, with peer IPv4 addresses mapped into IPv6 space as ``::FFFF:``."
-        },
-        "portValue": {
-          "type": "integer",
-          "format": "uint32"
-        },
-        "resolverName": {
-          "type": "string",
-          "description": "The name of the custom resolver. This must have been registered with Envoy. If this is empty, a context dependent default applies. If the address is a concrete IP address, no resolution will occur. If address is a hostname this should be set for resolution other than DNS. Specifying a custom resolver with ``STRICT_DNS`` or ``LOGICAL_DNS`` will generate an error at runtime."
-        },
-        "address": {
-          "description": "The address for this socket. :ref:`Listeners ` will bind to the address. An empty address is not allowed. Specify ``0.0.0.0`` or ``::`` to bind to any address. [#comment:TODO(zuercher) reinstate when implemented: It is possible to distinguish a Listener address via the prefix/suffix matching in :ref:`FilterChainMatch `.] When used within an upstream :ref:`BindConfig `, the address controls the source address of outbound connections. For :ref:`clusters `, the cluster type determines whether the address must be an IP (``STATIC`` or ``EDS`` clusters) or a hostname resolved by DNS (``STRICT_DNS`` or ``LOGICAL_DNS`` clusters). Address resolution can be customized via :ref:`resolver_name `.",
-          "type": "string"
-        },
-        "namedPort": {
-          "type": "string",
-          "description": "This is only valid if :ref:`resolver_name ` is specified below and the named resolver is capable of named port resolution."
-        },
-        "networkNamespaceFilepath": {
-          "type": "string",
-          "description": "Filepath that specifies the Linux network namespace this socket will be created in (see ``man 7 network_namespaces``). If this field is set, Envoy will create the socket in the specified network namespace. .. note:: Setting this parameter requires Envoy to run with the ``CAP_SYS_ADMIN`` capability. .. attention:: Network namespaces are only configurable on Linux. Otherwise, this field has no effect."
-        }
-      }
-    },
-    "DynamicEndpointConfig": {
-      "type": "object",
-      "id": "DynamicEndpointConfig",
-      "properties": {
-        "versionInfo": {
-          "description": "[#not-implemented-hide:] This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the endpoint configuration was loaded.",
-          "type": "string"
-        },
-        "endpointConfig": {
-          "description": "The endpoint config.",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "type": "object"
-        },
-        "lastUpdated": {
-          "format": "google-datetime",
-          "description": "[#not-implemented-hide:] The timestamp when the Endpoint was last updated.",
-          "type": "string"
-        },
-        "errorState": {
-          "$ref": "UpdateFailureState",
-          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]"
-        },
-        "clientStatus": {
-          "description": "The client status of this resource. [#not-implemented-hide:]",
-          "type": "string",
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ],
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ]
-        }
-      },
-      "description": "[#next-free-field: 6]"
-    },
-    "StaticListener": {
-      "type": "object",
-      "properties": {
-        "listener": {
-          "description": "The listener config.",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "type": "object"
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "The timestamp when the Listener was last successfully updated.",
-          "format": "google-datetime"
-        }
-      },
-      "id": "StaticListener",
-      "description": "Describes a statically loaded listener."
-    },
-    "InlineScopedRouteConfigs": {
-      "id": "InlineScopedRouteConfigs",
-      "properties": {
-        "scopedRouteConfigs": {
-          "items": {
-            "additionalProperties": {
-              "type": "any",
-              "description": "Properties of the object. Contains field @type with type URL."
-            },
-            "type": "object"
-          },
-          "type": "array",
-          "description": "The scoped route configurations."
-        },
-        "name": {
-          "description": "The name assigned to the scoped route configurations.",
-          "type": "string"
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "The timestamp when the scoped route config set was last updated.",
-          "format": "google-datetime"
-        }
-      },
-      "type": "object"
-    },
-    "ClustersConfigDump": {
-      "description": "Envoy's cluster manager fills this message with all currently known clusters. Cluster configuration information can be used to recreate an Envoy configuration by populating all clusters as static clusters or by returning them in a CDS response.",
-      "type": "object",
-      "properties": {
-        "versionInfo": {
-          "type": "string",
-          "description": "This is the :ref:`version_info ` in the last processed CDS discovery response. If there are only static bootstrap clusters, this field will be \"\"."
-        },
-        "dynamicActiveClusters": {
-          "description": "The dynamically loaded active clusters. These are clusters that are available to service data plane traffic.",
-          "items": {
-            "$ref": "DynamicCluster"
-          },
-          "type": "array"
-        },
-        "staticClusters": {
-          "description": "The statically loaded cluster configs.",
-          "items": {
-            "$ref": "StaticCluster"
-          },
-          "type": "array"
-        },
-        "dynamicWarmingClusters": {
-          "description": "The dynamically loaded warming clusters. These are clusters that are currently undergoing warming in preparation to service data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the warming clusters should generally be discarded.",
-          "items": {
-            "$ref": "DynamicCluster"
-          },
-          "type": "array"
-        }
-      },
-      "id": "ClustersConfigDump"
-    },
-    "GenericXdsConfig": {
-      "description": "GenericXdsConfig is used to specify the config status and the dump of any xDS resource identified by their type URL. It is the generalized version of the now deprecated ListenersConfigDump, ClustersConfigDump etc [#next-free-field: 10]",
-      "type": "object",
-      "id": "GenericXdsConfig",
-      "properties": {
-        "xdsConfig": {
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "type": "object",
-          "description": "The xDS resource config. Actual content depends on the type"
-        },
-        "clientStatus": {
-          "description": "Per xDS resource status from the view of a xDS client",
-          "type": "string",
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ],
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ]
-        },
-        "configStatus": {
-          "type": "string",
-          "enum": [
-            "UNKNOWN",
-            "SYNCED",
-            "NOT_SENT",
-            "STALE",
-            "ERROR"
-          ],
-          "enumDescriptions": [
-            "Status info is not available/unknown.",
-            "Management server has sent the config to client and received ACK.",
-            "Config is not sent.",
-            "Management server has sent the config to client but hasn’t received ACK/NACK.",
-            "Management server has sent the config to client but received NACK. The attached config dump will be the latest config (the rejected one), since it is the persisted version in the management server."
-          ],
-          "description": "Per xDS resource config status. It is generated by management servers. It will not be present if the CSDS server is an xDS client."
-        },
-        "lastUpdated": {
-          "type": "string",
-          "description": "Timestamp when the xDS resource was last updated",
-          "format": "google-datetime"
-        },
-        "isStaticResource": {
-          "description": "Is static resource is true if it is specified in the config supplied through the file at the startup.",
-          "type": "boolean"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the xDS resource"
-        },
-        "errorState": {
-          "description": "Set if the last update failed, cleared after the next successful update. The *error_state* field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
-          "$ref": "UpdateFailureState"
-        },
-        "typeUrl": {
-          "type": "string",
-          "description": "Type_url represents the fully qualified name of xDS resource type like envoy.v3.Cluster, envoy.v3.ClusterLoadAssignment etc."
-        },
-        "versionInfo": {
-          "type": "string",
-          "description": "This is the :ref:`version_info ` in the last processed xDS discovery response. If there are only static bootstrap listeners, this field will be \"\""
-        }
-      }
-    },
-    "EndpointsConfigDump": {
-      "type": "object",
-      "properties": {
-        "staticEndpointConfigs": {
-          "description": "The statically loaded endpoint configs.",
-          "type": "array",
-          "items": {
-            "$ref": "StaticEndpointConfig"
-          }
-        },
-        "dynamicEndpointConfigs": {
-          "type": "array",
-          "description": "The dynamically loaded endpoint configs.",
-          "items": {
-            "$ref": "DynamicEndpointConfig"
-          }
-        }
-      },
-      "id": "EndpointsConfigDump",
-      "description": "Envoy's admin fill this message with all currently known endpoints. Endpoint configuration information can be used to recreate an Envoy configuration by populating all endpoints as static endpoints or by returning them in an EDS response."
-    },
-    "EnvoyInternalAddress": {
-      "id": "EnvoyInternalAddress",
-      "properties": {
-        "endpointId": {
-          "type": "string",
-          "description": "Specifies an endpoint identifier to distinguish between multiple endpoints for the same internal listener in a single upstream pool. Only used in the upstream addresses for tracking changes to individual endpoints. This, for example, may be set to the final destination IP for the target internal listener."
-        },
-        "serverListenerName": {
-          "type": "string",
-          "description": "Specifies the :ref:`name ` of the internal listener."
-        }
-      },
-      "description": "The address represents an envoy internal listener. [#comment: ",
-      "type": "object"
-    },
-    "ClientStatusRequest": {
-      "type": "object",
-      "description": "Request for client status of clients identified by a list of NodeMatchers.",
-      "id": "ClientStatusRequest",
-      "properties": {
-        "node": {
-          "$ref": "Node",
-          "description": "The node making the csds request."
-        },
-        "excludeResourceContents": {
-          "type": "boolean",
-          "description": "If true, the server will not include the resource contents in the response (i.e., the generic_xds_configs.xds_config field will not be populated). [#not-implemented-hide:]"
-        },
-        "nodeMatchers": {
-          "items": {
-            "$ref": "NodeMatcher"
-          },
-          "type": "array",
-          "description": "Management server can use these match criteria to identify clients. The match follows OR semantics."
-        }
-      }
-    },
-    "RoutesConfigDump": {
-      "id": "RoutesConfigDump",
-      "properties": {
-        "staticRouteConfigs": {
-          "description": "The statically loaded route configs.",
-          "type": "array",
-          "items": {
-            "$ref": "StaticRouteConfig"
-          }
-        },
-        "dynamicRouteConfigs": {
-          "type": "array",
-          "items": {
-            "$ref": "DynamicRouteConfig"
-          },
-          "description": "The dynamically loaded route configs."
-        }
-      },
-      "description": "Envoy's RDS implementation fills this message with all currently loaded routes, as described by their RouteConfiguration objects. Static routes that are either defined in the bootstrap configuration or defined inline while configuring listeners are separated from those configured dynamically via RDS. Route configuration information can be used to recreate an Envoy configuration by populating all routes as static routes or by returning them in RDS responses.",
-      "type": "object"
-    },
-    "ScopedRoutesConfigDump": {
-      "properties": {
-        "dynamicScopedRouteConfigs": {
-          "description": "The dynamically loaded scoped route configs.",
-          "items": {
-            "$ref": "DynamicScopedRouteConfigs"
-          },
-          "type": "array"
-        },
-        "inlineScopedRouteConfigs": {
-          "items": {
-            "$ref": "InlineScopedRouteConfigs"
-          },
-          "description": "The statically loaded scoped route configs.",
-          "type": "array"
-        }
-      },
-      "type": "object",
-      "id": "ScopedRoutesConfigDump",
-      "description": "Envoy's scoped RDS implementation fills this message with all currently loaded route configuration scopes (defined via ScopedRouteConfigurationsSet protos). This message lists both the scopes defined inline with the higher order object (i.e., the HttpConnectionManager) and the dynamically obtained scopes via the SRDS API."
-    },
-    "StaticEndpointConfig": {
-      "properties": {
-        "lastUpdated": {
-          "description": "[#not-implemented-hide:] The timestamp when the Endpoint was last updated.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "endpointConfig": {
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "type": "object",
-          "description": "The endpoint config."
-        }
-      },
-      "type": "object",
-      "id": "StaticEndpointConfig"
-    },
-    "Pipe": {
-      "id": "Pipe",
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "Unix Domain Socket path. On Linux, paths starting with '@' will use the abstract namespace. The starting '@' is replaced by a null byte by Envoy. Paths starting with '@' will result in an error in environments other than Linux."
-        },
-        "mode": {
-          "type": "integer",
-          "format": "uint32",
-          "description": "The mode for the Pipe. Not applicable for abstract sockets."
-        }
-      },
-      "type": "object"
-    },
-    "RegexMatcher": {
-      "description": "A regex matcher designed for safety when used with untrusted input.",
-      "id": "RegexMatcher",
-      "type": "object",
-      "properties": {
-        "googleRe2": {
-          "$ref": "GoogleRE2",
-          "description": "Google's RE2 regex engine.",
-          "deprecated": true
-        },
-        "regex": {
-          "type": "string",
-          "description": "The regex match string. The string must be supported by the configured engine. The regex is matched against the full string, not as a partial match."
-        }
-      }
-    },
-    "ClientConfig": {
-      "type": "object",
-      "id": "ClientConfig",
-      "properties": {
-        "clientScope": {
-          "description": "For xDS clients, the scope in which the data is used. For example, gRPC indicates the data plane target or that the data is associated with gRPC server(s).",
-          "type": "string"
-        },
-        "xdsConfig": {
-          "deprecated": true,
-          "type": "array",
-          "items": {
-            "$ref": "PerXdsConfig"
-          },
-          "description": "This field is deprecated in favor of generic_xds_configs which is much simpler and uniform in structure."
-        },
-        "genericXdsConfigs": {
-          "items": {
-            "$ref": "GenericXdsConfig"
-          },
-          "type": "array",
-          "description": "Represents generic xDS config and the exact config structure depends on the type URL (like Cluster if it is CDS)"
-        },
-        "node": {
-          "$ref": "Node",
-          "description": "Node for a particular client."
-        }
-      },
-      "description": "All xds configs for a particular client."
-    },
-    "TypedExtensionConfig": {
-      "description": "Message type for extension configuration.",
-      "type": "object",
-      "properties": {
-        "typedConfig": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The typed config for the extension. The type URL will be used to identify the extension. In the case that the type URL is *xds.type.v3.TypedStruct* (or, for historical reasons, *udpa.type.v1.TypedStruct*), the inner type URL of *TypedStruct* will be utilized. See the :ref:`extension configuration overview ` for further details."
-        },
-        "name": {
-          "description": "The name of an extension. This is not used to select the extension, instead it serves the role of an opaque identifier.",
-          "type": "string"
-        }
-      },
-      "id": "TypedExtensionConfig"
-    },
-    "StructMatcher": {
-      "properties": {
-        "value": {
-          "$ref": "ValueMatcher",
-          "description": "The StructMatcher is matched if the value retrieved by path is matched to this value."
-        },
-        "path": {
-          "type": "array",
-          "items": {
-            "$ref": "PathSegment"
-          },
-          "description": "The path to retrieve the Value from the Struct."
-        }
-      },
-      "description": "StructMatcher provides a general interface to check if a given value is matched in google.protobuf.Struct. It uses ``path`` to retrieve the value from the struct and then check if it's matched to the specified value. For example, for the following Struct: .. code-block:: yaml fields: a: struct_value: fields: b: struct_value: fields: c: string_value: pro t: list_value: values: - string_value: m - string_value: n The following MetadataMatcher is matched as the path [a, b, c] will retrieve a string value \"pro\" from the Metadata which is matched to the specified prefix match. .. code-block:: yaml path: - key: a - key: b - key: c value: string_match: prefix: pr The following StructMatcher is matched as the code will match one of the string values in the list at the path [a, t]. .. code-block:: yaml path: - key: a - key: t value: list_match: one_of: string_match: exact: m An example use of StructMatcher is to match metadata in envoy.v*.core.Node.",
-      "id": "StructMatcher",
-      "type": "object"
-    },
-    "DynamicScopedRouteConfigs": {
-      "type": "object",
-      "id": "DynamicScopedRouteConfigs",
-      "properties": {
-        "clientStatus": {
-          "description": "The client status of this resource. [#not-implemented-hide:]",
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ],
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ],
-          "type": "string"
-        },
-        "errorState": {
-          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
-          "$ref": "UpdateFailureState"
-        },
-        "scopedRouteConfigs": {
-          "items": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "any",
-              "description": "Properties of the object. Contains field @type with type URL."
-            }
-          },
-          "type": "array",
-          "description": "The scoped route configurations."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name assigned to the scoped route configurations."
-        },
-        "lastUpdated": {
-          "description": "The timestamp when the scoped route config set was last updated.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "versionInfo": {
-          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the scoped routes configuration was loaded.",
-          "type": "string"
-        }
-      },
-      "description": "[#next-free-field: 7]"
-    },
-    "DynamicListenerState": {
-      "properties": {
-        "versionInfo": {
-          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the listener was loaded. In the future, discrete per-listener versions may be supported by the API.",
-          "type": "string"
-        },
-        "lastUpdated": {
-          "description": "The timestamp when the Listener was last successfully updated.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "listener": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The listener config."
-        }
-      },
-      "id": "DynamicListenerState",
-      "type": "object"
-    },
-    "ValueMatcher": {
-      "description": "Specifies the way to match a Protobuf::Value. Primitive values and ListValue are supported. StructValue is not supported and is always not matched. [#next-free-field: 8]",
-      "type": "object",
-      "id": "ValueMatcher",
-      "properties": {
-        "orMatch": {
-          "description": "If specified, a match occurs if and only if any of the alternatives in the match accept the value.",
-          "$ref": "OrMatcher"
-        },
-        "nullMatch": {
-          "description": "If specified, a match occurs if and only if the target value is a NullValue.",
-          "$ref": "NullMatch"
-        },
-        "doubleMatch": {
-          "$ref": "DoubleMatcher",
-          "description": "If specified, a match occurs if and only if the target value is a double value and is matched to this field."
-        },
-        "listMatch": {
-          "$ref": "ListMatcher",
-          "description": "If specified, a match occurs if and only if the target value is a list value and is matched to this field."
-        },
-        "stringMatch": {
-          "$ref": "StringMatcher",
-          "description": "If specified, a match occurs if and only if the target value is a string value and is matched to this field."
-        },
-        "boolMatch": {
-          "description": "If specified, a match occurs if and only if the target value is a bool value and is equal to this field.",
-          "type": "boolean"
-        },
-        "presentMatch": {
-          "description": "If specified, value match will be performed based on whether the path is referring to a valid primitive value in the metadata. If the path is referring to a non-primitive value, the result is always not matched.",
-          "type": "boolean"
-        }
-      }
-    },
-    "DynamicRouteConfig": {
-      "type": "object",
-      "properties": {
-        "versionInfo": {
-          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the route configuration was loaded.",
-          "type": "string"
-        },
-        "routeConfig": {
-          "description": "The route config.",
-          "type": "object",
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          }
-        },
-        "lastUpdated": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "The timestamp when the Route was last updated."
-        },
-        "errorState": {
-          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
-          "$ref": "UpdateFailureState"
-        },
-        "clientStatus": {
-          "type": "string",
-          "enumDescriptions": [
-            "Resource status is not available/unknown.",
-            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
-            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
-            "Client received this resource and replied with ACK.",
-            "Client received this resource and replied with NACK.",
-            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
-            "Client timed out waiting for the resource from the control plane."
-          ],
-          "enum": [
-            "UNKNOWN",
-            "REQUESTED",
-            "DOES_NOT_EXIST",
-            "ACKED",
-            "NACKED",
-            "RECEIVED_ERROR",
-            "TIMEOUT"
-          ],
-          "description": "The client status of this resource. [#not-implemented-hide:]"
-        }
-      },
-      "description": "[#next-free-field: 6]",
-      "id": "DynamicRouteConfig"
-    }
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
   },
-  "revision": "20260820",
-  "documentationLink": "https://cloud.google.com/traffic-director",
-  "version": "v3",
-  "baseUrl": "https://trafficdirector.googleapis.com/",
-  "discoveryVersion": "v1",
-  "id": "trafficdirector:v3",
-  "mtlsRootUrl": "https://trafficdirector.mtls.googleapis.com/",
-  "canonicalName": "Traffic Director Service",
-  "kind": "discovery#restDescription",
-  "protocol": "rest",
   "endpoints": [
     {
       "location": "africa-south1",
@@ -1249,74 +13,74 @@
       "description": "Regional Endpoint"
     },
     {
-      "location": "asia-east1",
       "endpointUrl": "https://trafficdirector.asia-east1.rep.googleapis.com/",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "asia-east1"
     },
     {
-      "location": "asia-east2",
+      "endpointUrl": "https://trafficdirector.asia-east2.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.asia-east2.rep.googleapis.com/"
+      "location": "asia-east2"
     },
     {
       "location": "asia-northeast1",
-      "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.asia-northeast1.rep.googleapis.com/"
+      "endpointUrl": "https://trafficdirector.asia-northeast1.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
       "endpointUrl": "https://trafficdirector.asia-northeast2.rep.googleapis.com/",
-      "location": "asia-northeast2",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "asia-northeast2"
     },
     {
-      "description": "Regional Endpoint",
       "location": "asia-northeast3",
-      "endpointUrl": "https://trafficdirector.asia-northeast3.rep.googleapis.com/"
+      "endpointUrl": "https://trafficdirector.asia-northeast3.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
+      "endpointUrl": "https://trafficdirector.asia-south1.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "location": "asia-south1",
-      "endpointUrl": "https://trafficdirector.asia-south1.rep.googleapis.com/"
+      "location": "asia-south1"
     },
     {
-      "location": "asia-south2",
       "endpointUrl": "https://trafficdirector.asia-south2.rep.googleapis.com/",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "asia-south2"
     },
     {
+      "location": "asia-southeast1",
       "endpointUrl": "https://trafficdirector.asia-southeast1.rep.googleapis.com/",
-      "description": "Regional Endpoint",
-      "location": "asia-southeast1"
-    },
-    {
-      "endpointUrl": "https://trafficdirector.asia-southeast2.rep.googleapis.com/",
-      "location": "asia-southeast2",
       "description": "Regional Endpoint"
     },
     {
+      "location": "asia-southeast2",
+      "endpointUrl": "https://trafficdirector.asia-southeast2.rep.googleapis.com/",
+      "description": "Regional Endpoint"
+    },
+    {
+      "location": "asia-southeast3",
       "endpointUrl": "https://trafficdirector.asia-southeast3.rep.googleapis.com/",
-      "description": "Regional Endpoint",
-      "location": "asia-southeast3"
+      "description": "Regional Endpoint"
     },
     {
+      "endpointUrl": "https://trafficdirector.australia-southeast1.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "location": "australia-southeast1",
-      "endpointUrl": "https://trafficdirector.australia-southeast1.rep.googleapis.com/"
+      "location": "australia-southeast1"
     },
     {
-      "description": "Regional Endpoint",
       "endpointUrl": "https://trafficdirector.australia-southeast2.rep.googleapis.com/",
+      "description": "Regional Endpoint",
       "location": "australia-southeast2"
     },
     {
-      "description": "Regional Endpoint",
       "location": "europe-central2",
-      "endpointUrl": "https://trafficdirector.europe-central2.rep.googleapis.com/"
+      "endpointUrl": "https://trafficdirector.europe-central2.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
       "location": "europe-north1",
-      "endpointUrl": "https://trafficdirector.europe-north1.rep.googleapis.com/"
+      "endpointUrl": "https://trafficdirector.europe-north1.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
       "endpointUrl": "https://trafficdirector.europe-north2.rep.googleapis.com/",
@@ -1329,28 +93,28 @@
       "description": "Regional Endpoint"
     },
     {
-      "location": "europe-west1",
+      "endpointUrl": "https://trafficdirector.europe-west1.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.europe-west1.rep.googleapis.com/"
+      "location": "europe-west1"
     },
     {
-      "location": "europe-west10",
+      "endpointUrl": "https://trafficdirector.europe-west10.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.europe-west10.rep.googleapis.com/"
+      "location": "europe-west10"
     },
     {
-      "location": "europe-west12",
+      "endpointUrl": "https://trafficdirector.europe-west12.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.europe-west12.rep.googleapis.com/"
+      "location": "europe-west12"
     },
     {
-      "description": "Regional Endpoint",
+      "location": "europe-west15",
       "endpointUrl": "https://trafficdirector.europe-west15.rep.googleapis.com/",
-      "location": "europe-west15"
+      "description": "Regional Endpoint"
     },
     {
-      "endpointUrl": "https://trafficdirector.europe-west2.rep.googleapis.com/",
       "location": "europe-west2",
+      "endpointUrl": "https://trafficdirector.europe-west2.rep.googleapis.com/",
       "description": "Regional Endpoint"
     },
     {
@@ -1359,19 +123,19 @@
       "location": "europe-west3"
     },
     {
-      "endpointUrl": "https://trafficdirector.europe-west4.rep.googleapis.com/",
       "location": "europe-west4",
+      "endpointUrl": "https://trafficdirector.europe-west4.rep.googleapis.com/",
       "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
+      "location": "europe-west6",
       "endpointUrl": "https://trafficdirector.europe-west6.rep.googleapis.com/",
-      "location": "europe-west6"
+      "description": "Regional Endpoint"
     },
     {
       "endpointUrl": "https://trafficdirector.europe-west8.rep.googleapis.com/",
-      "location": "europe-west8",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "europe-west8"
     },
     {
       "location": "europe-west9",
@@ -1379,34 +143,34 @@
       "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
+      "location": "me-central1",
       "endpointUrl": "https://trafficdirector.me-central1.rep.googleapis.com/",
-      "location": "me-central1"
+      "description": "Regional Endpoint"
     },
     {
-      "endpointUrl": "https://trafficdirector.me-central2.rep.googleapis.com/",
       "location": "me-central2",
+      "endpointUrl": "https://trafficdirector.me-central2.rep.googleapis.com/",
       "description": "Regional Endpoint"
     },
     {
       "endpointUrl": "https://trafficdirector.me-west1.rep.googleapis.com/",
-      "location": "me-west1",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "me-west1"
     },
     {
+      "endpointUrl": "https://trafficdirector.northamerica-northeast1.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "location": "northamerica-northeast1",
-      "endpointUrl": "https://trafficdirector.northamerica-northeast1.rep.googleapis.com/"
+      "location": "northamerica-northeast1"
     },
     {
+      "endpointUrl": "https://trafficdirector.northamerica-northeast2.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "location": "northamerica-northeast2",
-      "endpointUrl": "https://trafficdirector.northamerica-northeast2.rep.googleapis.com/"
+      "location": "northamerica-northeast2"
     },
     {
       "location": "northamerica-south1",
-      "description": "Regional Endpoint",
-      "endpointUrl": "https://trafficdirector.northamerica-south1.rep.googleapis.com/"
+      "endpointUrl": "https://trafficdirector.northamerica-south1.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
       "location": "southamerica-east1",
@@ -1414,9 +178,9 @@
       "description": "Regional Endpoint"
     },
     {
-      "location": "southamerica-west1",
       "endpointUrl": "https://trafficdirector.southamerica-west1.rep.googleapis.com/",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "southamerica-west1"
     },
     {
       "endpointUrl": "https://trafficdirector.us-central1.rep.googleapis.com/",
@@ -1425,169 +189,85 @@
     },
     {
       "endpointUrl": "https://trafficdirector.us-central2.rep.googleapis.com/",
-      "location": "us-central2",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "us-central2"
     },
     {
-      "description": "Regional Endpoint",
       "endpointUrl": "https://trafficdirector.us-east1.rep.googleapis.com/",
+      "description": "Regional Endpoint",
       "location": "us-east1"
     },
     {
+      "endpointUrl": "https://trafficdirector.us-east4.rep.googleapis.com/",
       "description": "Regional Endpoint",
-      "location": "us-east4",
-      "endpointUrl": "https://trafficdirector.us-east4.rep.googleapis.com/"
+      "location": "us-east4"
     },
     {
-      "location": "us-east5",
       "endpointUrl": "https://trafficdirector.us-east5.rep.googleapis.com/",
-      "description": "Regional Endpoint"
+      "description": "Regional Endpoint",
+      "location": "us-east5"
     },
     {
+      "location": "us-east7",
       "endpointUrl": "https://trafficdirector.us-east7.rep.googleapis.com/",
-      "description": "Regional Endpoint",
-      "location": "us-east7"
-    },
-    {
-      "endpointUrl": "https://trafficdirector.us-south1.rep.googleapis.com/",
-      "location": "us-south1",
       "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
-      "location": "us-west1",
-      "endpointUrl": "https://trafficdirector.us-west1.rep.googleapis.com/"
+      "location": "us-south1",
+      "endpointUrl": "https://trafficdirector.us-south1.rep.googleapis.com/",
+      "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
+      "location": "us-west1",
+      "endpointUrl": "https://trafficdirector.us-west1.rep.googleapis.com/",
+      "description": "Regional Endpoint"
+    },
+    {
+      "endpointUrl": "https://trafficdirector.us-west2.rep.googleapis.com/",
       "location": "us-west2",
-      "endpointUrl": "https://trafficdirector.us-west2.rep.googleapis.com/"
+      "description": "Regional Endpoint"
     },
     {
       "endpointUrl": "https://trafficdirector.us-west3.rep.googleapis.com/",
-      "location": "us-west3",
+      "description": "Regional Endpoint",
+      "location": "us-west3"
+    },
+    {
+      "location": "us-west4",
+      "endpointUrl": "https://trafficdirector.us-west4.rep.googleapis.com/",
       "description": "Regional Endpoint"
     },
     {
-      "description": "Regional Endpoint",
-      "location": "us-west4",
-      "endpointUrl": "https://trafficdirector.us-west4.rep.googleapis.com/"
-    },
-    {
+      "location": "us-west8",
       "endpointUrl": "https://trafficdirector.us-west8.rep.googleapis.com/",
-      "description": "Regional Endpoint",
-      "location": "us-west8"
+      "description": "Regional Endpoint"
     }
   ],
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "basePath": "",
-  "parameters": {
-    "fields": {
-      "description": "Selector specifying which fields to include in a partial response.",
-      "type": "string",
-      "location": "query"
-    },
-    "oauth_token": {
-      "type": "string",
-      "description": "OAuth 2.0 token for the current user.",
-      "location": "query"
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "description": "Returns response with indentations and line breaks.",
-      "default": "true",
-      "location": "query"
-    },
-    "upload_protocol": {
-      "location": "query",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
-      "type": "string"
-    },
-    "quotaUser": {
-      "location": "query",
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "access_token": {
-      "location": "query",
-      "type": "string",
-      "description": "OAuth access token."
-    },
-    "key": {
-      "location": "query",
-      "type": "string",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
-    },
-    "uploadType": {
-      "type": "string",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
-      "location": "query"
-    },
-    "alt": {
-      "type": "string",
-      "default": "json",
-      "location": "query",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "description": "Data format for response.",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ]
-    },
-    "$.xgafv": {
-      "enum": [
-        "1",
-        "2"
-      ],
-      "location": "query",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "description": "V1 error format.",
-      "type": "string"
-    },
-    "callback": {
-      "location": "query",
-      "description": "JSONP",
-      "type": "string"
-    }
-  },
-  "rootUrl": "https://trafficdirector.googleapis.com/",
   "resources": {
     "discovery": {
       "methods": {
         "client_status": {
+          "httpMethod": "POST",
+          "path": "v3/discovery:client_status",
           "response": {
             "$ref": "ClientStatusResponse"
           },
-          "parameters": {},
-          "request": {
-            "$ref": "ClientStatusRequest"
-          },
-          "parameterOrder": [],
-          "flatPath": "v3/discovery:client_status",
           "scopes": [
             "https://www.googleapis.com/auth/cloud-platform"
           ],
-          "httpMethod": "POST",
-          "path": "v3/discovery:client_status",
+          "flatPath": "v3/discovery:client_status",
+          "parameters": {},
+          "parameterOrder": [],
+          "description": "",
           "id": "trafficdirector.discovery.client_status",
-          "description": ""
+          "request": {
+            "$ref": "ClientStatusRequest"
+          }
         }
       }
     }
   },
-  "version_module": true,
-  "ownerDomain": "google.com",
+  "baseUrl": "https://trafficdirector.googleapis.com/",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -1596,5 +276,1325 @@
         }
       }
     }
-  }
+  },
+  "servicePath": "",
+  "ownerDomain": "google.com",
+  "ownerName": "Google",
+  "parameters": {
+    "oauth_token": {
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user.",
+      "type": "string"
+    },
+    "alt": {
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "description": "Data format for response.",
+      "type": "string",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "location": "query",
+      "default": "json"
+    },
+    "$.xgafv": {
+      "type": "string",
+      "description": "V1 error format.",
+      "location": "query",
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "prettyPrint": {
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean",
+      "default": "true",
+      "location": "query"
+    },
+    "callback": {
+      "description": "JSONP",
+      "location": "query",
+      "type": "string"
+    },
+    "upload_protocol": {
+      "type": "string",
+      "location": "query",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
+    },
+    "quotaUser": {
+      "location": "query",
+      "type": "string",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "uploadType": {
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "location": "query"
+    },
+    "key": {
+      "location": "query",
+      "type": "string",
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
+    },
+    "fields": {
+      "type": "string",
+      "location": "query",
+      "description": "Selector specifying which fields to include in a partial response."
+    },
+    "access_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth access token."
+    }
+  },
+  "rootUrl": "https://trafficdirector.googleapis.com/",
+  "description": "",
+  "canonicalName": "Traffic Director Service",
+  "schemas": {
+    "NodeMatcher": {
+      "id": "NodeMatcher",
+      "type": "object",
+      "properties": {
+        "nodeId": {
+          "$ref": "StringMatcher",
+          "description": "Specifies match criteria on the node id."
+        },
+        "nodeMetadatas": {
+          "items": {
+            "$ref": "StructMatcher"
+          },
+          "type": "array",
+          "description": "Specifies match criteria on the node metadata."
+        }
+      },
+      "description": "Specifies the way to match a Node. The match follows AND semantics."
+    },
+    "Address": {
+      "description": "Addresses specify either a logical or physical address and port, which are used to tell Envoy where to bind/listen, connect to upstream and find management servers.",
+      "properties": {
+        "pipe": {
+          "$ref": "Pipe"
+        },
+        "socketAddress": {
+          "$ref": "SocketAddress"
+        },
+        "envoyInternalAddress": {
+          "description": "Specifies a user-space address handled by :ref:`internal listeners `.",
+          "$ref": "EnvoyInternalAddress"
+        }
+      },
+      "type": "object",
+      "id": "Address"
+    },
+    "OrMatcher": {
+      "id": "OrMatcher",
+      "properties": {
+        "valueMatchers": {
+          "items": {
+            "$ref": "ValueMatcher"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "Specifies a list of alternatives for the match."
+    },
+    "ClientStatusResponse": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "array",
+          "items": {
+            "$ref": "ClientConfig"
+          },
+          "description": "Client configs for the clients specified in the ClientStatusRequest."
+        }
+      },
+      "id": "ClientStatusResponse"
+    },
+    "ContextParams": {
+      "id": "ContextParams",
+      "properties": {
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Additional parameters that can be used to select resource variants. These include any global context parameters, per-resource type client feature capabilities and per-resource type functional attributes. All per-resource type attributes will be `xds.resource.` prefixed and some of these are documented below: `xds.resource.listening_address`: The value is \"IP:port\" (e.g. \"10.1.1.3:8080\") which is the listening address of a Listener. Used in a Listener resource query.",
+      "type": "object"
+    },
+    "RegexMatcher": {
+      "type": "object",
+      "id": "RegexMatcher",
+      "properties": {
+        "googleRe2": {
+          "deprecated": true,
+          "description": "Google's RE2 regex engine.",
+          "$ref": "GoogleRE2"
+        },
+        "regex": {
+          "description": "The regex match string. The string must be supported by the configured engine. The regex is matched against the full string, not as a partial match.",
+          "type": "string"
+        }
+      },
+      "description": "A regex matcher designed for safety when used with untrusted input."
+    },
+    "ListenersConfigDump": {
+      "id": "ListenersConfigDump",
+      "properties": {
+        "staticListeners": {
+          "type": "array",
+          "items": {
+            "$ref": "StaticListener"
+          },
+          "description": "The statically loaded listener configs."
+        },
+        "versionInfo": {
+          "description": "This is the :ref:`version_info ` in the last processed LDS discovery response. If there are only static bootstrap listeners, this field will be \"\".",
+          "type": "string"
+        },
+        "dynamicListeners": {
+          "items": {
+            "$ref": "DynamicListener"
+          },
+          "type": "array",
+          "description": "State for any warming, active, or draining listeners."
+        }
+      },
+      "description": "Envoy's listener manager fills this message with all currently known listeners. Listener configuration information can be used to recreate an Envoy configuration by populating all listeners as static listeners or by returning them in a LDS response.",
+      "type": "object"
+    },
+    "ClientConfig": {
+      "id": "ClientConfig",
+      "properties": {
+        "clientScope": {
+          "type": "string",
+          "description": "For xDS clients, the scope in which the data is used. For example, gRPC indicates the data plane target or that the data is associated with gRPC server(s)."
+        },
+        "node": {
+          "description": "Node for a particular client.",
+          "$ref": "Node"
+        },
+        "xdsConfig": {
+          "items": {
+            "$ref": "PerXdsConfig"
+          },
+          "deprecated": true,
+          "description": "This field is deprecated in favor of generic_xds_configs which is much simpler and uniform in structure.",
+          "type": "array"
+        },
+        "genericXdsConfigs": {
+          "description": "Represents generic xDS config and the exact config structure depends on the type URL (like Cluster if it is CDS)",
+          "items": {
+            "$ref": "GenericXdsConfig"
+          },
+          "type": "array"
+        }
+      },
+      "description": "All xds configs for a particular client.",
+      "type": "object"
+    },
+    "ClustersConfigDump": {
+      "description": "Envoy's cluster manager fills this message with all currently known clusters. Cluster configuration information can be used to recreate an Envoy configuration by populating all clusters as static clusters or by returning them in a CDS response.",
+      "properties": {
+        "staticClusters": {
+          "items": {
+            "$ref": "StaticCluster"
+          },
+          "description": "The statically loaded cluster configs.",
+          "type": "array"
+        },
+        "dynamicWarmingClusters": {
+          "items": {
+            "$ref": "DynamicCluster"
+          },
+          "type": "array",
+          "description": "The dynamically loaded warming clusters. These are clusters that are currently undergoing warming in preparation to service data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the warming clusters should generally be discarded."
+        },
+        "versionInfo": {
+          "type": "string",
+          "description": "This is the :ref:`version_info ` in the last processed CDS discovery response. If there are only static bootstrap clusters, this field will be \"\"."
+        },
+        "dynamicActiveClusters": {
+          "items": {
+            "$ref": "DynamicCluster"
+          },
+          "type": "array",
+          "description": "The dynamically loaded active clusters. These are clusters that are available to service data plane traffic."
+        }
+      },
+      "id": "ClustersConfigDump",
+      "type": "object"
+    },
+    "StaticRouteConfig": {
+      "type": "object",
+      "properties": {
+        "routeConfig": {
+          "type": "object",
+          "description": "The route config.",
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          }
+        },
+        "lastUpdated": {
+          "description": "The timestamp when the Route was last updated.",
+          "format": "google-datetime",
+          "type": "string"
+        }
+      },
+      "id": "StaticRouteConfig"
+    },
+    "UpdateFailureState": {
+      "id": "UpdateFailureState",
+      "properties": {
+        "details": {
+          "type": "string",
+          "description": "Details about the last failed update attempt."
+        },
+        "versionInfo": {
+          "description": "This is the version of the rejected resource. [#not-implemented-hide:]",
+          "type": "string"
+        },
+        "lastUpdateAttempt": {
+          "description": "Time of the latest failed update attempt.",
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "failedConfiguration": {
+          "type": "object",
+          "description": "What the component configuration would have been if the update had succeeded. This field may not be populated by xDS clients due to storage overhead.",
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          }
+        }
+      },
+      "type": "object"
+    },
+    "SemanticVersion": {
+      "id": "SemanticVersion",
+      "properties": {
+        "majorNumber": {
+          "type": "integer",
+          "format": "uint32"
+        },
+        "patch": {
+          "type": "integer",
+          "format": "uint32"
+        },
+        "minorNumber": {
+          "format": "uint32",
+          "type": "integer"
+        }
+      },
+      "description": "Envoy uses SemVer (https://semver.org/). Major/minor versions indicate expected behaviors and APIs, the patch version field is used only for security fixes and can be generally ignored.",
+      "type": "object"
+    },
+    "StaticEndpointConfig": {
+      "properties": {
+        "lastUpdated": {
+          "description": "[#not-implemented-hide:] The timestamp when the Endpoint was last updated.",
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "endpointConfig": {
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          },
+          "description": "The endpoint config.",
+          "type": "object"
+        }
+      },
+      "type": "object",
+      "id": "StaticEndpointConfig"
+    },
+    "DynamicRouteConfig": {
+      "description": "[#next-free-field: 6]",
+      "properties": {
+        "versionInfo": {
+          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the route configuration was loaded.",
+          "type": "string"
+        },
+        "lastUpdated": {
+          "description": "The timestamp when the Route was last updated.",
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "errorState": {
+          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
+          "$ref": "UpdateFailureState"
+        },
+        "clientStatus": {
+          "description": "The client status of this resource. [#not-implemented-hide:]",
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ],
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ]
+        },
+        "routeConfig": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "The route config."
+        }
+      },
+      "type": "object",
+      "id": "DynamicRouteConfig"
+    },
+    "DynamicCluster": {
+      "type": "object",
+      "properties": {
+        "versionInfo": {
+          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the cluster was loaded. In the future, discrete per-cluster versions may be supported by the API.",
+          "type": "string"
+        },
+        "errorState": {
+          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
+          "$ref": "UpdateFailureState"
+        },
+        "clientStatus": {
+          "description": "The client status of this resource. [#not-implemented-hide:]",
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ],
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ]
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "google-datetime",
+          "description": "The timestamp when the Cluster was last updated."
+        },
+        "cluster": {
+          "description": "The cluster config.",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "type": "object"
+        }
+      },
+      "description": "Describes a dynamically loaded cluster via the CDS API. [#next-free-field: 6]",
+      "id": "DynamicCluster"
+    },
+    "NullMatch": {
+      "description": "NullMatch is an empty message to specify a null value.",
+      "id": "NullMatch",
+      "properties": {},
+      "type": "object"
+    },
+    "Locality": {
+      "description": "Identifies location of where either Envoy runs or where upstream hosts run.",
+      "type": "object",
+      "id": "Locality",
+      "properties": {
+        "region": {
+          "description": "Region this :ref:`zone ` belongs to.",
+          "type": "string"
+        },
+        "zone": {
+          "description": "Defines the local service zone where Envoy is running. Though optional, it should be set if discovery service routing is used and the discovery service exposes :ref:`zone data `, either in this message or via :option:`--service-zone`. The meaning of zone is context dependent, e.g. `Availability Zone (AZ) `_ on AWS, `Zone `_ on GCP, etc.",
+          "type": "string"
+        },
+        "subZone": {
+          "type": "string",
+          "description": "When used for locality of upstream hosts, this field further splits zone into smaller chunks of sub-zones so they can be load balanced independently."
+        }
+      }
+    },
+    "DoubleRange": {
+      "id": "DoubleRange",
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "number",
+          "format": "double",
+          "description": "start of the range (inclusive)"
+        },
+        "end": {
+          "format": "double",
+          "type": "number",
+          "description": "end of the range (exclusive)"
+        }
+      },
+      "description": "Specifies the double start and end of the range using half-open interval semantics [start, end)."
+    },
+    "EnvoyInternalAddress": {
+      "properties": {
+        "serverListenerName": {
+          "type": "string",
+          "description": "Specifies the :ref:`name ` of the internal listener."
+        },
+        "endpointId": {
+          "description": "Specifies an endpoint identifier to distinguish between multiple endpoints for the same internal listener in a single upstream pool. Only used in the upstream addresses for tracking changes to individual endpoints. This, for example, may be set to the final destination IP for the target internal listener.",
+          "type": "string"
+        }
+      },
+      "description": "The address represents an envoy internal listener. [#comment: ",
+      "id": "EnvoyInternalAddress",
+      "type": "object"
+    },
+    "Pipe": {
+      "type": "object",
+      "id": "Pipe",
+      "properties": {
+        "mode": {
+          "type": "integer",
+          "format": "uint32",
+          "description": "The mode for the Pipe. Not applicable for abstract sockets."
+        },
+        "path": {
+          "type": "string",
+          "description": "Unix Domain Socket path. On Linux, paths starting with '@' will use the abstract namespace. The starting '@' is replaced by a null byte by Envoy. Paths starting with '@' will result in an error in environments other than Linux."
+        }
+      }
+    },
+    "DoubleMatcher": {
+      "properties": {
+        "range": {
+          "description": "If specified, the input double value must be in the range specified here. Note: The range is using half-open interval semantics [start, end).",
+          "$ref": "DoubleRange"
+        },
+        "exact": {
+          "format": "double",
+          "description": "If specified, the input double value must be equal to the value specified here.",
+          "type": "number"
+        }
+      },
+      "id": "DoubleMatcher",
+      "description": "Specifies the way to match a double value.",
+      "type": "object"
+    },
+    "InlineScopedRouteConfigs": {
+      "type": "object",
+      "properties": {
+        "lastUpdated": {
+          "format": "google-datetime",
+          "type": "string",
+          "description": "The timestamp when the scoped route config set was last updated."
+        },
+        "scopedRouteConfigs": {
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
+            }
+          },
+          "description": "The scoped route configurations.",
+          "type": "array"
+        },
+        "name": {
+          "description": "The name assigned to the scoped route configurations.",
+          "type": "string"
+        }
+      },
+      "id": "InlineScopedRouteConfigs"
+    },
+    "GenericXdsConfig": {
+      "description": "GenericXdsConfig is used to specify the config status and the dump of any xDS resource identified by their type URL. It is the generalized version of the now deprecated ListenersConfigDump, ClustersConfigDump etc [#next-free-field: 10]",
+      "id": "GenericXdsConfig",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the xDS resource",
+          "type": "string"
+        },
+        "isStaticResource": {
+          "description": "Is static resource is true if it is specified in the config supplied through the file at the startup.",
+          "type": "boolean"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "description": "Timestamp when the xDS resource was last updated",
+          "format": "google-datetime"
+        },
+        "xdsConfig": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "type": "object",
+          "description": "The xDS resource config. Actual content depends on the type"
+        },
+        "clientStatus": {
+          "description": "Per xDS resource status from the view of a xDS client",
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ],
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ]
+        },
+        "errorState": {
+          "description": "Set if the last update failed, cleared after the next successful update. The *error_state* field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
+          "$ref": "UpdateFailureState"
+        },
+        "typeUrl": {
+          "type": "string",
+          "description": "Type_url represents the fully qualified name of xDS resource type like envoy.v3.Cluster, envoy.v3.ClusterLoadAssignment etc."
+        },
+        "configStatus": {
+          "description": "Per xDS resource config status. It is generated by management servers. It will not be present if the CSDS server is an xDS client.",
+          "enumDescriptions": [
+            "Status info is not available/unknown.",
+            "Management server has sent the config to client and received ACK.",
+            "Config is not sent.",
+            "Management server has sent the config to client but hasn’t received ACK/NACK.",
+            "Management server has sent the config to client but received NACK. The attached config dump will be the latest config (the rejected one), since it is the persisted version in the management server."
+          ],
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "SYNCED",
+            "NOT_SENT",
+            "STALE",
+            "ERROR"
+          ]
+        },
+        "versionInfo": {
+          "type": "string",
+          "description": "This is the :ref:`version_info ` in the last processed xDS discovery response. If there are only static bootstrap listeners, this field will be \"\""
+        }
+      }
+    },
+    "StaticListener": {
+      "id": "StaticListener",
+      "description": "Describes a statically loaded listener.",
+      "properties": {
+        "lastUpdated": {
+          "type": "string",
+          "description": "The timestamp when the Listener was last successfully updated.",
+          "format": "google-datetime"
+        },
+        "listener": {
+          "description": "The listener config.",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "TypedExtensionConfig": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of an extension. This is not used to select the extension, instead it serves the role of an opaque identifier.",
+          "type": "string"
+        },
+        "typedConfig": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "The typed config for the extension. The type URL will be used to identify the extension. In the case that the type URL is *xds.type.v3.TypedStruct* (or, for historical reasons, *udpa.type.v1.TypedStruct*), the inner type URL of *TypedStruct* will be utilized. See the :ref:`extension configuration overview ` for further details.",
+          "type": "object"
+        }
+      },
+      "id": "TypedExtensionConfig",
+      "description": "Message type for extension configuration."
+    },
+    "StructMatcher": {
+      "properties": {
+        "value": {
+          "$ref": "ValueMatcher",
+          "description": "The StructMatcher is matched if the value retrieved by path is matched to this value."
+        },
+        "path": {
+          "description": "The path to retrieve the Value from the Struct.",
+          "type": "array",
+          "items": {
+            "$ref": "PathSegment"
+          }
+        }
+      },
+      "type": "object",
+      "description": "StructMatcher provides a general interface to check if a given value is matched in google.protobuf.Struct. It uses ``path`` to retrieve the value from the struct and then check if it's matched to the specified value. For example, for the following Struct: .. code-block:: yaml fields: a: struct_value: fields: b: struct_value: fields: c: string_value: pro t: list_value: values: - string_value: m - string_value: n The following MetadataMatcher is matched as the path [a, b, c] will retrieve a string value \"pro\" from the Metadata which is matched to the specified prefix match. .. code-block:: yaml path: - key: a - key: b - key: c value: string_match: prefix: pr The following StructMatcher is matched as the code will match one of the string values in the list at the path [a, t]. .. code-block:: yaml path: - key: a - key: t value: list_match: one_of: string_match: exact: m An example use of StructMatcher is to match metadata in envoy.v*.core.Node.",
+      "id": "StructMatcher"
+    },
+    "DynamicEndpointConfig": {
+      "id": "DynamicEndpointConfig",
+      "description": "[#next-free-field: 6]",
+      "type": "object",
+      "properties": {
+        "lastUpdated": {
+          "type": "string",
+          "description": "[#not-implemented-hide:] The timestamp when the Endpoint was last updated.",
+          "format": "google-datetime"
+        },
+        "endpointConfig": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "The endpoint config."
+        },
+        "versionInfo": {
+          "type": "string",
+          "description": "[#not-implemented-hide:] This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the endpoint configuration was loaded."
+        },
+        "clientStatus": {
+          "description": "The client status of this resource. [#not-implemented-hide:]",
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ],
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ]
+        },
+        "errorState": {
+          "$ref": "UpdateFailureState",
+          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]"
+        }
+      }
+    },
+    "PerXdsConfig": {
+      "properties": {
+        "clientStatus": {
+          "enumDescriptions": [
+            "Config status is not available/unknown.",
+            "Client requested the config but hasn't received any config from management server yet.",
+            "Client received the config and replied with ACK.",
+            "Client received the config and replied with NACK. Notably, the attached config dump is not the NACKed version, but the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty."
+          ],
+          "enum": [
+            "CLIENT_UNKNOWN",
+            "CLIENT_REQUESTED",
+            "CLIENT_ACKED",
+            "CLIENT_NACKED",
+            "CLIENT_RECEIVED_ERROR"
+          ],
+          "deprecated": true,
+          "type": "string",
+          "description": "Client config status is populated by xDS clients. Will not be present if the CSDS server is an xDS server. No matter what the client config status is, xDS clients should always dump the most recent accepted xDS config. .. attention:: This field is deprecated. Use :ref:`ClientResourceStatus ` for per-resource config status instead."
+        },
+        "routeConfig": {
+          "$ref": "RoutesConfigDump"
+        },
+        "scopedRouteConfig": {
+          "$ref": "ScopedRoutesConfigDump"
+        },
+        "endpointConfig": {
+          "$ref": "EndpointsConfigDump"
+        },
+        "status": {
+          "enumDescriptions": [
+            "Status info is not available/unknown.",
+            "Management server has sent the config to client and received ACK.",
+            "Config is not sent.",
+            "Management server has sent the config to client but hasn’t received ACK/NACK.",
+            "Management server has sent the config to client but received NACK. The attached config dump will be the latest config (the rejected one), since it is the persisted version in the management server."
+          ],
+          "description": "Config status generated by management servers. Will not be present if the CSDS server is an xDS client.",
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "SYNCED",
+            "NOT_SENT",
+            "STALE",
+            "ERROR"
+          ]
+        },
+        "clusterConfig": {
+          "$ref": "ClustersConfigDump"
+        },
+        "listenerConfig": {
+          "$ref": "ListenersConfigDump"
+        }
+      },
+      "id": "PerXdsConfig",
+      "description": "Detailed config (per xDS) with status. [#next-free-field: 8]",
+      "type": "object"
+    },
+    "DynamicListenerState": {
+      "properties": {
+        "versionInfo": {
+          "type": "string",
+          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the listener was loaded. In the future, discrete per-listener versions may be supported by the API."
+        },
+        "listener": {
+          "description": "The listener config.",
+          "type": "object",
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          }
+        },
+        "lastUpdated": {
+          "description": "The timestamp when the Listener was last successfully updated.",
+          "format": "google-datetime",
+          "type": "string"
+        }
+      },
+      "id": "DynamicListenerState",
+      "type": "object"
+    },
+    "ListMatcher": {
+      "description": "Specifies the way to match a list value.",
+      "id": "ListMatcher",
+      "properties": {
+        "oneOf": {
+          "$ref": "ValueMatcher",
+          "description": "If specified, at least one of the values in the list must match the value specified."
+        }
+      },
+      "type": "object"
+    },
+    "DynamicScopedRouteConfigs": {
+      "type": "object",
+      "description": "[#next-free-field: 7]",
+      "id": "DynamicScopedRouteConfigs",
+      "properties": {
+        "lastUpdated": {
+          "description": "The timestamp when the scoped route config set was last updated.",
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "versionInfo": {
+          "description": "This is the per-resource version information. This version is currently taken from the :ref:`version_info ` field at the time that the scoped routes configuration was loaded.",
+          "type": "string"
+        },
+        "scopedRouteConfigs": {
+          "items": {
+            "additionalProperties": {
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
+            },
+            "type": "object"
+          },
+          "description": "The scoped route configurations.",
+          "type": "array"
+        },
+        "clientStatus": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ],
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ],
+          "description": "The client status of this resource. [#not-implemented-hide:]"
+        },
+        "errorState": {
+          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty. [#not-implemented-hide:]",
+          "$ref": "UpdateFailureState"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name assigned to the scoped route configurations."
+        }
+      }
+    },
+    "PathSegment": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "If specified, use the key to retrieve the value in a Struct."
+        }
+      },
+      "description": "Specifies the segment in a path to retrieve value from Struct.",
+      "id": "PathSegment"
+    },
+    "ScopedRoutesConfigDump": {
+      "properties": {
+        "inlineScopedRouteConfigs": {
+          "type": "array",
+          "description": "The statically loaded scoped route configs.",
+          "items": {
+            "$ref": "InlineScopedRouteConfigs"
+          }
+        },
+        "dynamicScopedRouteConfigs": {
+          "type": "array",
+          "items": {
+            "$ref": "DynamicScopedRouteConfigs"
+          },
+          "description": "The dynamically loaded scoped route configs."
+        }
+      },
+      "id": "ScopedRoutesConfigDump",
+      "type": "object",
+      "description": "Envoy's scoped RDS implementation fills this message with all currently loaded route configuration scopes (defined via ScopedRouteConfigurationsSet protos). This message lists both the scopes defined inline with the higher order object (i.e., the HttpConnectionManager) and the dynamically obtained scopes via the SRDS API."
+    },
+    "Extension": {
+      "description": "Version and identification for an Envoy extension. [#next-free-field: 7]",
+      "id": "Extension",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "This is the name of the Envoy filter as specified in the Envoy configuration, e.g. envoy.filters.http.router, com.acme.widget.",
+          "type": "string"
+        },
+        "typeDescriptor": {
+          "deprecated": true,
+          "description": "[#not-implemented-hide:] Type descriptor of extension configuration proto. [#comment:",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version is a property of the extension and maintained independently of other extensions and the Envoy API. This field is not set when extension did not provide version information.",
+          "$ref": "BuildVersion"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the extension. Extension category names use reverse DNS notation. For instance \"envoy.filters.listener\" for Envoy's built-in listener filters or \"com.acme.filters.http\" for HTTP filters from acme.com vendor. [#comment:"
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Indicates that the extension is present but was disabled via dynamic configuration."
+        },
+        "typeUrls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Type URLs of extension configuration protos."
+        }
+      }
+    },
+    "SocketAddress": {
+      "id": "SocketAddress",
+      "type": "object",
+      "properties": {
+        "namedPort": {
+          "type": "string",
+          "description": "This is only valid if :ref:`resolver_name ` is specified below and the named resolver is capable of named port resolution."
+        },
+        "ipv4Compat": {
+          "description": "When binding to an IPv6 address above, this enables `IPv4 compatibility `_. Binding to ``::`` will allow both IPv4 and IPv6 connections, with peer IPv4 addresses mapped into IPv6 space as ``::FFFF:``.",
+          "type": "boolean"
+        },
+        "resolverName": {
+          "type": "string",
+          "description": "The name of the custom resolver. This must have been registered with Envoy. If this is empty, a context dependent default applies. If the address is a concrete IP address, no resolution will occur. If address is a hostname this should be set for resolution other than DNS. Specifying a custom resolver with ``STRICT_DNS`` or ``LOGICAL_DNS`` will generate an error at runtime."
+        },
+        "networkNamespaceFilepath": {
+          "description": "Filepath that specifies the Linux network namespace this socket will be created in (see ``man 7 network_namespaces``). If this field is set, Envoy will create the socket in the specified network namespace. .. note:: Setting this parameter requires Envoy to run with the ``CAP_SYS_ADMIN`` capability. .. attention:: Network namespaces are only configurable on Linux. Otherwise, this field has no effect.",
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string",
+          "enum": [
+            "TCP",
+            "UDP"
+          ],
+          "enumDescriptions": [
+            "",
+            ""
+          ]
+        },
+        "portValue": {
+          "type": "integer",
+          "format": "uint32"
+        },
+        "address": {
+          "description": "The address for this socket. :ref:`Listeners ` will bind to the address. An empty address is not allowed. Specify ``0.0.0.0`` or ``::`` to bind to any address. [#comment:TODO(zuercher) reinstate when implemented: It is possible to distinguish a Listener address via the prefix/suffix matching in :ref:`FilterChainMatch `.] When used within an upstream :ref:`BindConfig `, the address controls the source address of outbound connections. For :ref:`clusters `, the cluster type determines whether the address must be an IP (``STATIC`` or ``EDS`` clusters) or a hostname resolved by DNS (``STRICT_DNS`` or ``LOGICAL_DNS`` clusters). Address resolution can be customized via :ref:`resolver_name `.",
+          "type": "string"
+        }
+      },
+      "description": "[#next-free-field: 8]"
+    },
+    "ClientStatusRequest": {
+      "description": "Request for client status of clients identified by a list of NodeMatchers.",
+      "properties": {
+        "node": {
+          "$ref": "Node",
+          "description": "The node making the csds request."
+        },
+        "nodeMatchers": {
+          "items": {
+            "$ref": "NodeMatcher"
+          },
+          "type": "array",
+          "description": "Management server can use these match criteria to identify clients. The match follows OR semantics."
+        },
+        "excludeResourceContents": {
+          "description": "If true, the server will not include the resource contents in the response (i.e., the generic_xds_configs.xds_config field will not be populated). [#not-implemented-hide:]",
+          "type": "boolean"
+        }
+      },
+      "id": "ClientStatusRequest",
+      "type": "object"
+    },
+    "BuildVersion": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "SemanticVersion",
+          "description": "SemVer version of extension."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Free-form build information. Envoy defines several well known keys in the source/common/version/version.h file",
+          "additionalProperties": {
+            "description": "Properties of the object.",
+            "type": "any"
+          }
+        }
+      },
+      "description": "BuildVersion combines SemVer version of extension with free-form build information (i.e. 'alpha', 'private-build') as a set of strings.",
+      "id": "BuildVersion"
+    },
+    "StringMatcher": {
+      "type": "object",
+      "id": "StringMatcher",
+      "description": "Specifies the way to match a string. [#next-free-field: 9]",
+      "properties": {
+        "custom": {
+          "$ref": "TypedExtensionConfig",
+          "description": "Use an extension as the matcher type. [#extension-category: envoy.string_matcher]"
+        },
+        "exact": {
+          "description": "The input string must match exactly the string specified here. Examples: * ``abc`` only matches the value ``abc``.",
+          "type": "string"
+        },
+        "ignoreCase": {
+          "type": "boolean",
+          "description": "If ``true``, indicates the exact/prefix/suffix/contains matching should be case insensitive. This has no effect for the ``safe_regex`` match. For example, the matcher ``data`` will match both input string ``Data`` and ``data`` if this option is set to ``true``."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The input string must have the prefix specified here. .. note:: Empty prefix match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``abc.xyz``"
+        },
+        "suffix": {
+          "description": "The input string must have the suffix specified here. .. note:: Empty suffix match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``xyz.abc``",
+          "type": "string"
+        },
+        "contains": {
+          "description": "The input string must have the substring specified here. .. note:: Empty contains match is not allowed, please use ``safe_regex`` instead. Examples: * ``abc`` matches the value ``xyz.abc.def``",
+          "type": "string"
+        },
+        "safeRegex": {
+          "$ref": "RegexMatcher",
+          "description": "The input string must match the regular expression specified here."
+        }
+      }
+    },
+    "StaticCluster": {
+      "type": "object",
+      "description": "Describes a statically loaded cluster.",
+      "properties": {
+        "lastUpdated": {
+          "format": "google-datetime",
+          "type": "string",
+          "description": "The timestamp when the Cluster was last updated."
+        },
+        "cluster": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "The cluster config.",
+          "type": "object"
+        }
+      },
+      "id": "StaticCluster"
+    },
+    "EndpointsConfigDump": {
+      "id": "EndpointsConfigDump",
+      "properties": {
+        "dynamicEndpointConfigs": {
+          "items": {
+            "$ref": "DynamicEndpointConfig"
+          },
+          "type": "array",
+          "description": "The dynamically loaded endpoint configs."
+        },
+        "staticEndpointConfigs": {
+          "type": "array",
+          "items": {
+            "$ref": "StaticEndpointConfig"
+          },
+          "description": "The statically loaded endpoint configs."
+        }
+      },
+      "description": "Envoy's admin fill this message with all currently known endpoints. Endpoint configuration information can be used to recreate an Envoy configuration by populating all endpoints as static endpoints or by returning them in an EDS response.",
+      "type": "object"
+    },
+    "Node": {
+      "type": "object",
+      "id": "Node",
+      "properties": {
+        "dynamicParameters": {
+          "additionalProperties": {
+            "$ref": "ContextParams"
+          },
+          "description": "Map from xDS resource type URL to dynamic context parameters. These may vary at runtime (unlike other fields in this message). For example, the xDS client may have a shard identifier that changes during the lifetime of the xDS client. In Envoy, this would be achieved by updating the dynamic context on the Server::Instance's LocalInfo context provider. The shard ID dynamic parameter then appears in this field during future discovery requests.",
+          "type": "object"
+        },
+        "userAgentName": {
+          "description": "Free-form string that identifies the entity requesting config. E.g. \"envoy\" or \"grpc\"",
+          "type": "string"
+        },
+        "clientFeatures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Client feature support list. These are well known features described in the Envoy API repository for a given major version of an API. Client features use reverse DNS naming scheme, for example ``com.acme.feature``. See :ref:`the list of features ` that xDS client may support."
+        },
+        "id": {
+          "description": "An opaque node identifier for the Envoy node. This also provides the local service node name. It should be set if any of the following features are used: :ref:`statsd `, :ref:`CDS `, and :ref:`HTTP tracing `, either in this message or via :option:`--service-node`.",
+          "type": "string"
+        },
+        "userAgentBuildVersion": {
+          "description": "Structured version of the entity requesting config.",
+          "$ref": "BuildVersion"
+        },
+        "extensions": {
+          "items": {
+            "$ref": "Extension"
+          },
+          "type": "array",
+          "description": "List of extensions and their versions supported by the node."
+        },
+        "cluster": {
+          "type": "string",
+          "description": "Defines the local service cluster name where Envoy is running. Though optional, it should be set if any of the following features are used: :ref:`statsd `, :ref:`health check cluster verification `, :ref:`runtime override directory `, :ref:`user agent addition `, :ref:`HTTP global rate limiting `, :ref:`CDS `, and :ref:`HTTP tracing `, either in this message or via :option:`--service-cluster`."
+        },
+        "listeningAddresses": {
+          "deprecated": true,
+          "description": "Known listening ports on the node as a generic hint to the management server for filtering :ref:`listeners ` to be returned. For example, if there is a listener bound to port 80, the list can optionally contain the SocketAddress ``(0.0.0.0,80)``. The field is optional and just a hint.",
+          "type": "array",
+          "items": {
+            "$ref": "Address"
+          }
+        },
+        "locality": {
+          "description": "Locality specifying where the Envoy instance is running.",
+          "$ref": "Locality"
+        },
+        "metadata": {
+          "description": "Opaque metadata extending the node identifier. Envoy will pass this directly to the management server.",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object."
+          },
+          "type": "object"
+        },
+        "userAgentVersion": {
+          "type": "string",
+          "description": "Free-form string that identifies the version of the entity requesting config. E.g. \"1.12.2\" or \"abcd1234\", or \"SpecialEnvoyBuild\""
+        }
+      },
+      "description": "Identifies a specific Envoy instance. The node identifier is presented to the management server, which may use this identifier to distinguish per Envoy configuration for serving. [#next-free-field: 13]"
+    },
+    "RoutesConfigDump": {
+      "properties": {
+        "dynamicRouteConfigs": {
+          "type": "array",
+          "description": "The dynamically loaded route configs.",
+          "items": {
+            "$ref": "DynamicRouteConfig"
+          }
+        },
+        "staticRouteConfigs": {
+          "description": "The statically loaded route configs.",
+          "type": "array",
+          "items": {
+            "$ref": "StaticRouteConfig"
+          }
+        }
+      },
+      "id": "RoutesConfigDump",
+      "description": "Envoy's RDS implementation fills this message with all currently loaded routes, as described by their RouteConfiguration objects. Static routes that are either defined in the bootstrap configuration or defined inline while configuring listeners are separated from those configured dynamically via RDS. Route configuration information can be used to recreate an Envoy configuration by populating all routes as static routes or by returning them in RDS responses.",
+      "type": "object"
+    },
+    "DynamicListener": {
+      "id": "DynamicListener",
+      "description": "Describes a dynamically loaded listener via the LDS API. [#next-free-field: 7]",
+      "properties": {
+        "errorState": {
+          "description": "Set if the last update failed, cleared after the next successful update. The ``error_state`` field contains the rejected version of this particular resource along with the reason and timestamp. For successfully updated or acknowledged resource, this field should be empty.",
+          "$ref": "UpdateFailureState"
+        },
+        "activeState": {
+          "$ref": "DynamicListenerState",
+          "description": "The listener state for any active listener by this name. These are listeners that are available to service data plane traffic."
+        },
+        "drainingState": {
+          "description": "The listener state for any draining listener by this name. These are listeners that are currently undergoing draining in preparation to stop servicing data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the draining listeners should generally be discarded.",
+          "$ref": "DynamicListenerState"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or unique id of this listener, pulled from the DynamicListenerState config."
+        },
+        "clientStatus": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOES_NOT_EXIST",
+            "ACKED",
+            "NACKED",
+            "RECEIVED_ERROR",
+            "TIMEOUT"
+          ],
+          "description": "The client status of this resource. [#not-implemented-hide:]",
+          "enumDescriptions": [
+            "Resource status is not available/unknown.",
+            "Client requested this resource but hasn't received any update from management server. The client will not fail requests, but will queue them until update arrives or the client times out waiting for the resource.",
+            "This resource has been requested by the client but has either not been delivered by the server or was previously delivered by the server and then subsequently removed from resources provided by the server. For more information, please refer to the :ref:`\"Knowing When a Requested Resource Does Not Exist\" ` section.",
+            "Client received this resource and replied with ACK.",
+            "Client received this resource and replied with NACK.",
+            "Client received an error from the control plane. The attached config dump is the most recent accepted one. If no config is accepted yet, the attached config dump will be empty.",
+            "Client timed out waiting for the resource from the control plane."
+          ]
+        },
+        "warmingState": {
+          "description": "The listener state for any warming listener by this name. These are listeners that are currently undergoing warming in preparation to service data plane traffic. Note that if attempting to recreate an Envoy configuration from a configuration dump, the warming listeners should generally be discarded.",
+          "$ref": "DynamicListenerState"
+        }
+      },
+      "type": "object"
+    },
+    "ValueMatcher": {
+      "type": "object",
+      "description": "Specifies the way to match a Protobuf::Value. Primitive values and ListValue are supported. StructValue is not supported and is always not matched. [#next-free-field: 8]",
+      "id": "ValueMatcher",
+      "properties": {
+        "doubleMatch": {
+          "$ref": "DoubleMatcher",
+          "description": "If specified, a match occurs if and only if the target value is a double value and is matched to this field."
+        },
+        "orMatch": {
+          "$ref": "OrMatcher",
+          "description": "If specified, a match occurs if and only if any of the alternatives in the match accept the value."
+        },
+        "boolMatch": {
+          "type": "boolean",
+          "description": "If specified, a match occurs if and only if the target value is a bool value and is equal to this field."
+        },
+        "nullMatch": {
+          "description": "If specified, a match occurs if and only if the target value is a NullValue.",
+          "$ref": "NullMatch"
+        },
+        "stringMatch": {
+          "description": "If specified, a match occurs if and only if the target value is a string value and is matched to this field.",
+          "$ref": "StringMatcher"
+        },
+        "presentMatch": {
+          "description": "If specified, value match will be performed based on whether the path is referring to a valid primitive value in the metadata. If the path is referring to a non-primitive value, the result is always not matched.",
+          "type": "boolean"
+        },
+        "listMatch": {
+          "$ref": "ListMatcher",
+          "description": "If specified, a match occurs if and only if the target value is a list value and is matched to this field."
+        }
+      }
+    },
+    "GoogleRE2": {
+      "properties": {
+        "maxProgramSize": {
+          "description": "This field controls the RE2 \"program size\" which is a rough estimate of how complex a compiled regex is to evaluate. A regex that has a program size greater than the configured value will fail to compile. In this case, the configured max program size can be increased or the regex can be simplified. If not specified, the default is 100. This field is deprecated; regexp validation should be performed on the management server instead of being done by each individual client. .. note:: Although this field is deprecated, the program size will still be checked against the global ``re2.max_program_size.error_level`` runtime value.",
+          "type": "integer",
+          "format": "uint32",
+          "deprecated": true
+        }
+      },
+      "description": "Google's `RE2 `_ regex engine. The regex string must adhere to the documented `syntax `_. The engine is designed to complete execution in linear time as well as limit the amount of memory used. Envoy supports program size checking via runtime. The runtime keys ``re2.max_program_size.error_level`` and ``re2.max_program_size.warn_level`` can be set to integers as the maximum program size or complexity that a compiled regex can have before an exception is thrown or a warning is logged, respectively. ``re2.max_program_size.error_level`` defaults to 100, and ``re2.max_program_size.warn_level`` has no default if unset (will not check/log a warning). Envoy emits two stats for tracking the program size of regexes: the histogram ``re2.program_size``, which records the program size, and the counter ``re2.exceeded_warn_level``, which is incremented each time the program size exceeds the warn level threshold.",
+      "id": "GoogleRE2",
+      "type": "object"
+    }
+  },
+  "id": "trafficdirector:v3",
+  "batchPath": "batch",
+  "protocol": "rest",
+  "name": "trafficdirector",
+  "revision": "20260820",
+  "version_module": true,
+  "discoveryVersion": "v1",
+  "kind": "discovery#restDescription",
+  "mtlsRootUrl": "https://trafficdirector.mtls.googleapis.com/",
+  "version": "v3",
+  "documentationLink": "https://cloud.google.com/traffic-director"
 }
