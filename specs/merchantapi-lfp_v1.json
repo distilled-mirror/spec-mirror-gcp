@@ -1,67 +1,14 @@
 {
-  "fullyEncodeReservedExpansion": true,
-  "title": "Merchant API",
-  "protocol": "rest",
-  "ownerName": "Google",
   "batchPath": "batch",
   "schemas": {
-    "ListLfpStoresResponse": {
-      "properties": {
-        "lfpStores": {
-          "items": {
-            "$ref": "LfpStore"
-          },
-          "type": "array",
-          "description": "The stores from the specified merchant."
-        },
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token, which can be sent as `pageToken` to retrieve the next page. If this field is omitted, there are no subsequent pages."
-        }
-      },
-      "description": "Response message for the ListLfpStores method.",
+    "Empty": {
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
       "type": "object",
-      "id": "ListLfpStoresResponse"
-    },
-    "LfpStoreState": {
-      "id": "LfpStoreState",
-      "properties": {
-        "matchingStateHint": {
-          "description": "The hint of why the matching has failed (only set if matching_state is FAILED).",
-          "type": "string"
-        },
-        "storeCode": {
-          "description": "Required. Immutable. The identifier of this store.",
-          "type": "string"
-        },
-        "matchingState": {
-          "enumDescriptions": [
-            "Store matching state unspecified.",
-            "The `LfpStore` is successfully matched with a Google Business Profile store.",
-            "The `LfpStore` is not matched with a Google Business Profile store."
-          ],
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The store matching state.",
-          "enum": [
-            "STORE_MATCHING_STATE_UNSPECIFIED",
-            "STORE_MATCHING_STATE_MATCHED",
-            "STORE_MATCHING_STATE_FAILED"
-          ]
-        }
-      },
-      "description": "The state of a specific merchant's store.",
-      "type": "object"
+      "id": "Empty",
+      "properties": {}
     },
     "LfpMerchantState": {
-      "type": "object",
-      "description": "The LFP state of a merchant.",
       "properties": {
-        "linkedGbps": {
-          "format": "int64",
-          "description": "Number of [GBPs](https://www.google.com/business/) this merchant has access to.",
-          "type": "string"
-        },
         "storeStates": {
           "description": "Output only. The state per store from the specified merchant. The field will be absent if the merchant has no stores submitted through LFP.",
           "items": {
@@ -70,128 +17,157 @@
           "type": "array",
           "readOnly": true
         },
+        "linkedGbps": {
+          "type": "string",
+          "format": "int64",
+          "description": "Number of [GBPs](https://www.google.com/business/) this merchant has access to."
+        },
+        "name": {
+          "description": "Identifier. The name of the `LfpMerchantState` resource. Format: `accounts/{account}/lfpMerchantStates/{target_merchant}`. For example, `accounts/123456/lfpMerchantStates/567890`.",
+          "type": "string"
+        },
         "inventoryStats": {
           "description": "The inventory statistics for the merchant. The field will be absent if the merchant has no inventory submitted through LFP.",
           "$ref": "InventoryStats"
         },
         "countrySettings": {
-          "description": "Country-specific settings for the merchant.",
           "type": "array",
           "items": {
             "$ref": "CountrySettings"
-          }
+          },
+          "description": "Country-specific settings for the merchant."
+        }
+      },
+      "description": "The LFP state of a merchant.",
+      "type": "object",
+      "id": "LfpMerchantState"
+    },
+    "LfpStore": {
+      "properties": {
+        "matchingStateHint": {
+          "type": "string",
+          "description": "Optional. Output only. The hint of why the matching has failed. This is only set when matchingState=`STORE_MATCHING_STATE_FAILED`. Possible values are: - \"`linked-store-not-found`\": There aren't any Google Business Profile stores available for matching. - \"`store-match-not-found`\": The provided `LfpStore` couldn't be matched to any of the connected Google Business Profile stores. Merchant Center account is connected correctly and stores are available on Google Business Profile, but the `LfpStore` location address does not match with Google Business Profile stores' addresses. Update the `LfpStore` address or Google Business Profile store address to match correctly. - \"`store-match-unverified`\": The provided `LfpStore` couldn't be matched to any of the connected Google Business Profile stores, as the matched Google Business Profile store is unverified. Go through the Google Business Profile verification process to match correctly.",
+          "readOnly": true
+        },
+        "matchingState": {
+          "enumDescriptions": [
+            "Store matching state unspecified.",
+            "The `LfpStore` is successfully matched with a Google Business Profile store.",
+            "The `LfpStore` is not matched with a Google Business Profile store."
+          ],
+          "enum": [
+            "STORE_MATCHING_STATE_UNSPECIFIED",
+            "STORE_MATCHING_STATE_MATCHED",
+            "STORE_MATCHING_STATE_FAILED"
+          ],
+          "type": "string",
+          "description": "Optional. Output only. The state of matching to a Google Business Profile. See matchingStateHint for further details if no match is found.",
+          "readOnly": true
         },
         "name": {
           "type": "string",
-          "description": "Identifier. The name of the `LfpMerchantState` resource. Format: `accounts/{account}/lfpMerchantStates/{target_merchant}`. For example, `accounts/123456/lfpMerchantStates/567890`."
+          "description": "Output only. Identifier. The name of the `LfpStore` resource. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
+          "readOnly": true
+        },
+        "storeAddress": {
+          "description": "Required. The street address of the store. Example: 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA.",
+          "type": "string"
+        },
+        "gcidCategory": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. [Google My Business category id](https://support.google.com/business/answer/7249669)."
+        },
+        "phoneNumber": {
+          "description": "Optional. The store phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format. Example: `+15556767888`",
+          "type": "string"
+        },
+        "placeId": {
+          "type": "string",
+          "description": "Optional. The [Google Place Id](https://developers.google.com/maps/documentation/places/web-service/place-id#id-overview) of the store location."
+        },
+        "storeCode": {
+          "type": "string",
+          "description": "Required. Immutable. A store identifier that is unique for the target merchant."
+        },
+        "targetAccount": {
+          "description": "Required. The Merchant Center id of the merchant to submit the store for.",
+          "format": "int64",
+          "type": "string"
+        },
+        "websiteUri": {
+          "description": "Optional. The website URL for the store or merchant.",
+          "type": "string"
+        },
+        "storeName": {
+          "type": "string",
+          "description": "Optional. The merchant or store name."
         }
       },
-      "id": "LfpMerchantState"
+      "description": "A store for the merchant. This will be used to match to a store under the Google Business Profile of the target merchant. If a matching store can't be found, the inventories or sales submitted with the store code will not be used.",
+      "id": "LfpStore",
+      "type": "object"
+    },
+    "InventoryStats": {
+      "properties": {
+        "submittedInStockEntries": {
+          "description": "Number of submitted in stock entries.",
+          "format": "int64",
+          "type": "string"
+        },
+        "submittedEntries": {
+          "format": "int64",
+          "description": "Number of entries (understanding entry as a pair of product and store) that were built based on provided inventories/sales and submitted to Google.",
+          "type": "string"
+        },
+        "submittedProducts": {
+          "type": "string",
+          "format": "int64",
+          "description": "Number of products from provided inventories/sales that were created from matches to existing online products provided by the merchant or to the Google catalog."
+        },
+        "unsubmittedEntries": {
+          "format": "int64",
+          "type": "string",
+          "description": "Number of entries that were built based on provided inventories/sales and couldn't be submitted to Google due to errors like missing product."
+        }
+      },
+      "description": "The inventory statistics for a merchant.",
+      "type": "object",
+      "id": "InventoryStats"
     },
     "Price": {
-      "type": "object",
-      "id": "Price",
       "properties": {
+        "currencyCode": {
+          "type": "string",
+          "description": "The currency of the price using three-letter acronyms according to [ISO 4217](http://en.wikipedia.org/wiki/ISO_4217)."
+        },
         "amountMicros": {
           "description": "The price represented as a number in micros (1 million micros is an equivalent to one's currency standard unit, for example, 1 USD = 1000000 micros).",
           "type": "string",
           "format": "int64"
-        },
-        "currencyCode": {
-          "type": "string",
-          "description": "The currency of the price using three-letter acronyms according to [ISO 4217](http://en.wikipedia.org/wiki/ISO_4217)."
         }
       },
+      "id": "Price",
+      "type": "object",
       "description": "The price represented as a number and currency."
     },
-    "LfpSale": {
-      "description": "A sale for the merchant.",
+    "ProductChange": {
+      "type": "object",
+      "id": "ProductChange",
+      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
       "properties": {
-        "feedLabel": {
+        "newValue": {
           "type": "string",
-          "description": "Optional. The [feed label](https://developers.google.com/shopping-content/guides/products/feed-labels) for the product. If this is not set, it will default to `regionCode`."
-        },
-        "uid": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. System generated globally unique ID for the `LfpSale`."
-        },
-        "targetAccount": {
-          "type": "string",
-          "format": "int64",
-          "description": "Required. The Merchant Center ID of the merchant to submit the sale for."
-        },
-        "contentLanguage": {
-          "type": "string",
-          "description": "Required. The two-letter ISO 639-1 language code for the item."
-        },
-        "storeCode": {
-          "description": "Required. The identifier of the merchant's store. Either a `storeCode` inserted through the API or the code of the store in the Business Profile.",
-          "type": "string"
-        },
-        "gtin": {
-          "type": "string",
-          "description": "Required. The Global Trade Item Number of the sold product."
-        },
-        "offerId": {
-          "description": "Required. A unique identifier for the product. If both inventories and sales are submitted for a merchant, this id should match for the same product. **Note**: if the merchant sells the same product new and used, they should have different IDs.",
-          "type": "string"
+          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
         },
         "regionCode": {
-          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country where the product is sold.",
+          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format.",
           "type": "string"
         },
-        "quantity": {
-          "format": "int64",
-          "type": "string",
-          "description": "Required. The relative change of the available quantity. Negative for items returned."
-        },
-        "price": {
-          "$ref": "Price",
-          "description": "Required. The unit price of the product."
-        },
-        "saleTime": {
-          "description": "Required. The timestamp for the sale.",
-          "type": "string",
-          "format": "google-datetime"
-        },
-        "name": {
-          "readOnly": true,
-          "description": "Output only. Identifier. The name of the `LfpSale` resource. Format: `accounts/{account}/lfpSales/{sale}`",
-          "type": "string"
-        }
-      },
-      "id": "LfpSale",
-      "type": "object"
-    },
-    "ProductChange": {
-      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
-      "id": "ProductChange",
-      "properties": {
         "reportingContext": {
-          "enum": [
-            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
-            "SHOPPING_ADS",
-            "DISCOVERY_ADS",
-            "DEMAND_GEN_ADS",
-            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
-            "VIDEO_ADS",
-            "DISPLAY_ADS",
-            "LOCAL_INVENTORY_ADS",
-            "VEHICLE_INVENTORY_ADS",
-            "FREE_LISTINGS",
-            "FREE_LISTINGS_UCP_CHECKOUT",
-            "FREE_LOCAL_LISTINGS",
-            "FREE_LOCAL_VEHICLE_LISTINGS",
-            "YOUTUBE_AFFILIATE",
-            "YOUTUBE_SHOPPING",
-            "CLOUD_RETAIL",
-            "LOCAL_CLOUD_RETAIL",
-            "PRODUCT_REVIEWS",
-            "MERCHANT_REVIEWS",
-            "YOUTUBE_CHECKOUT",
-            "RENTAL_ADS"
-          ],
+          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
           "type": "string",
           "enumDescriptions": [
             "Not specified.",
@@ -216,7 +192,29 @@
             "YouTube Checkout .",
             "Real Estate Rental Ads. ."
           ],
-          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
+          "enum": [
+            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
+            "SHOPPING_ADS",
+            "DISCOVERY_ADS",
+            "DEMAND_GEN_ADS",
+            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
+            "VIDEO_ADS",
+            "DISPLAY_ADS",
+            "LOCAL_INVENTORY_ADS",
+            "VEHICLE_INVENTORY_ADS",
+            "FREE_LISTINGS",
+            "FREE_LISTINGS_UCP_CHECKOUT",
+            "FREE_LOCAL_LISTINGS",
+            "FREE_LOCAL_VEHICLE_LISTINGS",
+            "YOUTUBE_AFFILIATE",
+            "YOUTUBE_SHOPPING",
+            "CLOUD_RETAIL",
+            "LOCAL_CLOUD_RETAIL",
+            "PRODUCT_REVIEWS",
+            "MERCHANT_REVIEWS",
+            "YOUTUBE_CHECKOUT",
+            "RENTAL_ADS"
+          ],
           "enumDeprecated": [
             false,
             false,
@@ -241,123 +239,175 @@
             false
           ]
         },
-        "newValue": {
-          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
-          "type": "string"
-        },
-        "regionCode": {
-          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format.",
-          "type": "string"
-        },
         "oldValue": {
           "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
+          "type": "string"
+        }
+      }
+    },
+    "LfpStoreState": {
+      "id": "LfpStoreState",
+      "description": "The state of a specific merchant's store.",
+      "properties": {
+        "matchingStateHint": {
+          "description": "The hint of why the matching has failed (only set if matching_state is FAILED).",
+          "type": "string"
+        },
+        "matchingState": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The store matching state.",
+          "enum": [
+            "STORE_MATCHING_STATE_UNSPECIFIED",
+            "STORE_MATCHING_STATE_MATCHED",
+            "STORE_MATCHING_STATE_FAILED"
+          ],
+          "enumDescriptions": [
+            "Store matching state unspecified.",
+            "The `LfpStore` is successfully matched with a Google Business Profile store.",
+            "The `LfpStore` is not matched with a Google Business Profile store."
+          ]
+        },
+        "storeCode": {
+          "description": "Required. Immutable. The identifier of this store.",
           "type": "string"
         }
       },
       "type": "object"
     },
-    "Empty": {
+    "ProductStatusChangeMessage": {
       "type": "object",
-      "properties": {},
-      "id": "Empty",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
-    },
-    "LfpInventory": {
       "properties": {
-        "availability": {
-          "type": "string",
-          "description": "Required. Availability of the product at this store. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342)"
+        "changes": {
+          "description": "A message to describe the change that happened to the product",
+          "type": "array",
+          "items": {
+            "$ref": "ProductChange"
+          }
         },
-        "contentLanguage": {
-          "description": "Required. The two-letter ISO 639-1 language code for the item.",
+        "managingAccount": {
+          "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`",
           "type": "string"
         },
-        "storeCode": {
-          "description": "Required. The identifier of the merchant's store. Either the store code inserted through `InsertLfpStore` or the store code in the Business Profile.",
-          "type": "string"
-        },
-        "targetAccount": {
+        "eventTime": {
           "type": "string",
-          "description": "Required. The Merchant Center ID of the merchant to submit the inventory for.",
-          "format": "int64"
-        },
-        "offerId": {
-          "type": "string",
-          "description": "Required. Immutable. A unique identifier for the product. If both inventories and sales are submitted for a merchant, this id should match for the same product. **Note**: if the merchant sells the same product new and used, they should have different IDs."
-        },
-        "collectionTime": {
           "format": "google-datetime",
-          "description": "Optional. The time when the inventory is collected. If not set, it will be set to the time when the inventory is submitted.",
+          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications."
+        },
+        "resource": {
+          "description": "The product name. Format: `accounts/{account}/products/{product}`",
           "type": "string"
         },
-        "regionCode": {
-          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country where the product is sold.",
+        "resourceId": {
+          "description": "The product id.",
           "type": "string"
         },
-        "pickupSla": {
-          "description": "Optional. Expected date that an order will be ready for pickup relative to the order date. Must be submitted together with `pickupMethod`. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342).",
-          "type": "string"
-        },
-        "gtin": {
-          "description": "Optional. The Global Trade Item Number of the product.",
-          "type": "string"
-        },
-        "quantity": {
-          "description": "Optional. Quantity of the product available at this store. Must be greater than or equal to zero.",
+        "attribute": {
           "type": "string",
-          "format": "int64"
+          "enum": [
+            "ATTRIBUTE_UNSPECIFIED",
+            "STATUS"
+          ],
+          "enumDescriptions": [
+            "Unspecified attribute",
+            "Status of the changed entity"
+          ],
+          "description": "The attribute in the resource that changed, in this case it will be always `Status`."
         },
-        "pickupMethod": {
-          "description": "Optional. Supported pickup method for this offer. Unless the value is \"not supported\", this field must be submitted together with `pickupSla`. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342).",
-          "type": "string"
+        "account": {
+          "type": "string",
+          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`"
         },
-        "price": {
-          "description": "Optional. The current price of the product.",
-          "$ref": "Price"
+        "resourceType": {
+          "type": "string",
+          "enum": [
+            "RESOURCE_UNSPECIFIED",
+            "PRODUCT",
+            "ACCOUNT_SERVICE"
+          ],
+          "enumDescriptions": [
+            "Unspecified resource",
+            "Resource type : product",
+            "Account service"
+          ],
+          "description": "The resource that changed, in this case it will always be `Product`."
         },
-        "feedLabel": {
-          "description": "Optional. The [feed label](https://developers.google.com/shopping-content/guides/products/feed-labels) for the product. If this is not set, it will default to `regionCode`.",
-          "type": "string"
-        },
-        "name": {
-          "readOnly": true,
-          "description": "Output only. Identifier. The name for the `LfpInventory` resource. Format: `accounts/{account}/lfpInventories/{target_merchant}~{store_code}~{offer}`",
+        "expirationTime": {
+          "format": "google-datetime",
+          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
           "type": "string"
         }
       },
-      "type": "object",
-      "description": "Local Inventory for the merchant.",
-      "id": "LfpInventory"
+      "id": "ProductStatusChangeMessage",
+      "description": "The message that the merchant will receive to notify about product status change event"
     },
-    "InventoryStats": {
-      "description": "The inventory statistics for a merchant.",
+    "ListLfpStoresResponse": {
+      "description": "Response message for the ListLfpStores method.",
       "type": "object",
-      "id": "InventoryStats",
       "properties": {
-        "unsubmittedEntries": {
-          "type": "string",
-          "format": "int64",
-          "description": "Number of entries that were built based on provided inventories/sales and couldn't be submitted to Google due to errors like missing product."
+        "lfpStores": {
+          "items": {
+            "$ref": "LfpStore"
+          },
+          "description": "The stores from the specified merchant.",
+          "type": "array"
         },
-        "submittedEntries": {
+        "nextPageToken": {
           "type": "string",
-          "format": "int64",
-          "description": "Number of entries (understanding entry as a pair of product and store) that were built based on provided inventories/sales and submitted to Google."
-        },
-        "submittedProducts": {
-          "description": "Number of products from provided inventories/sales that were created from matches to existing online products provided by the merchant or to the Google catalog.",
-          "type": "string",
-          "format": "int64"
-        },
-        "submittedInStockEntries": {
-          "type": "string",
-          "format": "int64",
-          "description": "Number of submitted in stock entries."
+          "description": "A token, which can be sent as `pageToken` to retrieve the next page. If this field is omitted, there are no subsequent pages."
         }
-      }
+      },
+      "id": "ListLfpStoresResponse"
     },
     "CountrySettings": {
+      "type": "object",
       "properties": {
+        "regionCode": {
+          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country for which these settings are defined.",
+          "type": "string"
+        },
+        "localInventoryAdsEnabled": {
+          "type": "boolean",
+          "description": "True if this merchant has enabled local inventory ads in MC."
+        },
+        "pickupServingVerificationState": {
+          "description": "Output only. The verification state of this merchant's pickup serving feature.",
+          "type": "string",
+          "readOnly": true,
+          "enumDescriptions": [
+            "Verification state unspecified.",
+            "Verification state not approved.",
+            "Verification state in progress.",
+            "Verification state approved."
+          ],
+          "enum": [
+            "VERIFICATION_STATE_UNSPECIFIED",
+            "VERIFICATION_STATE_NOT_APPROVED",
+            "VERIFICATION_STATE_IN_PROGRESS",
+            "VERIFICATION_STATE_APPROVED"
+          ]
+        },
+        "inventoryVerificationState": {
+          "readOnly": true,
+          "enumDescriptions": [
+            "Verification state unspecified.",
+            "Verification state not approved.",
+            "Verification state in progress.",
+            "Verification state approved."
+          ],
+          "enum": [
+            "VERIFICATION_STATE_UNSPECIFIED",
+            "VERIFICATION_STATE_NOT_APPROVED",
+            "VERIFICATION_STATE_IN_PROGRESS",
+            "VERIFICATION_STATE_APPROVED"
+          ],
+          "description": "Output only. The verification state of this merchant's inventory check.",
+          "type": "string"
+        },
+        "freeLocalListingsEnabled": {
+          "description": "True if this merchant has enabled free local listings in MC.",
+          "type": "boolean"
+        },
         "productPageType": {
           "enumDescriptions": [
             "Product page type unspecified.",
@@ -366,13 +416,13 @@
             "Merchant hosted store specific product page."
           ],
           "readOnly": true,
-          "type": "string",
           "enum": [
             "PRODUCT_PAGE_TYPE_UNSPECIFIED",
             "GOOGLE_HOSTED",
             "MERCHANT_HOSTED",
             "MERCHANT_HOSTED_STORE_SPECIFIC"
           ],
+          "type": "string",
           "description": "Output only. The product page type selected by this merchant."
         },
         "instockServingVerificationState": {
@@ -382,513 +432,231 @@
             "VERIFICATION_STATE_IN_PROGRESS",
             "VERIFICATION_STATE_APPROVED"
           ],
-          "type": "string",
-          "readOnly": true,
           "description": "Output only. The verification state of this merchant's instock serving feature.",
-          "enumDescriptions": [
-            "Verification state unspecified.",
-            "Verification state not approved.",
-            "Verification state in progress.",
-            "Verification state approved."
-          ]
-        },
-        "localInventoryAdsEnabled": {
-          "description": "True if this merchant has enabled local inventory ads in MC.",
-          "type": "boolean"
-        },
-        "freeLocalListingsEnabled": {
-          "description": "True if this merchant has enabled free local listings in MC.",
-          "type": "boolean"
-        },
-        "regionCode": {
           "type": "string",
-          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country for which these settings are defined."
-        },
-        "pickupServingVerificationState": {
-          "enum": [
-            "VERIFICATION_STATE_UNSPECIFIED",
-            "VERIFICATION_STATE_NOT_APPROVED",
-            "VERIFICATION_STATE_IN_PROGRESS",
-            "VERIFICATION_STATE_APPROVED"
-          ],
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The verification state of this merchant's pickup serving feature.",
-          "enumDescriptions": [
-            "Verification state unspecified.",
-            "Verification state not approved.",
-            "Verification state in progress.",
-            "Verification state approved."
-          ]
-        },
-        "inventoryVerificationState": {
-          "type": "string",
-          "enum": [
-            "VERIFICATION_STATE_UNSPECIFIED",
-            "VERIFICATION_STATE_NOT_APPROVED",
-            "VERIFICATION_STATE_IN_PROGRESS",
-            "VERIFICATION_STATE_APPROVED"
-          ],
           "enumDescriptions": [
             "Verification state unspecified.",
             "Verification state not approved.",
             "Verification state in progress.",
             "Verification state approved."
           ],
-          "description": "Output only. The verification state of this merchant's inventory check.",
           "readOnly": true
         }
       },
       "id": "CountrySettings",
-      "type": "object",
       "description": "Country-specific settings for the merchant."
     },
-    "ProductStatusChangeMessage": {
+    "LfpSale": {
+      "id": "LfpSale",
       "properties": {
-        "resourceId": {
-          "description": "The product id.",
-          "type": "string"
-        },
-        "attribute": {
+        "targetAccount": {
           "type": "string",
-          "enumDescriptions": [
-            "Unspecified attribute",
-            "Status of the changed entity"
-          ],
-          "enum": [
-            "ATTRIBUTE_UNSPECIFIED",
-            "STATUS"
-          ],
-          "description": "The attribute in the resource that changed, in this case it will be always `Status`."
+          "format": "int64",
+          "description": "Required. The Merchant Center ID of the merchant to submit the sale for."
         },
-        "resourceType": {
-          "description": "The resource that changed, in this case it will always be `Product`.",
-          "enumDescriptions": [
-            "Unspecified resource",
-            "Resource type : product",
-            "Account service"
-          ],
-          "enum": [
-            "RESOURCE_UNSPECIFIED",
-            "PRODUCT",
-            "ACCOUNT_SERVICE"
-          ],
-          "type": "string"
-        },
-        "managingAccount": {
+        "quantity": {
+          "format": "int64",
           "type": "string",
-          "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`"
+          "description": "Required. The relative change of the available quantity. Negative for items returned."
         },
-        "account": {
-          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`",
+        "feedLabel": {
+          "description": "Optional. The [feed label](https://developers.google.com/shopping-content/guides/products/feed-labels) for the product. If this is not set, it will default to `regionCode`.",
           "type": "string"
         },
-        "expirationTime": {
-          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
+        "offerId": {
+          "type": "string",
+          "description": "Required. A unique identifier for the product. If both inventories and sales are submitted for a merchant, this id should match for the same product. **Note**: if the merchant sells the same product new and used, they should have different IDs."
+        },
+        "uid": {
+          "description": "Output only. System generated globally unique ID for the `LfpSale`.",
+          "type": "string",
+          "readOnly": true
+        },
+        "contentLanguage": {
+          "type": "string",
+          "description": "Required. The two-letter ISO 639-1 language code for the item."
+        },
+        "saleTime": {
+          "description": "Required. The timestamp for the sale.",
           "type": "string",
           "format": "google-datetime"
-        },
-        "changes": {
-          "description": "A message to describe the change that happened to the product",
-          "items": {
-            "$ref": "ProductChange"
-          },
-          "type": "array"
-        },
-        "eventTime": {
-          "type": "string",
-          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications.",
-          "format": "google-datetime"
-        },
-        "resource": {
-          "description": "The product name. Format: `accounts/{account}/products/{product}`",
-          "type": "string"
-        }
-      },
-      "id": "ProductStatusChangeMessage",
-      "description": "The message that the merchant will receive to notify about product status change event",
-      "type": "object"
-    },
-    "LfpStore": {
-      "properties": {
-        "storeAddress": {
-          "description": "Required. The street address of the store. Example: 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA.",
-          "type": "string"
-        },
-        "storeCode": {
-          "type": "string",
-          "description": "Required. Immutable. A store identifier that is unique for the target merchant."
         },
         "name": {
           "type": "string",
-          "description": "Output only. Identifier. The name of the `LfpStore` resource. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
+          "description": "Output only. Identifier. The name of the `LfpSale` resource. Format: `accounts/{account}/lfpSales/{sale}`",
           "readOnly": true
         },
-        "websiteUri": {
-          "description": "Optional. The website URL for the store or merchant.",
+        "gtin": {
+          "description": "Required. The Global Trade Item Number of the sold product.",
           "type": "string"
         },
-        "phoneNumber": {
+        "regionCode": {
+          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country where the product is sold.",
+          "type": "string"
+        },
+        "storeCode": {
+          "description": "Required. The identifier of the merchant's store. Either a `storeCode` inserted through the API or the code of the store in the Business Profile.",
+          "type": "string"
+        },
+        "price": {
+          "description": "Required. The unit price of the product.",
+          "$ref": "Price"
+        }
+      },
+      "type": "object",
+      "description": "A sale for the merchant."
+    },
+    "LfpInventory": {
+      "type": "object",
+      "id": "LfpInventory",
+      "properties": {
+        "storeCode": {
           "type": "string",
-          "description": "Optional. The store phone number in [E.164](https://en.wikipedia.org/wiki/E.164) format. Example: `+15556767888`"
+          "description": "Required. The identifier of the merchant's store. Either the store code inserted through `InsertLfpStore` or the store code in the Business Profile."
         },
-        "storeName": {
-          "description": "Optional. The merchant or store name.",
+        "pickupMethod": {
+          "description": "Optional. Supported pickup method for this offer. Unless the value is \"not supported\", this field must be submitted together with `pickupSla`. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342).",
           "type": "string"
+        },
+        "quantity": {
+          "type": "string",
+          "format": "int64",
+          "description": "Optional. Quantity of the product available at this store. Must be greater than or equal to zero."
+        },
+        "availability": {
+          "description": "Required. Availability of the product at this store. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342)",
+          "type": "string"
+        },
+        "collectionTime": {
+          "type": "string",
+          "format": "google-datetime",
+          "description": "Optional. The time when the inventory is collected. If not set, it will be set to the time when the inventory is submitted."
+        },
+        "contentLanguage": {
+          "type": "string",
+          "description": "Required. The two-letter ISO 639-1 language code for the item."
+        },
+        "pickupSla": {
+          "description": "Optional. Expected date that an order will be ready for pickup relative to the order date. Must be submitted together with `pickupMethod`. For accepted attribute values, see the [local product inventory data specification](https://support.google.com/merchants/answer/3061342).",
+          "type": "string"
+        },
+        "gtin": {
+          "description": "Optional. The Global Trade Item Number of the product.",
+          "type": "string"
+        },
+        "name": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Identifier. The name for the `LfpInventory` resource. Format: `accounts/{account}/lfpInventories/{target_merchant}~{store_code}~{offer}`"
+        },
+        "feedLabel": {
+          "type": "string",
+          "description": "Optional. The [feed label](https://developers.google.com/shopping-content/guides/products/feed-labels) for the product. If this is not set, it will default to `regionCode`."
         },
         "targetAccount": {
           "type": "string",
-          "description": "Required. The Merchant Center id of the merchant to submit the store for.",
+          "description": "Required. The Merchant Center ID of the merchant to submit the inventory for.",
           "format": "int64"
         },
-        "gcidCategory": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Optional. [Google My Business category id](https://support.google.com/business/answer/7249669).",
-          "type": "array"
+        "price": {
+          "description": "Optional. The current price of the product.",
+          "$ref": "Price"
         },
-        "matchingState": {
-          "description": "Optional. Output only. The state of matching to a Google Business Profile. See matchingStateHint for further details if no match is found.",
-          "readOnly": true,
-          "enumDescriptions": [
-            "Store matching state unspecified.",
-            "The `LfpStore` is successfully matched with a Google Business Profile store.",
-            "The `LfpStore` is not matched with a Google Business Profile store."
-          ],
-          "enum": [
-            "STORE_MATCHING_STATE_UNSPECIFIED",
-            "STORE_MATCHING_STATE_MATCHED",
-            "STORE_MATCHING_STATE_FAILED"
-          ],
+        "regionCode": {
+          "description": "Required. The [CLDR territory code](https://github.com/unicode-org/cldr/blob/latest/common/main/en.xml) for the country where the product is sold.",
           "type": "string"
         },
-        "placeId": {
-          "description": "Optional. The [Google Place Id](https://developers.google.com/maps/documentation/places/web-service/place-id#id-overview) of the store location.",
+        "offerId": {
+          "description": "Required. Immutable. A unique identifier for the product. If both inventories and sales are submitted for a merchant, this id should match for the same product. **Note**: if the merchant sells the same product new and used, they should have different IDs.",
           "type": "string"
-        },
-        "matchingStateHint": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Optional. Output only. The hint of why the matching has failed. This is only set when matchingState=`STORE_MATCHING_STATE_FAILED`. Possible values are: - \"`linked-store-not-found`\": There aren't any Google Business Profile stores available for matching. - \"`store-match-not-found`\": The provided `LfpStore` couldn't be matched to any of the connected Google Business Profile stores. Merchant Center account is connected correctly and stores are available on Google Business Profile, but the `LfpStore` location address does not match with Google Business Profile stores' addresses. Update the `LfpStore` address or Google Business Profile store address to match correctly. - \"`store-match-unverified`\": The provided `LfpStore` couldn't be matched to any of the connected Google Business Profile stores, as the matched Google Business Profile store is unverified. Go through the Google Business Profile verification process to match correctly."
         }
       },
-      "description": "A store for the merchant. This will be used to match to a store under the Google Business Profile of the target merchant. If a matching store can't be found, the inventories or sales submitted with the store code will not be used.",
-      "id": "LfpStore",
-      "type": "object"
+      "description": "Local Inventory for the merchant."
     }
   },
-  "id": "merchantapi:lfp_v1",
+  "servicePath": "",
+  "protocol": "rest",
+  "ownerDomain": "google.com",
   "parameters": {
-    "prettyPrint": {
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
       "location": "query",
-      "description": "Returns response with indentations and line breaks.",
-      "type": "boolean",
-      "default": "true"
-    },
-    "alt": {
-      "description": "Data format for response.",
-      "type": "string",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "default": "json",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "location": "query"
-    },
-    "callback": {
-      "location": "query",
-      "description": "JSONP",
       "type": "string"
     },
-    "oauth_token": {
-      "type": "string",
+    "uploadType": {
       "location": "query",
-      "description": "OAuth 2.0 token for the current user."
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "type": "string"
+    },
+    "access_token": {
+      "location": "query",
+      "type": "string",
+      "description": "OAuth access token."
     },
     "fields": {
       "location": "query",
-      "type": "string",
-      "description": "Selector specifying which fields to include in a partial response."
+      "description": "Selector specifying which fields to include in a partial response.",
+      "type": "string"
     },
     "$.xgafv": {
       "enumDescriptions": [
         "v1 error format",
         "v2 error format"
       ],
-      "location": "query",
       "type": "string",
       "enum": [
         "1",
         "2"
       ],
+      "location": "query",
       "description": "V1 error format."
     },
     "quotaUser": {
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "type": "string",
+      "location": "query",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "prettyPrint": {
+      "location": "query",
+      "default": "true",
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean"
+    },
+    "oauth_token": {
+      "description": "OAuth 2.0 token for the current user.",
       "type": "string",
       "location": "query"
     },
-    "uploadType": {
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+    "alt": {
+      "location": "query",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "description": "Data format for response.",
       "type": "string",
-      "location": "query"
+      "default": "json",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ]
     },
-    "key": {
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+    "callback": {
       "type": "string",
+      "description": "JSONP",
       "location": "query"
     },
     "upload_protocol": {
+      "type": "string",
       "location": "query",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
-      "type": "string"
-    },
-    "access_token": {
-      "location": "query",
-      "description": "OAuth access token.",
-      "type": "string"
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
     }
   },
-  "resources": {
-    "accounts": {
-      "resources": {
-        "lfpMerchantStates": {
-          "methods": {
-            "get": {
-              "response": {
-                "$ref": "LfpMerchantState"
-              },
-              "description": "Gets the LFP state of a merchant",
-              "parameters": {
-                "name": {
-                  "required": true,
-                  "location": "path",
-                  "type": "string",
-                  "pattern": "^accounts/[^/]+/lfpMerchantStates/[^/]+$",
-                  "description": "Required. The name of the state to retrieve. Format: `accounts/{account}/lfpMerchantStates/{target_merchant}`. For example, `accounts/123456/lfpMerchantStates/567890`."
-                }
-              },
-              "path": "lfp/v1/{+name}",
-              "id": "merchantapi.accounts.lfpMerchantStates.get",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "parameterOrder": [
-                "name"
-              ],
-              "httpMethod": "GET",
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpMerchantStates/{lfpMerchantStatesId}"
-            }
-          }
-        },
-        "lfpSales": {
-          "methods": {
-            "insert": {
-              "httpMethod": "POST",
-              "description": "Inserts a `LfpSale` for the given merchant.",
-              "path": "lfp/v1/{+parent}/lfpSales:insert",
-              "response": {
-                "$ref": "LfpSale"
-              },
-              "id": "merchantapi.accounts.lfpSales.insert",
-              "parameters": {
-                "parent": {
-                  "description": "Required. The LFP provider account. Format: `accounts/{lfp_partner}`",
-                  "location": "path",
-                  "required": true,
-                  "type": "string",
-                  "pattern": "^accounts/[^/]+$"
-                }
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpSales:insert",
-              "parameterOrder": [
-                "parent"
-              ],
-              "request": {
-                "$ref": "LfpSale"
-              }
-            }
-          }
-        },
-        "lfpInventories": {
-          "methods": {
-            "insert": {
-              "parameterOrder": [
-                "parent"
-              ],
-              "description": "Inserts a `LfpInventory` resource for the given target merchant account. If the resource already exists, it will be replaced. The inventory automatically expires after 30 days.",
-              "parameters": {
-                "parent": {
-                  "description": "Required. The LFP provider account. Format: `accounts/{account}`",
-                  "type": "string",
-                  "pattern": "^accounts/[^/]+$",
-                  "location": "path",
-                  "required": true
-                }
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "id": "merchantapi.accounts.lfpInventories.insert",
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpInventories:insert",
-              "response": {
-                "$ref": "LfpInventory"
-              },
-              "request": {
-                "$ref": "LfpInventory"
-              },
-              "httpMethod": "POST",
-              "path": "lfp/v1/{+parent}/lfpInventories:insert"
-            }
-          }
-        },
-        "lfpStores": {
-          "methods": {
-            "delete": {
-              "response": {
-                "$ref": "Empty"
-              },
-              "parameters": {
-                "name": {
-                  "pattern": "^accounts/[^/]+/lfpStores/[^/]+$",
-                  "location": "path",
-                  "description": "Required. The name of the store to delete for the target merchant account. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
-                  "required": true,
-                  "type": "string"
-                }
-              },
-              "description": "Deletes a store for a target merchant.",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "httpMethod": "DELETE",
-              "path": "lfp/v1/{+name}",
-              "parameterOrder": [
-                "name"
-              ],
-              "id": "merchantapi.accounts.lfpStores.delete",
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores/{lfpStoresId}"
-            },
-            "get": {
-              "parameterOrder": [
-                "name"
-              ],
-              "path": "lfp/v1/{+name}",
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores/{lfpStoresId}",
-              "parameters": {
-                "name": {
-                  "pattern": "^accounts/[^/]+/lfpStores/[^/]+$",
-                  "location": "path",
-                  "required": true,
-                  "description": "Required. The name of the store to retrieve. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
-                  "type": "string"
-                }
-              },
-              "description": "Retrieves information about a store.",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "id": "merchantapi.accounts.lfpStores.get",
-              "response": {
-                "$ref": "LfpStore"
-              },
-              "httpMethod": "GET"
-            },
-            "insert": {
-              "request": {
-                "$ref": "LfpStore"
-              },
-              "httpMethod": "POST",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "response": {
-                "$ref": "LfpStore"
-              },
-              "description": "Inserts a store for the target merchant. If the store with the same store code already exists, it will be replaced.",
-              "id": "merchantapi.accounts.lfpStores.insert",
-              "parameterOrder": [
-                "parent"
-              ],
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores:insert",
-              "parameters": {
-                "parent": {
-                  "required": true,
-                  "location": "path",
-                  "description": "Required. The LFP provider account Format: `accounts/{account}`",
-                  "type": "string",
-                  "pattern": "^accounts/[^/]+$"
-                }
-              },
-              "path": "lfp/v1/{+parent}/lfpStores:insert"
-            },
-            "list": {
-              "parameterOrder": [
-                "parent"
-              ],
-              "parameters": {
-                "targetAccount": {
-                  "location": "query",
-                  "description": "Required. The Merchant Center id of the merchant to list stores for.",
-                  "type": "string",
-                  "format": "int64"
-                },
-                "pageSize": {
-                  "description": "Optional. The maximum number of `LfpStore` resources for the given account to return. The service returns fewer than this value if the number of stores for the given account is less than the `pageSize`. The default value is 250. The maximum value is 1000; If a value higher than the maximum is specified, then the `pageSize` will default to the maximum.",
-                  "location": "query",
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "parent": {
-                  "description": "Required. The LFP partner. Format: `accounts/{account}`",
-                  "pattern": "^accounts/[^/]+$",
-                  "type": "string",
-                  "required": true,
-                  "location": "path"
-                },
-                "pageToken": {
-                  "type": "string",
-                  "location": "query",
-                  "description": "Optional. A page token, received from a previous `ListLfpStoresRequest` call. Provide the page token to retrieve the subsequent page. When paginating, all other parameters provided to `ListLfpStoresRequest` must match the call that provided the page token. The token returned as nextPageToken in the response to the previous request."
-                }
-              },
-              "response": {
-                "$ref": "ListLfpStoresResponse"
-              },
-              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores",
-              "path": "lfp/v1/{+parent}/lfpStores",
-              "id": "merchantapi.accounts.lfpStores.list",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "description": "Lists the stores of the target merchant, specified by the filter in `ListLfpStoresRequest`.",
-              "httpMethod": "GET"
-            }
-          }
-        }
-      }
-    }
-  },
-  "discoveryVersion": "v1",
-  "name": "merchantapi",
-  "documentationLink": "https://developers.google.com/merchant/api",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "baseUrl": "https://merchantapi.googleapis.com/",
   "description": "Programmatically manage your Merchant Center Accounts.",
-  "basePath": "",
+  "baseUrl": "https://merchantapi.googleapis.com/",
+  "ownerName": "Google",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -898,13 +666,245 @@
       }
     }
   },
-  "revision": "20260901",
-  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
-  "kind": "discovery#restDescription",
-  "ownerDomain": "google.com",
-  "rootUrl": "https://merchantapi.googleapis.com/",
+  "revision": "20260902",
+  "name": "merchantapi",
+  "resources": {
+    "accounts": {
+      "resources": {
+        "lfpInventories": {
+          "methods": {
+            "insert": {
+              "parameters": {
+                "parent": {
+                  "required": true,
+                  "location": "path",
+                  "type": "string",
+                  "pattern": "^accounts/[^/]+$",
+                  "description": "Required. The LFP provider account. Format: `accounts/{account}`"
+                }
+              },
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpInventories:insert",
+              "id": "merchantapi.accounts.lfpInventories.insert",
+              "httpMethod": "POST",
+              "response": {
+                "$ref": "LfpInventory"
+              },
+              "description": "Inserts a `LfpInventory` resource for the given target merchant account. If the resource already exists, it will be replaced. The inventory automatically expires after 30 days.",
+              "path": "lfp/v1/{+parent}/lfpInventories:insert",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "parameterOrder": [
+                "parent"
+              ],
+              "request": {
+                "$ref": "LfpInventory"
+              }
+            }
+          }
+        },
+        "lfpMerchantStates": {
+          "methods": {
+            "get": {
+              "path": "lfp/v1/{+name}",
+              "description": "Gets the LFP state of a merchant",
+              "response": {
+                "$ref": "LfpMerchantState"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "id": "merchantapi.accounts.lfpMerchantStates.get",
+              "httpMethod": "GET",
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "name": {
+                  "pattern": "^accounts/[^/]+/lfpMerchantStates/[^/]+$",
+                  "type": "string",
+                  "required": true,
+                  "description": "Required. The name of the state to retrieve. Format: `accounts/{account}/lfpMerchantStates/{target_merchant}`. For example, `accounts/123456/lfpMerchantStates/567890`.",
+                  "location": "path"
+                }
+              },
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpMerchantStates/{lfpMerchantStatesId}"
+            }
+          }
+        },
+        "lfpStores": {
+          "methods": {
+            "list": {
+              "response": {
+                "$ref": "ListLfpStoresResponse"
+              },
+              "parameters": {
+                "pageSize": {
+                  "format": "int32",
+                  "location": "query",
+                  "type": "integer",
+                  "description": "Optional. The maximum number of `LfpStore` resources for the given account to return. The service returns fewer than this value if the number of stores for the given account is less than the `pageSize`. The default value is 250. The maximum value is 1000; If a value higher than the maximum is specified, then the `pageSize` will default to the maximum."
+                },
+                "pageToken": {
+                  "description": "Optional. A page token, received from a previous `ListLfpStoresRequest` call. Provide the page token to retrieve the subsequent page. When paginating, all other parameters provided to `ListLfpStoresRequest` must match the call that provided the page token. The token returned as nextPageToken in the response to the previous request.",
+                  "location": "query",
+                  "type": "string"
+                },
+                "parent": {
+                  "required": true,
+                  "description": "Required. The LFP partner. Format: `accounts/{account}`",
+                  "type": "string",
+                  "location": "path",
+                  "pattern": "^accounts/[^/]+$"
+                },
+                "targetAccount": {
+                  "format": "int64",
+                  "location": "query",
+                  "description": "Required. The Merchant Center id of the merchant to list stores for.",
+                  "type": "string"
+                }
+              },
+              "httpMethod": "GET",
+              "id": "merchantapi.accounts.lfpStores.list",
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores",
+              "parameterOrder": [
+                "parent"
+              ],
+              "path": "lfp/v1/{+parent}/lfpStores",
+              "description": "Lists the stores of the target merchant, specified by the filter in `ListLfpStoresRequest`.",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ]
+            },
+            "get": {
+              "id": "merchantapi.accounts.lfpStores.get",
+              "response": {
+                "$ref": "LfpStore"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "httpMethod": "GET",
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "required": true,
+                  "description": "Required. The name of the store to retrieve. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
+                  "pattern": "^accounts/[^/]+/lfpStores/[^/]+$",
+                  "type": "string"
+                }
+              },
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores/{lfpStoresId}",
+              "path": "lfp/v1/{+name}",
+              "description": "Retrieves information about a store."
+            },
+            "insert": {
+              "parameterOrder": [
+                "parent"
+              ],
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores:insert",
+              "description": "Inserts a store for the target merchant. If the store with the same store code already exists, it will be replaced.",
+              "httpMethod": "POST",
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "location": "path",
+                  "description": "Required. The LFP provider account Format: `accounts/{account}`",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+$"
+                }
+              },
+              "request": {
+                "$ref": "LfpStore"
+              },
+              "response": {
+                "$ref": "LfpStore"
+              },
+              "path": "lfp/v1/{+parent}/lfpStores:insert",
+              "id": "merchantapi.accounts.lfpStores.insert"
+            },
+            "delete": {
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "path": "lfp/v1/{+name}",
+              "httpMethod": "DELETE",
+              "id": "merchantapi.accounts.lfpStores.delete",
+              "parameters": {
+                "name": {
+                  "description": "Required. The name of the store to delete for the target merchant account. Format: `accounts/{account}/lfpStores/{target_merchant}~{store_code}`",
+                  "pattern": "^accounts/[^/]+/lfpStores/[^/]+$",
+                  "location": "path",
+                  "type": "string",
+                  "required": true
+                }
+              },
+              "parameterOrder": [
+                "name"
+              ],
+              "response": {
+                "$ref": "Empty"
+              },
+              "description": "Deletes a store for a target merchant.",
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpStores/{lfpStoresId}"
+            }
+          }
+        },
+        "lfpSales": {
+          "methods": {
+            "insert": {
+              "request": {
+                "$ref": "LfpSale"
+              },
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "pattern": "^accounts/[^/]+$",
+                  "location": "path",
+                  "description": "Required. The LFP provider account. Format: `accounts/{lfp_partner}`",
+                  "required": true
+                }
+              },
+              "parameterOrder": [
+                "parent"
+              ],
+              "httpMethod": "POST",
+              "id": "merchantapi.accounts.lfpSales.insert",
+              "response": {
+                "$ref": "LfpSale"
+              },
+              "description": "Inserts a `LfpSale` for the given merchant.",
+              "path": "lfp/v1/{+parent}/lfpSales:insert",
+              "flatPath": "lfp/v1/accounts/{accountsId}/lfpSales:insert",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "discoveryVersion": "v1",
   "canonicalName": "Merchant",
+  "version_module": true,
+  "basePath": "",
+  "rootUrl": "https://merchantapi.googleapis.com/",
+  "documentationLink": "https://developers.google.com/merchant/api",
+  "id": "merchantapi:lfp_v1",
+  "fullyEncodeReservedExpansion": true,
+  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
   "version": "lfp_v1",
-  "servicePath": "",
-  "version_module": true
+  "kind": "discovery#restDescription",
+  "title": "Merchant API"
 }
