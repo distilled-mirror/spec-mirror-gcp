@@ -1,101 +1,184 @@
 {
-  "discoveryVersion": "v1",
-  "ownerDomain": "google.com",
-  "id": "ftp:v1",
+  "canonicalName": "Cloud FTP",
   "rootUrl": "https://ftp.googleapis.com/",
+  "id": "ftp:v1",
+  "ownerDomain": "google.com",
+  "auth": {
+    "oauth2": {
+      "scopes": {
+        "https://www.googleapis.com/auth/cloud-platform": {
+          "description": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+        }
+      }
+    }
+  },
+  "ownerName": "Google",
+  "fullyEncodeReservedExpansion": true,
+  "version_module": true,
   "schemas": {
+    "InternalServerConfig": {
+      "type": "object",
+      "properties": {
+        "consumerRejectList": {
+          "type": "array",
+          "items": {
+            "$ref": "DeniedConsumer"
+          },
+          "description": "Optional. A list of projects that are denied connection. Format: \"projects/sample_project_id\" or \"projects/1234567890\" Projects in this list will be denied access, even if they are included in the `allow_list`. If this list is empty, no projects are explicitly rejected."
+        },
+        "serviceAttachment": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The resource name of the service attachment. Format: `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`"
+        },
+        "pscEndpoints": {
+          "readOnly": true,
+          "items": {
+            "$ref": "PscEndpoint"
+          },
+          "description": "Output only. Details of endpoints created by the customer.",
+          "type": "array"
+        },
+        "consumerAcceptList": {
+          "type": "array",
+          "items": {
+            "$ref": "AllowedConsumer"
+          },
+          "description": "Required. A list of projects that are permitted to connect. At least one project is required in the allow list."
+        }
+      },
+      "description": "Configuration for private server accessible via PSC.",
+      "id": "InternalServerConfig"
+    },
     "UserCredential": {
+      "id": "UserCredential",
       "description": "Message describing UserCredential object",
+      "type": "object",
       "properties": {
         "credentialType": {
           "enumDescriptions": [
             "Type unspecified.",
             "Public key credential."
           ],
-          "description": "Required. Type of credential.",
+          "type": "string",
           "enum": [
             "TYPE_UNSPECIFIED",
             "PUBLIC_KEY"
           ],
-          "type": "string"
-        },
-        "sshPublicKeyBody": {
-          "type": "string",
-          "description": "Optional. SSH public key body in OpenSSH format. Example: \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ...\""
+          "description": "Required. Type of credential."
         },
         "credentialName": {
-          "description": "Required. Name of the user credential.",
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "id": "UserCredential"
-    },
-    "Status": {
-      "properties": {
-        "details": {
-          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
-          "items": {
-            "type": "object",
-            "additionalProperties": {
-              "description": "Properties of the object. Contains field @type with type URL.",
-              "type": "any"
-            }
-          },
-          "type": "array"
-        },
-        "code": {
-          "description": "The status code, which should be an enum value of google.rpc.Code.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
-          "type": "string"
-        }
-      },
-      "id": "Status",
-      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
-      "type": "object"
-    },
-    "PscEndpoint": {
-      "description": "Details of PSC endpoint created by customer.",
-      "id": "PscEndpoint",
-      "type": "object",
-      "properties": {
-        "status": {
-          "description": "Output only. The status of the connected endpoint.",
           "type": "string",
-          "readOnly": true
+          "description": "Required. Name of the user credential."
         },
-        "network": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. The consumer network. Format: `projects/{project}/locations/{location}/networks/{network}`"
-        },
-        "endpoint": {
-          "readOnly": true,
-          "description": "Output only. This is a Resource name for Private Service Connect endpoint. Format: `projects/{project}/regions/{region}/forwardingRules/{forwarding_rule}`",
+        "sshPublicKeyBody": {
+          "description": "Optional. SSH public key body in OpenSSH format. Example: \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ...\"",
           "type": "string"
         }
       }
     },
-    "ListOperationsResponse": {
+    "Empty": {
+      "id": "Empty",
+      "properties": {},
       "type": "object",
-      "description": "The response message for Operations.ListOperations.",
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
+    },
+    "ServerCredential": {
       "properties": {
+        "asymmetricAlgorithm": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Asymmetric algorithm used by the public key. Possible values (can be expanded in future): - ssh-ed25519"
+        },
+        "fingerprint": {
+          "description": "Output only. The fingerprint is a hash of the public key, and is displayed when clients access the server for the first time to verify the server's identity.",
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "description": "Represents credentials of an FTP Server.",
+      "id": "ServerCredential",
+      "type": "object"
+    },
+    "DeniedConsumer": {
+      "id": "DeniedConsumer",
+      "description": "A consumer project or network that is denied to connect to the server via PSC.",
+      "properties": {
+        "project": {
+          "description": "The project ID or number of the consumer project. Must be in the format: `projects/{project}`.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Location": {
+      "description": "A resource that represents a Google Cloud location.",
+      "properties": {
+        "name": {
+          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`",
+          "type": "string"
+        },
+        "locationId": {
+          "type": "string",
+          "description": "The canonical id for this location. For example: `\"us-east1\"`."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Service-specific metadata. For example the available capacity at the given location.",
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          }
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
+          "type": "object"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\"."
+        }
+      },
+      "id": "Location",
+      "type": "object"
+    },
+    "ListUsersResponse": {
+      "properties": {
+        "nextPageToken": {
+          "description": "A token identifying a page of results the user should return.",
+          "type": "string"
+        },
+        "users": {
+          "items": {
+            "$ref": "User"
+          },
+          "description": "The list of User",
+          "type": "array"
+        },
         "unreachable": {
+          "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations.",
-          "type": "array"
-        },
-        "operations": {
+          "description": "Unordered list. Locations that could not be reached."
+        }
+      },
+      "type": "object",
+      "id": "ListUsersResponse",
+      "description": "Message for response to listing Users"
+    },
+    "ListLocationsResponse": {
+      "id": "ListLocationsResponse",
+      "type": "object",
+      "properties": {
+        "locations": {
           "items": {
-            "$ref": "Operation"
+            "$ref": "Location"
           },
-          "description": "A list of operations that matches the specified filter in the request.",
+          "description": "A list of locations that matches the specified filter in the request.",
           "type": "array"
         },
         "nextPageToken": {
@@ -103,63 +186,250 @@
           "type": "string"
         }
       },
-      "id": "ListOperationsResponse"
+      "description": "The response message for Locations.ListLocations."
+    },
+    "ExternalServerConfig": {
+      "type": "object",
+      "properties": {
+        "ipAddress": {
+          "description": "Output only. IP address of the LB via which clients will connect.",
+          "type": "string",
+          "readOnly": true
+        },
+        "allowedCidrBlocks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. List of CIDR blocks that are allowed to access the Server. A CIDR range consists of an IP Address and a prefix length to construct the subnet mask. By default, the prefix length is 32 (i.e. matches a single IP address). For now, only IPV4 addresses are supported. Examples: \"203.0.113.0/24\" - matches with the IP addresses in the range 203.0.113.0 - 203.0.113.255. \"0.0.0.0/0\" - matches against any IP address. This field must contain at least one entry if the access type is EXTERNAL. The number of allowed CIDR blocks cannot exceed 500. Example: 192.168.0.0/16"
+        }
+      },
+      "id": "ExternalServerConfig",
+      "description": "Configuration for external server."
+    },
+    "CancelOperationRequest": {
+      "id": "CancelOperationRequest",
+      "type": "object",
+      "description": "The request message for Operations.CancelOperation.",
+      "properties": {}
+    },
+    "StorageDirectoryMapping": {
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "description": "Required. Name of the bucket."
+        },
+        "bucketPrefix": {
+          "description": "Optional. Prefix inside the bucket.",
+          "type": "string"
+        },
+        "permission": {
+          "type": "string",
+          "enum": [
+            "PERMISSION_UNSPECIFIED",
+            "READ_ONLY",
+            "READ_WRITE"
+          ],
+          "description": "Required. Permission to the bucket.",
+          "enumDescriptions": [
+            "Permission unspecified.",
+            "Read only permission.",
+            "Read write permission."
+          ]
+        },
+        "directory": {
+          "description": "Required. Directory where the user lands in the SFTP server.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "id": "StorageDirectoryMapping",
+      "description": "Mapping of backing Cloud Storage path to the directory where the user lands in the SFTP server. If directory is not specified, it'll default to '/'. Eg 1 - (bucket_name: bucket, bucket_prefix: path1/path2, directory: /abc/def/username) The user will land at /abcd/def/username, and the view there will match that of /bucket/path1/path2. The user will not be aware of Cloud Storage prefix '/bucket/path1' and there will be no such directory in the view. Eg 2 - (bucket_name: bucket, bucket_prefix: path1/path2, directory: '') The user will land at '/', and the view there will match that of /bucket/path1/path2. The user will not be aware of Cloud Storage prefix '/bucket/path1/path2' and there will be no such directory in the view."
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "customerServiceAccount": {
+          "description": "Required. Service account in customer project attached to this SFTP User.",
+          "type": "string"
+        },
+        "state": {
+          "enumDescriptions": [
+            "State unspecified.",
+            "User is being created.",
+            "User is ready to be used.",
+            "User creation failed.",
+            "The resource is being updated.",
+            "The resource is being deleted."
+          ],
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "CREATING",
+            "ACTIVE",
+            "ERROR",
+            "UPDATING",
+            "DELETING"
+          ],
+          "description": "Output only. Tracks user creation.",
+          "readOnly": true,
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "description": "Identifier. User-friendly name via which User will be identified. projects/{project}/locations/{location}/servers/{server}/users/{user}"
+        },
+        "createTime": {
+          "readOnly": true,
+          "description": "Output only. [Output only] Create time stamp",
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "storageDirectoryMappings": {
+          "description": "Required. Mapping of Cloud Storage buckets to directories where the user will land in the SFTP server.",
+          "type": "array",
+          "items": {
+            "$ref": "StorageDirectoryMapping"
+          }
+        },
+        "userCredentials": {
+          "type": "array",
+          "items": {
+            "$ref": "UserCredential"
+          },
+          "description": "Required. User credential for the user. The maximum number of user credentials is 10."
+        },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Optional. Labels as key value pairs",
+          "type": "object"
+        },
+        "username": {
+          "type": "string",
+          "description": "Output only. [Output only] The username of the user.",
+          "readOnly": true
+        },
+        "updateTime": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. [Output only] Update time stamp",
+          "format": "google-datetime"
+        }
+      },
+      "id": "User",
+      "description": "Message describing User object"
     },
     "ListServersResponse": {
-      "type": "object",
+      "description": "Message for response to listing Servers",
+      "properties": {
+        "nextPageToken": {
+          "description": "A token identifying a page of results the server should return.",
+          "type": "string"
+        },
+        "unreachable": {
+          "description": "Unordered list. Locations that could not be reached.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "servers": {
+          "items": {
+            "$ref": "Server"
+          },
+          "type": "array",
+          "description": "The list of Server"
+        }
+      },
       "id": "ListServersResponse",
+      "type": "object"
+    },
+    "AllowedConsumer": {
+      "id": "AllowedConsumer",
+      "properties": {
+        "project": {
+          "description": "The project ID or number of the consumer project. Must be in the format: `projects/{project}`.",
+          "type": "string"
+        },
+        "connectionLimit": {
+          "type": "string",
+          "description": "Required. The connection limit for the consumer. Value must be greater than 0.",
+          "format": "int64"
+        }
+      },
+      "type": "object",
+      "description": "A consumer project or network that is permitted to connect to the server via PSC."
+    },
+    "ListOperationsResponse": {
       "properties": {
         "unreachable": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Unordered list. Locations that could not be reached."
+          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations."
         },
-        "servers": {
-          "description": "The list of Server",
-          "type": "array",
+        "operations": {
           "items": {
-            "$ref": "Server"
-          }
+            "$ref": "Operation"
+          },
+          "type": "array",
+          "description": "A list of operations that matches the specified filter in the request."
         },
         "nextPageToken": {
-          "description": "A token identifying a page of results the server should return.",
+          "description": "The standard List next-page token.",
           "type": "string"
         }
       },
-      "description": "Message for response to listing Servers"
+      "id": "ListOperationsResponse",
+      "type": "object",
+      "description": "The response message for Operations.ListOperations."
+    },
+    "Status": {
+      "id": "Status",
+      "properties": {
+        "message": {
+          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+          "type": "string"
+        },
+        "code": {
+          "description": "The status code, which should be an enum value of google.rpc.Code.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "details": {
+          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
+          "items": {
+            "additionalProperties": {
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
     },
     "Server": {
       "id": "Server",
+      "description": "Message describing Server object",
+      "type": "object",
       "properties": {
-        "displayName": {
-          "description": "Optional. Display name of the Server",
-          "type": "string"
+        "googleManagedServerCredential": {
+          "description": "Output only. Credentials of the FTP Server.",
+          "$ref": "ServerCredential",
+          "readOnly": true
         },
         "createTime": {
-          "description": "Output only. [Output only] Create time stamp",
           "type": "string",
+          "format": "google-datetime",
           "readOnly": true,
-          "format": "google-datetime"
-        },
-        "googleManagedServerCredential": {
-          "$ref": "ServerCredential",
-          "description": "Output only. Credentials of the FTP Server.",
-          "readOnly": true
-        },
-        "serviceAgent": {
-          "description": "Output only. Service agent used to access the customer bucket.",
-          "readOnly": true,
-          "type": "string"
-        },
-        "satisfiesPzs": {
-          "description": "Output only. Whether the Server satisfies Physical Zone Separation (PZS) requirements.",
-          "type": "boolean",
-          "readOnly": true
+          "description": "Output only. [Output only] Create time stamp"
         },
         "state": {
-          "readOnly": true,
           "enum": [
             "STATE_UNSPECIFIED",
             "CREATING",
@@ -182,151 +452,89 @@
             "Server is in error state.",
             "Server is being updated."
           ],
+          "description": "Output only. The state of the server.",
           "type": "string",
-          "description": "Output only. The state of the server."
-        },
-        "internalConfig": {
-          "$ref": "InternalServerConfig",
-          "description": "Configuration for internal access."
-        },
-        "satisfiesPzi": {
-          "readOnly": true,
-          "description": "Output only. Whether the Server satisfies Physical Zone Isolation (PZI) requirements.",
-          "type": "boolean"
-        },
-        "externalConfig": {
-          "$ref": "ExternalServerConfig",
-          "description": "Configuration for external access."
+          "readOnly": true
         },
         "labels": {
-          "description": "Optional. Labels as key value pairs",
           "type": "object",
+          "description": "Optional. Labels as key value pairs",
           "additionalProperties": {
             "type": "string"
           }
         },
-        "name": {
+        "serviceAgent": {
           "type": "string",
-          "description": "Identifier. name of resource"
+          "readOnly": true,
+          "description": "Output only. Service agent used to access the customer bucket."
         },
-        "updateTime": {
-          "description": "Output only. [Output only] Update time stamp",
-          "format": "google-datetime",
-          "type": "string",
+        "satisfiesPzs": {
+          "readOnly": true,
+          "type": "boolean",
+          "description": "Output only. Whether the Server satisfies Physical Zone Separation (PZS) requirements."
+        },
+        "satisfiesPzi": {
+          "type": "boolean",
+          "description": "Output only. Whether the Server satisfies Physical Zone Isolation (PZI) requirements.",
           "readOnly": true
         },
         "accessType": {
+          "description": "Required. The access type of the Server.",
           "enumDescriptions": [
             "Default value. This value is unused.",
             "Server is assigned a public IP.",
             "Server is assigned an internal IP."
           ],
-          "description": "Required. The access type of the Server.",
           "type": "string",
           "enum": [
             "ACCESS_TYPE_UNSPECIFIED",
             "EXTERNAL",
             "INTERNAL"
           ]
-        }
-      },
-      "type": "object",
-      "description": "Message describing Server object"
-    },
-    "AllowedConsumer": {
-      "id": "AllowedConsumer",
-      "type": "object",
-      "properties": {
-        "project": {
-          "type": "string",
-          "description": "The project ID or number of the consumer project. Must be in the format: `projects/{project}`."
         },
-        "connectionLimit": {
-          "description": "Required. The connection limit for the consumer. Value must be greater than 0.",
-          "type": "string",
-          "format": "int64"
-        }
-      },
-      "description": "A consumer project or network that is permitted to connect to the server via PSC."
-    },
-    "Location": {
-      "type": "object",
-      "properties": {
+        "externalConfig": {
+          "description": "Configuration for external access.",
+          "$ref": "ExternalServerConfig"
+        },
         "displayName": {
           "type": "string",
-          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\"."
+          "description": "Optional. Display name of the Server"
         },
-        "labels": {
-          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "locationId": {
-          "description": "The canonical id for this location. For example: `\"us-east1\"`.",
-          "type": "string"
-        },
-        "metadata": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "Service-specific metadata. For example the available capacity at the given location."
+        "updateTime": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. [Output only] Update time stamp",
+          "format": "google-datetime"
         },
         "name": {
-          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`",
+          "description": "Identifier. name of resource",
           "type": "string"
-        }
-      },
-      "id": "Location",
-      "description": "A resource that represents a Google Cloud location."
-    },
-    "ServerCredential": {
-      "id": "ServerCredential",
-      "properties": {
-        "asymmetricAlgorithm": {
-          "description": "Output only. Asymmetric algorithm used by the public key. Possible values (can be expanded in future): - ssh-ed25519",
-          "type": "string",
-          "readOnly": true
         },
-        "fingerprint": {
-          "type": "string",
-          "description": "Output only. The fingerprint is a hash of the public key, and is displayed when clients access the server for the first time to verify the server's identity.",
-          "readOnly": true
+        "internalConfig": {
+          "$ref": "InternalServerConfig",
+          "description": "Configuration for internal access."
         }
-      },
-      "description": "Represents credentials of an FTP Server.",
-      "type": "object"
+      }
     },
-    "DeniedConsumer": {
-      "id": "DeniedConsumer",
-      "properties": {
-        "project": {
-          "description": "The project ID or number of the consumer project. Must be in the format: `projects/{project}`.",
-          "type": "string"
-        }
-      },
+    "PscEndpoint": {
       "type": "object",
-      "description": "A consumer project or network that is denied to connect to the server via PSC."
-    },
-    "ExternalServerConfig": {
-      "id": "ExternalServerConfig",
-      "type": "object",
-      "description": "Configuration for external server.",
+      "description": "Details of PSC endpoint created by customer.",
+      "id": "PscEndpoint",
       "properties": {
-        "ipAddress": {
-          "type": "string",
+        "status": {
+          "description": "Output only. The status of the connected endpoint.",
           "readOnly": true,
-          "description": "Output only. IP address of the LB via which clients will connect."
+          "type": "string"
         },
-        "allowedCidrBlocks": {
-          "type": "array",
-          "description": "Optional. List of CIDR blocks that are allowed to access the Server. A CIDR range consists of an IP Address and a prefix length to construct the subnet mask. By default, the prefix length is 32 (i.e. matches a single IP address). For now, only IPV4 addresses are supported. Examples: \"203.0.113.0/24\" - matches with the IP addresses in the range 203.0.113.0 - 203.0.113.255. \"0.0.0.0/0\" - matches against any IP address. This field must contain at least one entry if the access type is EXTERNAL. The number of allowed CIDR blocks cannot exceed 500. Example: 192.168.0.0/16",
-          "items": {
-            "type": "string"
-          }
+        "endpoint": {
+          "description": "Output only. This is a Resource name for Private Service Connect endpoint. Format: `projects/{project}/regions/{region}/forwardingRules/{forwarding_rule}`",
+          "readOnly": true,
+          "type": "string"
+        },
+        "network": {
+          "readOnly": true,
+          "description": "Output only. The consumer network. Format: `projects/{project}/locations/{location}/networks/{network}`",
+          "type": "string"
         }
       }
     },
@@ -334,10 +542,31 @@
       "id": "OperationMetadata",
       "description": "Represents the metadata of the long-running operation.",
       "properties": {
+        "endTime": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The time the operation finished running.",
+          "format": "google-datetime"
+        },
+        "verb": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Name of the verb executed by the operation."
+        },
         "requestedCancellation": {
           "description": "Output only. Identifies whether the user has requested cancellation of the operation. Operations that have been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
-          "type": "boolean",
-          "readOnly": true
+          "readOnly": true,
+          "type": "boolean"
+        },
+        "apiVersion": {
+          "readOnly": true,
+          "description": "Output only. API version used to start the operation.",
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Server-defined resource path for the target of the operation."
         },
         "createTime": {
           "readOnly": true,
@@ -345,705 +574,303 @@
           "description": "Output only. The time the operation was created.",
           "type": "string"
         },
-        "apiVersion": {
-          "type": "string",
-          "description": "Output only. API version used to start the operation.",
-          "readOnly": true
-        },
-        "target": {
-          "description": "Output only. Server-defined resource path for the target of the operation.",
-          "type": "string",
-          "readOnly": true
-        },
-        "verb": {
-          "description": "Output only. Name of the verb executed by the operation.",
-          "type": "string",
-          "readOnly": true
-        },
         "statusMessage": {
-          "description": "Output only. Human-readable status of the operation, if any.",
           "readOnly": true,
-          "type": "string"
-        },
-        "endTime": {
-          "format": "google-datetime",
-          "description": "Output only. The time the operation finished running.",
-          "readOnly": true,
-          "type": "string"
+          "type": "string",
+          "description": "Output only. Human-readable status of the operation, if any."
         }
       },
       "type": "object"
-    },
-    "StorageDirectoryMapping": {
-      "description": "Mapping of backing Cloud Storage path to the directory where the user lands in the SFTP server. If directory is not specified, it'll default to '/'. Eg 1 - (bucket_name: bucket, bucket_prefix: path1/path2, directory: /abc/def/username) The user will land at /abcd/def/username, and the view there will match that of /bucket/path1/path2. The user will not be aware of Cloud Storage prefix '/bucket/path1' and there will be no such directory in the view. Eg 2 - (bucket_name: bucket, bucket_prefix: path1/path2, directory: '') The user will land at '/', and the view there will match that of /bucket/path1/path2. The user will not be aware of Cloud Storage prefix '/bucket/path1/path2' and there will be no such directory in the view.",
-      "id": "StorageDirectoryMapping",
-      "properties": {
-        "permission": {
-          "type": "string",
-          "enum": [
-            "PERMISSION_UNSPECIFIED",
-            "READ_ONLY",
-            "READ_WRITE"
-          ],
-          "description": "Required. Permission to the bucket.",
-          "enumDescriptions": [
-            "Permission unspecified.",
-            "Read only permission.",
-            "Read write permission."
-          ]
-        },
-        "directory": {
-          "type": "string",
-          "description": "Required. Directory where the user lands in the SFTP server."
-        },
-        "bucket": {
-          "type": "string",
-          "description": "Required. Name of the bucket."
-        },
-        "bucketPrefix": {
-          "type": "string",
-          "description": "Optional. Prefix inside the bucket."
-        }
-      },
-      "type": "object"
-    },
-    "User": {
-      "properties": {
-        "userCredentials": {
-          "type": "array",
-          "items": {
-            "$ref": "UserCredential"
-          },
-          "description": "Required. User credential for the user. The maximum number of user credentials is 10."
-        },
-        "name": {
-          "description": "Identifier. User-friendly name via which User will be identified. projects/{project}/locations/{location}/servers/{server}/users/{user}",
-          "type": "string"
-        },
-        "createTime": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "Output only. [Output only] Create time stamp",
-          "readOnly": true
-        },
-        "storageDirectoryMappings": {
-          "items": {
-            "$ref": "StorageDirectoryMapping"
-          },
-          "description": "Required. Mapping of Cloud Storage buckets to directories where the user will land in the SFTP server.",
-          "type": "array"
-        },
-        "state": {
-          "enumDescriptions": [
-            "State unspecified.",
-            "User is being created.",
-            "User is ready to be used.",
-            "User creation failed.",
-            "The resource is being updated.",
-            "The resource is being deleted."
-          ],
-          "description": "Output only. Tracks user creation.",
-          "readOnly": true,
-          "enum": [
-            "STATE_UNSPECIFIED",
-            "CREATING",
-            "ACTIVE",
-            "ERROR",
-            "UPDATING",
-            "DELETING"
-          ],
-          "type": "string"
-        },
-        "updateTime": {
-          "format": "google-datetime",
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. [Output only] Update time stamp"
-        },
-        "username": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. [Output only] The username of the user."
-        },
-        "labels": {
-          "type": "object",
-          "description": "Optional. Labels as key value pairs",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "customerServiceAccount": {
-          "description": "Required. Service account in customer project attached to this SFTP User.",
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "description": "Message describing User object",
-      "id": "User"
-    },
-    "ListUsersResponse": {
-      "description": "Message for response to listing Users",
-      "type": "object",
-      "properties": {
-        "users": {
-          "description": "The list of User",
-          "type": "array",
-          "items": {
-            "$ref": "User"
-          }
-        },
-        "unreachable": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Unordered list. Locations that could not be reached."
-        },
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token identifying a page of results the user should return."
-        }
-      },
-      "id": "ListUsersResponse"
-    },
-    "CancelOperationRequest": {
-      "type": "object",
-      "properties": {},
-      "description": "The request message for Operations.CancelOperation.",
-      "id": "CancelOperationRequest"
-    },
-    "Operation": {
-      "properties": {
-        "metadata": {
-          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
-          "type": "object",
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          }
-        },
-        "error": {
-          "description": "The error result of the operation in case of failure or cancellation.",
-          "$ref": "Status"
-        },
-        "done": {
-          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
-          "type": "boolean"
-        },
-        "response": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`."
-        },
-        "name": {
-          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
-          "type": "string"
-        }
-      },
-      "id": "Operation",
-      "type": "object",
-      "description": "This resource represents a long-running operation that is the result of a network API call."
-    },
-    "Empty": {
-      "type": "object",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
-      "id": "Empty",
-      "properties": {}
     },
     "StartServerRequest": {
       "properties": {},
       "description": "Request message for starting a Server.",
-      "type": "object",
-      "id": "StartServerRequest"
-    },
-    "ListLocationsResponse": {
-      "id": "ListLocationsResponse",
-      "type": "object",
-      "properties": {
-        "locations": {
-          "items": {
-            "$ref": "Location"
-          },
-          "type": "array",
-          "description": "A list of locations that matches the specified filter in the request."
-        },
-        "nextPageToken": {
-          "description": "The standard List next-page token.",
-          "type": "string"
-        }
-      },
-      "description": "The response message for Locations.ListLocations."
-    },
-    "InternalServerConfig": {
-      "description": "Configuration for private server accessible via PSC.",
-      "properties": {
-        "pscEndpoints": {
-          "description": "Output only. Details of endpoints created by the customer.",
-          "readOnly": true,
-          "items": {
-            "$ref": "PscEndpoint"
-          },
-          "type": "array"
-        },
-        "consumerAcceptList": {
-          "items": {
-            "$ref": "AllowedConsumer"
-          },
-          "type": "array",
-          "description": "Required. A list of projects that are permitted to connect. At least one project is required in the allow list."
-        },
-        "consumerRejectList": {
-          "items": {
-            "$ref": "DeniedConsumer"
-          },
-          "description": "Optional. A list of projects that are denied connection. Format: \"projects/sample_project_id\" or \"projects/1234567890\" Projects in this list will be denied access, even if they are included in the `allow_list`. If this list is empty, no projects are explicitly rejected.",
-          "type": "array"
-        },
-        "serviceAttachment": {
-          "type": "string",
-          "description": "Output only. The resource name of the service attachment. Format: `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`",
-          "readOnly": true
-        }
-      },
-      "id": "InternalServerConfig",
+      "id": "StartServerRequest",
       "type": "object"
     },
-    "StopServerRequest": {
-      "description": "Request message for stopping a Server.",
-      "properties": {},
+    "Operation": {
       "type": "object",
-      "id": "StopServerRequest"
-    }
-  },
-  "auth": {
-    "oauth2": {
-      "scopes": {
-        "https://www.googleapis.com/auth/cloud-platform": {
-          "description": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
+      "description": "This resource represents a long-running operation that is the result of a network API call.",
+      "id": "Operation",
+      "properties": {
+        "metadata": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
+          "type": "object"
+        },
+        "name": {
+          "type": "string",
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
+        },
+        "error": {
+          "$ref": "Status",
+          "description": "The error result of the operation in case of failure or cancellation."
+        },
+        "done": {
+          "type": "boolean",
+          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available."
+        },
+        "response": {
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          }
         }
       }
+    },
+    "StopServerRequest": {
+      "properties": {},
+      "id": "StopServerRequest",
+      "description": "Request message for stopping a Server.",
+      "type": "object"
     }
   },
-  "protocol": "rest",
+  "title": "Cloud FTP API",
   "version": "v1",
+  "servicePath": "",
+  "discoveryVersion": "v1",
+  "name": "ftp",
+  "mtlsRootUrl": "https://ftp.mtls.googleapis.com/",
+  "description": "A managed, cloud-native solution to move data in and out of Google Cloud by using SSH File Transfer Protocol (SFTP).",
+  "batchPath": "batch",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "kind": "discovery#restDescription",
+  "documentationLink": "https://docs.cloud.google.com/cloud-ftp",
   "resources": {
     "projects": {
       "resources": {
         "locations": {
+          "methods": {
+            "list": {
+              "description": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "parameters": {
+                "name": {
+                  "description": "The resource that owns the locations collection, if applicable.",
+                  "pattern": "^projects/[^/]+$",
+                  "location": "path",
+                  "required": true,
+                  "type": "string"
+                },
+                "pageToken": {
+                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page.",
+                  "type": "string",
+                  "location": "query"
+                },
+                "extraLocationTypes": {
+                  "description": "Optional. Do not use this field unless explicitly documented otherwise. This is primarily for internal usage.",
+                  "location": "query",
+                  "type": "string",
+                  "repeated": true
+                },
+                "pageSize": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The maximum number of results to return. If not set, the service selects a default.",
+                  "location": "query"
+                },
+                "filter": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160)."
+                }
+              },
+              "flatPath": "v1/projects/{projectsId}/locations",
+              "id": "ftp.projects.locations.list",
+              "parameterOrder": [
+                "name"
+              ],
+              "response": {
+                "$ref": "ListLocationsResponse"
+              },
+              "path": "v1/{+name}/locations",
+              "httpMethod": "GET"
+            },
+            "get": {
+              "response": {
+                "$ref": "Location"
+              },
+              "httpMethod": "GET",
+              "parameterOrder": [
+                "name"
+              ],
+              "description": "Gets information about a location.",
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "description": "Resource name for the location.",
+                  "pattern": "^projects/[^/]+/locations/[^/]+$",
+                  "location": "path",
+                  "required": true
+                }
+              },
+              "path": "v1/{+name}",
+              "id": "ftp.projects.locations.get",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}"
+            }
+          },
           "resources": {
             "operations": {
               "methods": {
-                "cancel": {
-                  "httpMethod": "POST",
-                  "id": "ftp.projects.locations.operations.cancel",
-                  "path": "v1/{+name}:cancel",
-                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+                "list": {
                   "scopes": [
                     "https://www.googleapis.com/auth/cloud-platform"
                   ],
+                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
                   "parameters": {
                     "name": {
-                      "description": "The name of the operation resource to be cancelled.",
+                      "description": "The name of the operation's parent resource.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
                       "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
                       "required": true,
                       "type": "string"
-                    }
-                  },
-                  "response": {
-                    "$ref": "Empty"
-                  },
-                  "request": {
-                    "$ref": "CancelOperationRequest"
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
-                  "parameterOrder": [
-                    "name"
-                  ]
-                },
-                "delete": {
-                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
-                  "httpMethod": "DELETE",
-                  "response": {
-                    "$ref": "Empty"
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "id": "ftp.projects.locations.operations.delete",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "path": "v1/{+name}",
-                  "parameters": {
-                    "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "description": "The name of the operation resource to be deleted.",
-                      "required": true,
-                      "type": "string",
-                      "location": "path"
-                    }
-                  }
-                },
-                "get": {
-                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "httpMethod": "GET",
-                  "id": "ftp.projects.locations.operations.get",
-                  "path": "v1/{+name}",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "location": "path",
-                      "required": true,
-                      "type": "string",
-                      "description": "The name of the operation resource."
-                    }
-                  }
-                },
-                "list": {
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "parameters": {
+                    },
                     "pageSize": {
                       "description": "The standard list page size.",
-                      "type": "integer",
                       "format": "int32",
-                      "location": "query"
-                    },
-                    "pageToken": {
                       "location": "query",
-                      "type": "string",
-                      "description": "The standard list page token."
-                    },
-                    "returnPartialSuccess": {
-                      "type": "boolean",
-                      "location": "query",
-                      "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation."
+                      "type": "integer"
                     },
                     "filter": {
                       "location": "query",
-                      "type": "string",
-                      "description": "The standard list filter."
+                      "description": "The standard list filter.",
+                      "type": "string"
                     },
-                    "name": {
-                      "description": "The name of the operation's parent resource.",
-                      "type": "string",
-                      "required": true,
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+$"
+                    "pageToken": {
+                      "location": "query",
+                      "description": "The standard list page token.",
+                      "type": "string"
+                    },
+                    "returnPartialSuccess": {
+                      "location": "query",
+                      "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation.",
+                      "type": "boolean"
                     }
                   },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations",
+                  "path": "v1/{+name}/operations",
                   "response": {
                     "$ref": "ListOperationsResponse"
                   },
+                  "id": "ftp.projects.locations.operations.list",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "httpMethod": "GET"
+                },
+                "get": {
+                  "httpMethod": "GET",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
                   "scopes": [
                     "https://www.googleapis.com/auth/cloud-platform"
                   ],
-                  "id": "ftp.projects.locations.operations.list",
-                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
-                  "path": "v1/{+name}/operations",
-                  "httpMethod": "GET"
+                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+                  "id": "ftp.projects.locations.operations.get",
+                  "parameters": {
+                    "name": {
+                      "description": "The name of the operation resource.",
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+                    }
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "path": "v1/{+name}",
+                  "response": {
+                    "$ref": "Operation"
+                  }
+                },
+                "cancel": {
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
+                  "request": {
+                    "$ref": "CancelOperationRequest"
+                  },
+                  "httpMethod": "POST",
+                  "id": "ftp.projects.locations.operations.cancel",
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "required": true,
+                      "description": "The name of the operation resource to be cancelled.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "type": "string"
+                    }
+                  },
+                  "path": "v1/{+name}:cancel"
+                },
+                "delete": {
+                  "response": {
+                    "$ref": "Empty"
+                  },
+                  "id": "ftp.projects.locations.operations.delete",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "path": "v1/{+name}",
+                  "parameters": {
+                    "name": {
+                      "description": "The name of the operation resource to be deleted.",
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+                    }
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "httpMethod": "DELETE",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
+                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`."
                 }
               }
             },
             "servers": {
-              "methods": {
-                "list": {
-                  "id": "ftp.projects.locations.servers.list",
-                  "httpMethod": "GET",
-                  "parameterOrder": [
-                    "parent"
-                  ],
-                  "path": "v1/{+parent}/servers",
-                  "description": "Lists Servers in a given project and location.",
-                  "parameters": {
-                    "orderBy": {
-                      "description": "Optional. Hint for how to order the results",
-                      "type": "string",
-                      "location": "query"
-                    },
-                    "view": {
-                      "enum": [
-                        "SERVER_VIEW_UNSPECIFIED",
-                        "SERVER_VIEW_BASIC",
-                        "SERVER_VIEW_FULL"
-                      ],
-                      "type": "string",
-                      "enumDescriptions": [
-                        "Default value. Equivalent to SERVER_VIEW_BASIC.",
-                        "Basic view. Excludes heavy configurations (internal_config, external_config, google_managed_server_credential).",
-                        "Full view. Includes all fields."
-                      ],
-                      "location": "query",
-                      "description": "Optional. The view of the Server resource to return."
-                    },
-                    "parent": {
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "location": "path",
-                      "description": "Required. Parent value for ListServersRequest",
-                      "type": "string"
-                    },
-                    "filter": {
-                      "description": "Optional. Filtering results",
-                      "type": "string",
-                      "location": "query"
-                    },
-                    "pageSize": {
-                      "type": "integer",
-                      "format": "int32",
-                      "location": "query",
-                      "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default."
-                    },
-                    "pageToken": {
-                      "type": "string",
-                      "description": "Optional. A token identifying a page of results the server should return.",
-                      "location": "query"
-                    }
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers",
-                  "response": {
-                    "$ref": "ListServersResponse"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ]
-                },
-                "get": {
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
-                  "httpMethod": "GET",
-                  "path": "v1/{+name}",
-                  "description": "Gets details of a single Server.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Server"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                      "location": "path",
-                      "description": "Required. Name of the resource",
-                      "required": true,
-                      "type": "string"
-                    },
-                    "view": {
-                      "type": "string",
-                      "description": "Optional. The view of the Server resource to return.",
-                      "enum": [
-                        "SERVER_VIEW_UNSPECIFIED",
-                        "SERVER_VIEW_BASIC",
-                        "SERVER_VIEW_FULL"
-                      ],
-                      "location": "query",
-                      "enumDescriptions": [
-                        "Default value. Equivalent to SERVER_VIEW_BASIC.",
-                        "Basic view. Excludes heavy configurations (internal_config, external_config, google_managed_server_credential).",
-                        "Full view. Includes all fields."
-                      ]
-                    }
-                  },
-                  "id": "ftp.projects.locations.servers.get"
-                },
-                "stop": {
-                  "request": {
-                    "$ref": "StopServerRequest"
-                  },
-                  "httpMethod": "POST",
-                  "description": "Stops an active Server.",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}:stop",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "id": "ftp.projects.locations.servers.stop",
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                      "required": true,
-                      "description": "Required. Name of the resource. Format: `projects/{project}/locations/{location}/servers/{server}`"
-                    }
-                  },
-                  "path": "v1/{+name}:stop"
-                },
-                "start": {
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                      "required": true,
-                      "type": "string",
-                      "description": "Required. Name of the resource Format: `projects/{project}/locations/{location}/servers/{server}`"
-                    }
-                  },
-                  "id": "ftp.projects.locations.servers.start",
-                  "request": {
-                    "$ref": "StartServerRequest"
-                  },
-                  "description": "Starts a stopping/stopped Server.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "httpMethod": "POST",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "path": "v1/{+name}:start",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}:start"
-                },
-                "delete": {
-                  "httpMethod": "DELETE",
-                  "id": "ftp.projects.locations.servers.delete",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                      "type": "string",
-                      "required": true,
-                      "description": "Required. Name of the resource"
-                    }
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "description": "Deletes a single Server.",
-                  "path": "v1/{+name}",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
-                  "parameterOrder": [
-                    "name"
-                  ]
-                },
-                "patch": {
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "id": "ftp.projects.locations.servers.patch",
-                  "httpMethod": "PATCH",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
-                  "request": {
-                    "$ref": "Server"
-                  },
-                  "description": "Updates the parameters of a single Server.",
-                  "parameters": {
-                    "requestId": {
-                      "type": "string",
-                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
-                      "location": "query"
-                    },
-                    "name": {
-                      "description": "Identifier. name of resource",
-                      "required": true,
-                      "type": "string",
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$"
-                    },
-                    "updateMask": {
-                      "type": "string",
-                      "format": "google-fieldmask",
-                      "location": "query",
-                      "description": "Optional. Field mask is used to specify the fields to be overwritten in the Server resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten."
-                    }
-                  },
-                  "path": "v1/{+name}"
-                },
-                "create": {
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers",
-                  "id": "ftp.projects.locations.servers.create",
-                  "parameterOrder": [
-                    "parent"
-                  ],
-                  "description": "Creates a new Server in a given project and location.",
-                  "httpMethod": "POST",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "request": {
-                    "$ref": "Server"
-                  },
-                  "path": "v1/{+parent}/servers",
-                  "parameters": {
-                    "serverId": {
-                      "location": "query",
-                      "description": "Required. A unique ID for the server. Must start with a lowercase letter, and end with a lowercase letter or number. Can contain lowercase letters, numbers, and hyphens. Maximum length is 30 characters.",
-                      "type": "string"
-                    },
-                    "parent": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "type": "string",
-                      "location": "path",
-                      "required": true,
-                      "description": "Required. Value for parent."
-                    },
-                    "requestId": {
-                      "type": "string",
-                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
-                      "location": "query"
-                    }
-                  }
-                }
-              },
               "resources": {
                 "users": {
                   "methods": {
-                    "get": {
-                      "description": "Gets details of a single User.",
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users/{usersId}",
-                      "httpMethod": "GET",
-                      "response": {
-                        "$ref": "User"
-                      },
-                      "parameterOrder": [
-                        "name"
-                      ],
-                      "path": "v1/{+name}",
-                      "id": "ftp.projects.locations.servers.users.get",
+                    "list": {
+                      "id": "ftp.projects.locations.servers.users.list",
                       "parameters": {
-                        "view": {
-                          "description": "Optional. The view of the User resource to return.",
-                          "location": "query",
+                        "pageToken": {
                           "type": "string",
+                          "location": "query",
+                          "description": "Optional. A token identifying a page of results the user should return."
+                        },
+                        "pageSize": {
+                          "format": "int32",
+                          "location": "query",
+                          "type": "integer",
+                          "description": "Optional. Requested page size. User may return fewer items than requested. The maximum value is 1000; The default value is 50 if the field is omitted (or set to 0)."
+                        },
+                        "view": {
+                          "location": "query",
                           "enum": [
                             "USER_VIEW_UNSPECIFIED",
                             "USER_VIEW_BASIC",
@@ -1053,111 +880,72 @@
                             "Default value. Equivalent to USER_VIEW_BASIC.",
                             "Basic view. Excludes heavy configurations (user_credentials, storage_directory_mappings).",
                             "Full view. Includes all fields."
-                          ]
-                        },
-                        "name": {
-                          "description": "Required. Name of the resource",
+                          ],
                           "type": "string",
-                          "required": true,
+                          "description": "Optional. The view of the User resource to return."
+                        },
+                        "filter": {
+                          "location": "query",
+                          "type": "string",
+                          "description": "Optional. Filtering results"
+                        },
+                        "parent": {
+                          "description": "Required. Parent value for ListUsersRequest",
+                          "type": "string",
                           "location": "path",
-                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$"
+                          "required": true,
+                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$"
+                        },
+                        "orderBy": {
+                          "type": "string",
+                          "location": "query",
+                          "description": "Optional. Hint for how to order the results"
                         }
                       },
+                      "parameterOrder": [
+                        "parent"
+                      ],
+                      "response": {
+                        "$ref": "ListUsersResponse"
+                      },
+                      "description": "Lists Users in a given project and location.",
+                      "httpMethod": "GET",
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users",
+                      "path": "v1/{+parent}/users",
                       "scopes": [
                         "https://www.googleapis.com/auth/cloud-platform"
                       ]
                     },
                     "patch": {
-                      "path": "v1/{+name}",
-                      "response": {
-                        "$ref": "Operation"
-                      },
-                      "description": "Updates the parameters of a single User.",
-                      "id": "ftp.projects.locations.servers.users.patch",
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
                       "parameterOrder": [
                         "name"
                       ],
+                      "description": "Updates the parameters of a single User.",
+                      "parameters": {
+                        "updateMask": {
+                          "location": "query",
+                          "format": "google-fieldmask",
+                          "description": "Optional. Field mask is used to specify the fields to be overwritten in the User resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten.",
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string",
+                          "location": "path",
+                          "required": true,
+                          "description": "Identifier. User-friendly name via which User will be identified. projects/{project}/locations/{location}/servers/{server}/users/{user}",
+                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$"
+                        }
+                      },
                       "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users/{usersId}",
-                      "httpMethod": "PATCH",
+                      "id": "ftp.projects.locations.servers.users.patch",
                       "request": {
                         "$ref": "User"
                       },
-                      "parameters": {
-                        "name": {
-                          "description": "Identifier. User-friendly name via which User will be identified. projects/{project}/locations/{location}/servers/{server}/users/{user}",
-                          "type": "string",
-                          "required": true,
-                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$",
-                          "location": "path"
-                        },
-                        "updateMask": {
-                          "format": "google-fieldmask",
-                          "type": "string",
-                          "description": "Optional. Field mask is used to specify the fields to be overwritten in the User resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten.",
-                          "location": "query"
-                        }
-                      }
-                    },
-                    "list": {
-                      "path": "v1/{+parent}/users",
-                      "parameterOrder": [
-                        "parent"
-                      ],
-                      "parameters": {
-                        "view": {
-                          "enumDescriptions": [
-                            "Default value. Equivalent to USER_VIEW_BASIC.",
-                            "Basic view. Excludes heavy configurations (user_credentials, storage_directory_mappings).",
-                            "Full view. Includes all fields."
-                          ],
-                          "enum": [
-                            "USER_VIEW_UNSPECIFIED",
-                            "USER_VIEW_BASIC",
-                            "USER_VIEW_FULL"
-                          ],
-                          "description": "Optional. The view of the User resource to return.",
-                          "type": "string",
-                          "location": "query"
-                        },
-                        "pageToken": {
-                          "description": "Optional. A token identifying a page of results the user should return.",
-                          "type": "string",
-                          "location": "query"
-                        },
-                        "filter": {
-                          "type": "string",
-                          "description": "Optional. Filtering results",
-                          "location": "query"
-                        },
-                        "orderBy": {
-                          "location": "query",
-                          "description": "Optional. Hint for how to order the results",
-                          "type": "string"
-                        },
-                        "pageSize": {
-                          "type": "integer",
-                          "description": "Optional. Requested page size. User may return fewer items than requested. The maximum value is 1000; The default value is 50 if the field is omitted (or set to 0).",
-                          "format": "int32",
-                          "location": "query"
-                        },
-                        "parent": {
-                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                          "type": "string",
-                          "description": "Required. Parent value for ListUsersRequest",
-                          "location": "path",
-                          "required": true
-                        }
-                      },
-                      "description": "Lists Users in a given project and location.",
-                      "id": "ftp.projects.locations.servers.users.list",
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users",
                       "response": {
-                        "$ref": "ListUsersResponse"
+                        "$ref": "Operation"
                       },
-                      "httpMethod": "GET",
+                      "path": "v1/{+name}",
+                      "httpMethod": "PATCH",
                       "scopes": [
                         "https://www.googleapis.com/auth/cloud-platform"
                       ]
@@ -1166,55 +954,92 @@
                       "parameterOrder": [
                         "parent"
                       ],
-                      "description": "Creates a new User in a given project and location and Server.",
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users",
+                      "path": "v1/{+parent}/users",
+                      "httpMethod": "POST",
+                      "id": "ftp.projects.locations.servers.users.create",
                       "request": {
                         "$ref": "User"
                       },
-                      "httpMethod": "POST",
-                      "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform"
-                      ],
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users",
-                      "response": {
-                        "$ref": "Operation"
-                      },
-                      "path": "v1/{+parent}/users",
+                      "description": "Creates a new User in a given project and location and Server.",
                       "parameters": {
-                        "userId": {
-                          "description": "Required. A unique user ID for the SFTP user. The user ID must start with a lowercase letter and can include lowercase letters, numbers, or hyphens.",
-                          "type": "string",
-                          "location": "query"
-                        },
-                        "parent": {
-                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
-                          "type": "string",
-                          "location": "path",
-                          "required": true,
-                          "description": "Required. Value for parent."
-                        },
                         "requestId": {
                           "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
                           "location": "query",
                           "type": "string"
+                        },
+                        "userId": {
+                          "location": "query",
+                          "type": "string",
+                          "description": "Required. A unique user ID for the SFTP user. The user ID must start with a lowercase letter and can include lowercase letters, numbers, or hyphens."
+                        },
+                        "parent": {
+                          "type": "string",
+                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
+                          "description": "Required. Value for parent.",
+                          "location": "path",
+                          "required": true
                         }
-                      },
-                      "id": "ftp.projects.locations.servers.users.create"
-                    },
-                    "delete": {
-                      "parameterOrder": [
-                        "name"
-                      ],
-                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users/{usersId}",
-                      "httpMethod": "DELETE",
-                      "path": "v1/{+name}",
-                      "response": {
-                        "$ref": "Operation"
                       },
                       "scopes": [
                         "https://www.googleapis.com/auth/cloud-platform"
                       ],
+                      "response": {
+                        "$ref": "Operation"
+                      }
+                    },
+                    "get": {
+                      "parameters": {
+                        "view": {
+                          "description": "Optional. The view of the User resource to return.",
+                          "enum": [
+                            "USER_VIEW_UNSPECIFIED",
+                            "USER_VIEW_BASIC",
+                            "USER_VIEW_FULL"
+                          ],
+                          "location": "query",
+                          "enumDescriptions": [
+                            "Default value. Equivalent to USER_VIEW_BASIC.",
+                            "Basic view. Excludes heavy configurations (user_credentials, storage_directory_mappings).",
+                            "Full view. Includes all fields."
+                          ],
+                          "type": "string"
+                        },
+                        "name": {
+                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$",
+                          "description": "Required. Name of the resource",
+                          "type": "string",
+                          "location": "path",
+                          "required": true
+                        }
+                      },
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users/{usersId}",
+                      "id": "ftp.projects.locations.servers.users.get",
+                      "parameterOrder": [
+                        "name"
+                      ],
+                      "description": "Gets details of a single User.",
+                      "httpMethod": "GET",
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
+                      "response": {
+                        "$ref": "User"
+                      },
+                      "path": "v1/{+name}"
+                    },
+                    "delete": {
+                      "response": {
+                        "$ref": "Operation"
+                      },
                       "description": "Deletes a single User.",
-                      "id": "ftp.projects.locations.servers.users.delete",
+                      "parameterOrder": [
+                        "name"
+                      ],
+                      "httpMethod": "DELETE",
+                      "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform"
+                      ],
                       "parameters": {
                         "force": {
                           "location": "query",
@@ -1222,191 +1047,366 @@
                           "description": "Optional. If set to true, the request will force the deletion of the User."
                         },
                         "name": {
+                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$",
                           "location": "path",
-                          "description": "Required. Name of the resource",
-                          "type": "string",
                           "required": true,
-                          "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+/users/[^/]+$"
+                          "description": "Required. Name of the resource",
+                          "type": "string"
                         }
-                      }
+                      },
+                      "path": "v1/{+name}",
+                      "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}/users/{usersId}",
+                      "id": "ftp.projects.locations.servers.users.delete"
                     }
                   }
                 }
+              },
+              "methods": {
+                "get": {
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
+                      "type": "string",
+                      "location": "path",
+                      "required": true,
+                      "description": "Required. Name of the resource"
+                    },
+                    "view": {
+                      "location": "query",
+                      "type": "string",
+                      "description": "Optional. The view of the Server resource to return.",
+                      "enum": [
+                        "SERVER_VIEW_UNSPECIFIED",
+                        "SERVER_VIEW_BASIC",
+                        "SERVER_VIEW_FULL"
+                      ],
+                      "enumDescriptions": [
+                        "Default value. Equivalent to SERVER_VIEW_BASIC.",
+                        "Basic view. Excludes heavy configurations (internal_config, external_config, google_managed_server_credential).",
+                        "Full view. Includes all fields."
+                      ]
+                    }
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "response": {
+                    "$ref": "Server"
+                  },
+                  "description": "Gets details of a single Server.",
+                  "id": "ftp.projects.locations.servers.get",
+                  "path": "v1/{+name}",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "GET"
+                },
+                "stop": {
+                  "description": "Stops an active Server.",
+                  "httpMethod": "POST",
+                  "id": "ftp.projects.locations.servers.stop",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
+                      "location": "path",
+                      "required": true,
+                      "description": "Required. Name of the resource. Format: `projects/{project}/locations/{location}/servers/{server}`"
+                    }
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}:stop",
+                  "request": {
+                    "$ref": "StopServerRequest"
+                  },
+                  "path": "v1/{+name}:stop",
+                  "parameterOrder": [
+                    "name"
+                  ]
+                },
+                "list": {
+                  "response": {
+                    "$ref": "ListServersResponse"
+                  },
+                  "parameters": {
+                    "pageSize": {
+                      "format": "int32",
+                      "type": "integer",
+                      "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, server will pick an appropriate default.",
+                      "location": "query"
+                    },
+                    "parent": {
+                      "description": "Required. Parent value for ListServersRequest",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "location": "path",
+                      "required": true,
+                      "type": "string"
+                    },
+                    "filter": {
+                      "type": "string",
+                      "description": "Optional. Filtering results",
+                      "location": "query"
+                    },
+                    "view": {
+                      "enum": [
+                        "SERVER_VIEW_UNSPECIFIED",
+                        "SERVER_VIEW_BASIC",
+                        "SERVER_VIEW_FULL"
+                      ],
+                      "description": "Optional. The view of the Server resource to return.",
+                      "location": "query",
+                      "enumDescriptions": [
+                        "Default value. Equivalent to SERVER_VIEW_BASIC.",
+                        "Basic view. Excludes heavy configurations (internal_config, external_config, google_managed_server_credential).",
+                        "Full view. Includes all fields."
+                      ],
+                      "type": "string"
+                    },
+                    "pageToken": {
+                      "location": "query",
+                      "type": "string",
+                      "description": "Optional. A token identifying a page of results the server should return."
+                    },
+                    "orderBy": {
+                      "description": "Optional. Hint for how to order the results",
+                      "type": "string",
+                      "location": "query"
+                    }
+                  },
+                  "path": "v1/{+parent}/servers",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "id": "ftp.projects.locations.servers.list",
+                  "httpMethod": "GET",
+                  "description": "Lists Servers in a given project and location.",
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers"
+                },
+                "create": {
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "path": "v1/{+parent}/servers",
+                  "description": "Creates a new Server in a given project and location.",
+                  "request": {
+                    "$ref": "Server"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers",
+                  "parameters": {
+                    "serverId": {
+                      "description": "Required. A unique ID for the server. Must start with a lowercase letter, and end with a lowercase letter or number. Can contain lowercase letters, numbers, and hyphens. Maximum length is 30 characters.",
+                      "location": "query",
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "location": "query",
+                      "type": "string",
+                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000)."
+                    },
+                    "parent": {
+                      "type": "string",
+                      "description": "Required. Value for parent.",
+                      "location": "path",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+$"
+                    }
+                  },
+                  "id": "ftp.projects.locations.servers.create",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "httpMethod": "POST"
+                },
+                "patch": {
+                  "id": "ftp.projects.locations.servers.patch",
+                  "parameters": {
+                    "updateMask": {
+                      "format": "google-fieldmask",
+                      "description": "Optional. Field mask is used to specify the fields to be overwritten in the Server resource by the update. The fields specified in the update_mask are relative to the resource, not the full request. A field will be overwritten if it is in the mask. If the user does not provide a mask then all fields present in the request will be overwritten.",
+                      "location": "query",
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+                      "type": "string",
+                      "location": "query"
+                    },
+                    "name": {
+                      "description": "Identifier. name of resource",
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$"
+                    }
+                  },
+                  "path": "v1/{+name}",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
+                  "description": "Updates the parameters of a single Server.",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "PATCH",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "request": {
+                    "$ref": "Server"
+                  }
+                },
+                "start": {
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "request": {
+                    "$ref": "StartServerRequest"
+                  },
+                  "id": "ftp.projects.locations.servers.start",
+                  "path": "v1/{+name}:start",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}:start",
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
+                      "description": "Required. Name of the resource Format: `projects/{project}/locations/{location}/servers/{server}`"
+                    }
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "httpMethod": "POST",
+                  "description": "Starts a stopping/stopped Server."
+                },
+                "delete": {
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/servers/[^/]+$",
+                      "description": "Required. Name of the resource",
+                      "type": "string",
+                      "location": "path",
+                      "required": true
+                    }
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/servers/{serversId}",
+                  "id": "ftp.projects.locations.servers.delete",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "httpMethod": "DELETE",
+                  "path": "v1/{+name}",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "description": "Deletes a single Server."
+                }
               }
-            }
-          },
-          "methods": {
-            "get": {
-              "description": "Gets information about a location.",
-              "httpMethod": "GET",
-              "parameterOrder": [
-                "name"
-              ],
-              "path": "v1/{+name}",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}",
-              "parameters": {
-                "name": {
-                  "description": "Resource name for the location.",
-                  "pattern": "^projects/[^/]+/locations/[^/]+$",
-                  "location": "path",
-                  "type": "string",
-                  "required": true
-                }
-              },
-              "response": {
-                "$ref": "Location"
-              },
-              "id": "ftp.projects.locations.get"
-            },
-            "list": {
-              "parameters": {
-                "name": {
-                  "required": true,
-                  "pattern": "^projects/[^/]+$",
-                  "description": "The resource that owns the locations collection, if applicable.",
-                  "type": "string",
-                  "location": "path"
-                },
-                "extraLocationTypes": {
-                  "repeated": true,
-                  "type": "string",
-                  "description": "Optional. Do not use this field unless explicitly documented otherwise. This is primarily for internal usage.",
-                  "location": "query"
-                },
-                "filter": {
-                  "location": "query",
-                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).",
-                  "type": "string"
-                },
-                "pageSize": {
-                  "description": "The maximum number of results to return. If not set, the service selects a default.",
-                  "location": "query",
-                  "format": "int32",
-                  "type": "integer"
-                },
-                "pageToken": {
-                  "location": "query",
-                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page.",
-                  "type": "string"
-                }
-              },
-              "flatPath": "v1/projects/{projectsId}/locations",
-              "response": {
-                "$ref": "ListLocationsResponse"
-              },
-              "path": "v1/{+name}/locations",
-              "description": "Lists information about the supported locations for this service. This method lists locations based on the resource scope provided in the ListLocationsRequest.name field: * **Global locations**: If `name` is empty, the method lists the public locations available to all projects. * **Project-specific locations**: If `name` follows the format `projects/{project}`, the method lists locations visible to that specific project. This includes public, private, or other project-specific locations enabled for the project. For gRPC and client library implementations, the resource name is passed as the `name` field. For direct service calls, the resource name is incorporated into the request path based on the specific service implementation and version.",
-              "httpMethod": "GET",
-              "id": "ftp.projects.locations.list",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "parameterOrder": [
-                "name"
-              ]
             }
           }
         }
       }
     }
   },
-  "ownerName": "Google",
-  "mtlsRootUrl": "https://ftp.mtls.googleapis.com/",
   "revision": "20260904",
-  "documentationLink": "https://docs.cloud.google.com/cloud-ftp",
-  "kind": "discovery#restDescription",
-  "version_module": true,
-  "servicePath": "",
-  "basePath": "",
-  "fullyEncodeReservedExpansion": true,
-  "canonicalName": "Cloud FTP",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
   "parameters": {
+    "uploadType": {
+      "location": "query",
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
+    },
+    "oauth_token": {
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user.",
+      "type": "string"
+    },
+    "callback": {
+      "type": "string",
+      "description": "JSONP",
+      "location": "query"
+    },
+    "quotaUser": {
+      "location": "query",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "type": "string"
+    },
     "alt": {
+      "description": "Data format for response.",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "default": "json",
       "enumDescriptions": [
         "Responses with Content-Type of application/json",
         "Media download with context-dependent Content-Type",
         "Responses with Content-Type of application/x-protobuf"
       ],
       "location": "query",
-      "default": "json",
-      "type": "string",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "description": "Data format for response."
+      "type": "string"
     },
-    "access_token": {
+    "fields": {
       "location": "query",
       "type": "string",
-      "description": "OAuth access token."
+      "description": "Selector specifying which fields to include in a partial response."
     },
     "key": {
       "type": "string",
-      "location": "query",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "location": "query"
     },
-    "$.xgafv": {
-      "enum": [
-        "1",
-        "2"
-      ],
-      "type": "string",
+    "prettyPrint": {
       "location": "query",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "description": "V1 error format."
+      "default": "true",
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean"
     },
     "upload_protocol": {
       "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
       "type": "string",
       "location": "query"
     },
-    "callback": {
-      "description": "JSONP",
-      "type": "string",
-      "location": "query"
-    },
-    "uploadType": {
+    "access_token": {
+      "description": "OAuth access token.",
       "location": "query",
-      "type": "string",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
+      "type": "string"
     },
-    "fields": {
-      "description": "Selector specifying which fields to include in a partial response.",
-      "type": "string",
-      "location": "query"
-    },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "type": "string",
-      "location": "query"
-    },
-    "prettyPrint": {
-      "description": "Returns response with indentations and line breaks.",
-      "type": "boolean",
+    "$.xgafv": {
+      "description": "V1 error format.",
       "location": "query",
-      "default": "true"
-    },
-    "quotaUser": {
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
-      "location": "query"
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
     }
   },
-  "baseUrl": "https://ftp.googleapis.com/",
-  "description": "A managed, cloud-native solution to move data in and out of Google Cloud by using SSH File Transfer Protocol (SFTP).",
-  "name": "ftp",
-  "batchPath": "batch",
-  "title": "Cloud FTP API"
+  "basePath": "",
+  "protocol": "rest",
+  "baseUrl": "https://ftp.googleapis.com/"
 }
