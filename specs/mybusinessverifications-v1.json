@@ -1,271 +1,411 @@
 {
-  "protocol": "rest",
-  "version": "v1",
-  "version_module": true,
-  "fullyEncodeReservedExpansion": true,
-  "baseUrl": "https://mybusinessverifications.googleapis.com/",
-  "schemas": {
-    "FetchVerificationOptionsRequest": {
-      "type": "object",
-      "properties": {
-        "context": {
-          "$ref": "ServiceBusinessContext",
-          "description": "Optional. Extra context information for the verification of service businesses. Can only be applied to the locations whose business type is CUSTOMER_LOCATION_ONLY. Specifying an accurate address could enable more options. INVALID_ARGUMENT will be thrown if it is set for other business types of locations."
-        },
-        "languageCode": {
-          "type": "string",
-          "description": "Required. The BCP 47 language code representing the language that is to be used for the verification process. Available options vary by language."
-        }
-      },
-      "id": "FetchVerificationOptionsRequest",
-      "description": "Request message for Verifications.FetchVerificationOptions."
-    },
-    "VerificationOption": {
-      "id": "VerificationOption",
-      "properties": {
-        "emailData": {
-          "$ref": "EmailVerificationData",
-          "description": "Set only if the method is EMAIL."
-        },
-        "phoneNumber": {
-          "type": "string",
-          "description": "Set only if the method is PHONE_CALL or SMS. Phone number that the PIN will be sent to."
-        },
-        "announcement": {
-          "type": "string",
-          "description": "Set only if the method is VETTED_PARTNER."
-        },
-        "verificationMethod": {
-          "type": "string",
-          "description": "Method to verify the location.",
-          "enumDescriptions": [
-            "Default value, will result in errors.",
-            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
-            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
-            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Verify the location without additional user action. This option may not be available for all locations.",
-            "Verify the location via a trusted partner."
-          ],
-          "enum": [
-            "VERIFICATION_METHOD_UNSPECIFIED",
-            "ADDRESS",
-            "EMAIL",
-            "PHONE_CALL",
-            "SMS",
-            "AUTO",
-            "TRUSTED_PARTNER"
-          ]
-        },
-        "addressData": {
-          "description": "Set only if the method is MAIL.",
-          "$ref": "AddressVerificationData"
-        }
-      },
-      "description": "The verification option represents how to verify the location (indicated by verification method) and where the verification will be sent to (indicated by display data).",
-      "type": "object"
-    },
-    "VoiceOfMerchantState": {
-      "id": "VoiceOfMerchantState",
-      "type": "object",
-      "description": "Response message for VoiceOfMerchant.GetVoiceOfMerchantState.",
-      "properties": {
-        "waitForVoiceOfMerchant": {
-          "description": "Wait to gain Voice of Merchant. The location is under review for quality purposes.",
-          "$ref": "WaitForVoiceOfMerchant"
-        },
-        "hasVoiceOfMerchant": {
-          "description": "Indicates whether the location is in good standing and has control over the business on Google. Any edits made to the location will propagate to Maps after passing the review phase.",
-          "type": "boolean"
-        },
-        "resolveOwnershipConflict": {
-          "$ref": "ResolveOwnershipConflict",
-          "description": "This location duplicates another location that is in good standing. If you have access to the location in good standing, use that location's id to perform operations. Otherwise, request access from the current owner."
-        },
-        "complyWithGuidelines": {
-          "$ref": "ComplyWithGuidelines",
-          "description": "The location fails to comply with our [guidelines](https://support.google.com/business/answer/3038177) and requires additional steps for reinstatement. To fix this issue, consult the [Help Center Article](https://support.google.com/business/answer/4569145)."
-        },
-        "hasBusinessAuthority": {
-          "type": "boolean",
-          "description": "Indicates whether the location has the authority (ownership) over the business on Google. If true, another location cannot take over and become the dominant listing on Maps. However, edits will not become live unless Voice of Merchant is gained (i.e. has_voice_of_merchant is true)."
-        },
+  "ownerDomain": "google.com",
+  "name": "mybusinessverifications",
+  "resources": {
+    "locations": {
+      "methods": {
         "verify": {
-          "description": "Start or continue the verification process.",
-          "$ref": "Verify"
-        }
-      }
-    },
-    "ComplyWithGuidelines": {
-      "type": "object",
-      "description": "Indicates that the location fails to comply with our [guidelines](https://support.google.com/business/answer/3038177).",
-      "properties": {
-        "recommendationReason": {
-          "enum": [
-            "RECOMMENDATION_REASON_UNSPECIFIED",
-            "BUSINESS_LOCATION_SUSPENDED",
-            "BUSINESS_LOCATION_DISABLED"
+          "httpMethod": "POST",
+          "request": {
+            "$ref": "VerifyLocationRequest"
+          },
+          "flatPath": "v1/locations/{locationsId}:verify",
+          "parameterOrder": [
+            "name"
           ],
-          "type": "string",
-          "enumDescriptions": [
-            "Not specified.",
-            "The business location is suspended. To fix this issue, consult the [Help Center article](https://support.google.com/business/answer/4569145).",
-            "The business location is disabled. To fix this issue, consult the [Help Center article](https://support.google.com/business/answer/9334246)."
+          "path": "v1/{+name}:verify",
+          "parameters": {
+            "name": {
+              "description": "Required. Resource name of the location to verify.",
+              "location": "path",
+              "type": "string",
+              "required": true,
+              "pattern": "^locations/[^/]+$"
+            }
+          },
+          "response": {
+            "$ref": "VerifyLocationResponse"
+          },
+          "id": "mybusinessverifications.locations.verify",
+          "description": "Starts the verification process for a location."
+        },
+        "getVoiceOfMerchantState": {
+          "flatPath": "v1/locations/{locationsId}/VoiceOfMerchantState",
+          "response": {
+            "$ref": "VoiceOfMerchantState"
+          },
+          "path": "v1/{+name}/VoiceOfMerchantState",
+          "httpMethod": "GET",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "description": "Required. Resource name of the location.",
+              "location": "path",
+              "pattern": "^locations/[^/]+$",
+              "required": true
+            }
+          },
+          "parameterOrder": [
+            "name"
           ],
-          "description": "The reason why the location is being recommended to comply with guidelines."
+          "id": "mybusinessverifications.locations.getVoiceOfMerchantState",
+          "description": "Gets the VoiceOfMerchant state."
+        },
+        "fetchVerificationOptions": {
+          "parameters": {
+            "location": {
+              "location": "path",
+              "type": "string",
+              "description": "Required. The location to verify.",
+              "required": true,
+              "pattern": "^locations/[^/]+$"
+            }
+          },
+          "id": "mybusinessverifications.locations.fetchVerificationOptions",
+          "flatPath": "v1/locations/{locationsId}:fetchVerificationOptions",
+          "httpMethod": "POST",
+          "description": "Reports all eligible verification options for a location in a specific language.",
+          "request": {
+            "$ref": "FetchVerificationOptionsRequest"
+          },
+          "parameterOrder": [
+            "location"
+          ],
+          "path": "v1/{+location}:fetchVerificationOptions",
+          "response": {
+            "$ref": "FetchVerificationOptionsResponse"
+          }
         }
       },
-      "id": "ComplyWithGuidelines"
-    },
-    "Verification": {
-      "type": "object",
-      "description": "A verification represents a verification attempt on a location.",
-      "id": "Verification",
-      "properties": {
-        "announcement": {
-          "description": "Optional. Response announcement set only if the method is VETTED_PARTNER.",
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "description": "Resource name of the verification."
-        },
-        "createTime": {
-          "description": "The timestamp when the verification is requested.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "method": {
-          "type": "string",
-          "enumDescriptions": [
-            "Default value, will result in errors.",
-            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
-            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
-            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Verify the location without additional user action. This option may not be available for all locations.",
-            "Verify the location via a trusted partner."
-          ],
-          "description": "The method of the verification.",
-          "enum": [
-            "VERIFICATION_METHOD_UNSPECIFIED",
-            "ADDRESS",
-            "EMAIL",
-            "PHONE_CALL",
-            "SMS",
-            "AUTO",
-            "TRUSTED_PARTNER"
-          ]
-        },
-        "state": {
-          "enumDescriptions": [
-            "Default value, will result in errors.",
-            "The verification is pending.",
-            "The verification is completed.",
-            "The verification is failed."
-          ],
-          "enum": [
-            "STATE_UNSPECIFIED",
-            "PENDING",
-            "COMPLETED",
-            "FAILED"
-          ],
-          "type": "string",
-          "description": "The state of the verification."
+      "resources": {
+        "verifications": {
+          "methods": {
+            "list": {
+              "path": "v1/{+parent}/verifications",
+              "id": "mybusinessverifications.locations.verifications.list",
+              "parameterOrder": [
+                "parent"
+              ],
+              "flatPath": "v1/locations/{locationsId}/verifications",
+              "response": {
+                "$ref": "ListVerificationsResponse"
+              },
+              "description": "List verifications of a location, ordered by create time.",
+              "httpMethod": "GET",
+              "parameters": {
+                "parent": {
+                  "required": true,
+                  "type": "string",
+                  "description": "Required. Resource name of the location that verification requests belong to.",
+                  "location": "path",
+                  "pattern": "^locations/[^/]+$"
+                },
+                "pageSize": {
+                  "location": "query",
+                  "type": "integer",
+                  "description": "How many verification to include per page. Minimum is 1, and the default and maximum page size is 100.",
+                  "format": "int32"
+                },
+                "pageToken": {
+                  "type": "string",
+                  "description": "If specified, returns the next page of verifications.",
+                  "location": "query"
+                }
+              }
+            },
+            "complete": {
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "pattern": "^locations/[^/]+/verifications/[^/]+$",
+                  "description": "Required. Resource name of the verification to complete.",
+                  "location": "path"
+                }
+              },
+              "id": "mybusinessverifications.locations.verifications.complete",
+              "flatPath": "v1/locations/{locationsId}/verifications/{verificationsId}:complete",
+              "request": {
+                "$ref": "CompleteVerificationRequest"
+              },
+              "path": "v1/{+name}:complete",
+              "httpMethod": "POST",
+              "description": "Completes a `PENDING` verification. It is only necessary for non `AUTO` verification methods. `AUTO` verification request is instantly `VERIFIED` upon creation.",
+              "response": {
+                "$ref": "CompleteVerificationResponse"
+              }
+            }
+          }
         }
       }
     },
-    "WaitForVoiceOfMerchant": {
-      "id": "WaitForVoiceOfMerchant",
-      "type": "object",
-      "properties": {},
-      "description": "Indicates that the location will gain voice of merchant after passing review."
-    },
-    "EmailVerificationData": {
-      "description": "Display data for verifications through email.",
-      "type": "object",
-      "id": "EmailVerificationData",
-      "properties": {
-        "user": {
-          "description": "User name in the email address. e.g. \"foo\" in foo@gmail.com",
-          "type": "string"
-        },
-        "domain": {
-          "type": "string",
-          "description": "Domain name in the email address. e.g. \"gmail.com\" in foo@gmail.com"
-        },
-        "isUserNameEditable": {
-          "type": "boolean",
-          "description": "Whether client is allowed to provide a different user name."
+    "verificationTokens": {
+      "methods": {
+        "generate": {
+          "id": "mybusinessverifications.verificationTokens.generate",
+          "parameters": {},
+          "flatPath": "v1/verificationTokens:generate",
+          "path": "v1/verificationTokens:generate",
+          "request": {
+            "$ref": "GenerateInstantVerificationTokenRequest"
+          },
+          "httpMethod": "POST",
+          "parameterOrder": [],
+          "description": "Generate a token for the provided location data to verify the location.",
+          "response": {
+            "$ref": "GenerateInstantVerificationTokenResponse"
+          }
         }
       }
+    }
+  },
+  "revision": "20260916",
+  "baseUrl": "https://mybusinessverifications.googleapis.com/",
+  "id": "mybusinessverifications:v1",
+  "protocol": "rest",
+  "icons": {
+    "x32": "http://www.google.com/images/icons/product/search-32.gif",
+    "x16": "http://www.google.com/images/icons/product/search-16.gif"
+  },
+  "rootUrl": "https://mybusinessverifications.googleapis.com/",
+  "description": "The My Business Verifications API provides an interface for taking verifications related actions for locations.",
+  "schemas": {
+    "GenerateInstantVerificationTokenRequest": {
+      "id": "GenerateInstantVerificationTokenRequest",
+      "type": "object",
+      "properties": {
+        "locationId": {
+          "type": "string",
+          "description": "The location identifier associated with an unverified listing. This is the location id generated at the time that the listing was originally created. It is the final portion of a location resource name as generated by the Google My Business API. Note: the caller must be an owner or manager of this listing in order to generate a verification token. See the [location resource](/my-business/reference/rest/v4/accounts.locations) documentation for more information."
+        }
+      },
+      "description": "Request message for Verifications.GenerateInstantVerificationToken."
+    },
+    "CompleteVerificationRequest": {
+      "properties": {
+        "pin": {
+          "description": "Required. PIN code received by the merchant to complete the verification.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "id": "CompleteVerificationRequest",
+      "description": "Request message for Verifications.CompleteVerificationAction."
+    },
+    "ServiceBusinessContext": {
+      "properties": {
+        "address": {
+          "description": "The verification address of the location. It is used to either enable more verification options or send a postcard.",
+          "$ref": "PostalAddress"
+        }
+      },
+      "type": "object",
+      "id": "ServiceBusinessContext",
+      "description": "Additional data for service business verification."
+    },
+    "VerifyLocationResponse": {
+      "type": "object",
+      "description": "Response message for Verifications.VerifyLocation.",
+      "properties": {
+        "verification": {
+          "$ref": "Verification",
+          "description": "The created verification request."
+        }
+      },
+      "id": "VerifyLocationResponse"
     },
     "AddressVerificationData": {
+      "description": "Display data for verifications through postcard.",
       "properties": {
-        "business": {
-          "type": "string",
-          "description": "Merchant's business name."
+        "expectedDeliveryDaysRegion": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Expected number of days it takes to deliver a postcard to the address's region."
         },
         "address": {
           "$ref": "PostalAddress",
           "description": "Address that a postcard can be sent to."
         },
-        "expectedDeliveryDaysRegion": {
-          "description": "Expected number of days it takes to deliver a postcard to the address's region.",
-          "format": "int32",
-          "type": "integer"
+        "business": {
+          "type": "string",
+          "description": "Merchant's business name."
         }
       },
       "id": "AddressVerificationData",
-      "type": "object",
-      "description": "Display data for verifications through postcard."
+      "type": "object"
     },
     "ListVerificationsResponse": {
-      "id": "ListVerificationsResponse",
-      "type": "object",
-      "description": "Response message for Verifications.ListVerifications.",
       "properties": {
         "verifications": {
-          "type": "array",
-          "description": "List of the verifications.",
           "items": {
             "$ref": "Verification"
-          }
+          },
+          "description": "List of the verifications.",
+          "type": "array"
         },
         "nextPageToken": {
           "type": "string",
           "description": "If the number of verifications exceeded the requested page size, this field will be populated with a token to fetch the next page of verification on a subsequent call. If there are no more attributes, this field will not be present in the response."
         }
+      },
+      "description": "Response message for Verifications.ListVerifications.",
+      "id": "ListVerificationsResponse",
+      "type": "object"
+    },
+    "EmailVerificationData": {
+      "id": "EmailVerificationData",
+      "type": "object",
+      "description": "Display data for verifications through email.",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "Domain name in the email address. e.g. \"gmail.com\" in foo@gmail.com"
+        },
+        "user": {
+          "type": "string",
+          "description": "User name in the email address. e.g. \"foo\" in foo@gmail.com"
+        },
+        "isUserNameEditable": {
+          "description": "Whether client is allowed to provide a different user name.",
+          "type": "boolean"
+        }
       }
     },
-    "GenerateInstantVerificationTokenRequest": {
-      "description": "Request message for Verifications.GenerateInstantVerificationToken.",
+    "PostalAddress": {
+      "type": "object",
+      "id": "PostalAddress",
       "properties": {
-        "locationId": {
-          "description": "The location identifier associated with an unverified listing. This is the location id generated at the time that the listing was originally created. It is the final portion of a location resource name as generated by the Google My Business API. Note: the caller must be an owner or manager of this listing in order to generate a verification token. See the [location resource](/my-business/reference/rest/v4/accounts.locations) documentation for more information.",
+        "administrativeArea": {
+          "description": "Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state, a province, an oblast, or a prefecture. For Spain, this is the province and not the autonomous community (for example, \"Barcelona\" and not \"Catalonia\"). Many countries don't use an administrative area in postal addresses. For example, in Switzerland, this should be left unpopulated.",
+          "type": "string"
+        },
+        "sortingCode": {
+          "description": "Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used, the value is either a string like \"CEDEX\", optionally followed by a number (for example, \"CEDEX 7\"), or just a number alone, representing the \"sector code\" (Jamaica), \"delivery area indicator\" (Malawi) or \"post office indicator\" (Côte d'Ivoire).",
+          "type": "string"
+        },
+        "regionCode": {
+          "description": "Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to ensure the value is correct. See https://cldr.unicode.org/ and https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: \"CH\" for Switzerland.",
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The schema revision of the `PostalAddress`. This must be set to 0, which is the latest revision. All new revisions **must** be backward compatible with old revisions."
+        },
+        "organization": {
+          "type": "string",
+          "description": "Optional. The name of the organization at the address."
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional. The recipient at the address. This field may, under certain circumstances, contain multiline information. For example, it might contain \"care of\" information."
+        },
+        "addressLines": {
+          "items": {
+            "type": "string"
+          },
+          "description": "Unstructured address lines describing the lower levels of an address. Because values in `address_lines` do not have type information and may sometimes contain multiple values in a single field (for example, \"Austin, TX\"), it is important that the line order is clear. The order of address lines should be \"envelope order\" for the country or region of the address. In places where this can vary (for example, Japan), `address_language` is used to make it explicit (for example, \"ja\" for large-to-small ordering and \"ja-Latn\" or \"en\" for small-to-large). In this way, the most specific line of an address can be selected based on the language. The minimum permitted structural representation of an address consists of a `region_code` with all remaining information placed in the `address_lines`. It would be possible to format such an address very approximately without geocoding, but no semantic reasoning could be made about any of the address components until it was at least partially resolved. Creating an address only containing a `region_code` and `address_lines` and then geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the address should be localities or administrative areas).",
+          "type": "array"
+        },
+        "languageCode": {
+          "description": "Optional. BCP-47 language code of the contents of this address (if known). This is often the UI language of the input form or is expected to match one of the languages used in the address' country/region, or their transliterated equivalents. This can affect formatting in certain countries, but is not critical to the correctness of the data and will never affect any validation or other non-formatting related operations. If this value is not known, it should be omitted (rather than specifying a possibly incorrect default). Examples: \"zh-Hant\", \"ja\", \"ja-Latn\", \"en\".",
+          "type": "string"
+        },
+        "sublocality": {
+          "type": "string",
+          "description": "Optional. Sublocality of the address. For example, this can be a neighborhood, borough, or district."
+        },
+        "locality": {
+          "description": "Optional. Generally refers to the city or town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world where localities are not well defined or do not fit into this structure well, leave `locality` empty and use `address_lines`.",
+          "type": "string"
+        },
+        "postalCode": {
+          "description": "Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where they are used, they may trigger additional validation with other parts of the address (for example, state or zip code validation in the United States).",
           "type": "string"
         }
       },
+      "description": "Represents a postal address, such as for postal delivery or payments addresses. With a postal address, a postal service can deliver items to a premise, P.O. box, or similar. A postal address is not intended to model geographical locations like roads, towns, or mountains. In typical usage, an address would be created by user input or from importing existing data, depending on the type of process. Advice on address input or editing: - Use an internationalization-ready address widget such as https://github.com/google/libaddressinput. - Users should not be presented with UI elements for input or editing of fields outside countries where that field is used. For more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478."
+    },
+    "FetchVerificationOptionsRequest": {
+      "id": "FetchVerificationOptionsRequest",
       "type": "object",
-      "id": "GenerateInstantVerificationTokenRequest"
+      "description": "Request message for Verifications.FetchVerificationOptions.",
+      "properties": {
+        "languageCode": {
+          "type": "string",
+          "description": "Required. The BCP 47 language code representing the language that is to be used for the verification process. Available options vary by language."
+        },
+        "context": {
+          "description": "Optional. Extra context information for the verification of service businesses. Can only be applied to the locations whose business type is CUSTOMER_LOCATION_ONLY. Specifying an accurate address could enable more options. INVALID_ARGUMENT will be thrown if it is set for other business types of locations.",
+          "$ref": "ServiceBusinessContext"
+        }
+      }
+    },
+    "ResolveOwnershipConflict": {
+      "type": "object",
+      "id": "ResolveOwnershipConflict",
+      "description": "Indicates that the location duplicates another location that is in good standing.",
+      "properties": {}
+    },
+    "Verify": {
+      "type": "object",
+      "properties": {
+        "hasPendingVerification": {
+          "type": "boolean",
+          "description": "Indicates whether a verification process has already started, and can be completed by the location."
+        }
+      },
+      "id": "Verify",
+      "description": "Indicates that the location requires verification. Contains information about the current verification actions performed on the location."
+    },
+    "FetchVerificationOptionsResponse": {
+      "properties": {
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "VerificationOption"
+          },
+          "description": "The available verification options."
+        }
+      },
+      "id": "FetchVerificationOptionsResponse",
+      "description": "Response message for Verifications.FetchVerificationOptions.",
+      "type": "object"
+    },
+    "VerificationToken": {
+      "properties": {
+        "tokenString": {
+          "description": "The token string.",
+          "type": "string"
+        }
+      },
+      "description": "Token generated by a vetted [partner](https://support.google.com/business/answer/7674102).",
+      "type": "object",
+      "id": "VerificationToken"
     },
     "VerifyLocationRequest": {
+      "description": "Request message for Verifications.VerifyLocation.",
       "properties": {
-        "token": {
-          "$ref": "VerificationToken",
-          "description": "Optional. The input for VETTED_PARTNER method available to select [partners.](https://support.google.com/business/answer/7674102) The input is not needed for a vetted account. Token that is associated to the location. Token that is associated to the location."
+        "trustedPartnerToken": {
+          "description": "The input for TRUSTED_PARTNER method The verification token that is associated to the location.",
+          "type": "string"
+        },
+        "context": {
+          "$ref": "ServiceBusinessContext",
+          "description": "Optional. Extra context information for the verification of service businesses. It is only required for the locations whose business type is CUSTOMER_LOCATION_ONLY. For ADDRESS verification, the address will be used to send out postcard. For other methods, it should be the same as the one that is passed to GetVerificationOptions. INVALID_ARGUMENT will be thrown if it is set for other types of business locations."
+        },
+        "emailAddress": {
+          "type": "string",
+          "description": "Optional. The input for EMAIL method. Email address where the PIN should be sent to. An email address is accepted only if it is one of the addresses provided by FetchVerificationOptions. If the EmailVerificationData has is_user_name_editable set to true, the client may specify a different user name (local-part) but must match the domain name."
         },
         "method": {
           "type": "string",
-          "enumDescriptions": [
-            "Default value, will result in errors.",
-            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
-            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
-            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
-            "Verify the location without additional user action. This option may not be available for all locations.",
-            "Verify the location via a trusted partner."
-          ],
           "description": "Required. Verification method.",
           "enum": [
             "VERIFICATION_METHOD_UNSPECIFIED",
@@ -275,126 +415,135 @@
             "SMS",
             "AUTO",
             "TRUSTED_PARTNER"
+          ],
+          "enumDescriptions": [
+            "Default value, will result in errors.",
+            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
+            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
+            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Verify the location without additional user action. This option may not be available for all locations.",
+            "Verify the location via a trusted partner."
           ]
         },
-        "languageCode": {
-          "description": "Optional. The BCP 47 language code representing the language that is to be used for the verification process.",
-          "type": "string"
-        },
-        "emailAddress": {
-          "description": "Optional. The input for EMAIL method. Email address where the PIN should be sent to. An email address is accepted only if it is one of the addresses provided by FetchVerificationOptions. If the EmailVerificationData has is_user_name_editable set to true, the client may specify a different user name (local-part) but must match the domain name.",
-          "type": "string"
-        },
-        "phoneNumber": {
-          "description": "Optional. The input for PHONE_CALL/SMS method The phone number that should be called or be sent SMS to. It must be one of the phone numbers in the eligible options.",
-          "type": "string"
+        "token": {
+          "$ref": "VerificationToken",
+          "description": "Optional. The input for VETTED_PARTNER method available to select [partners.](https://support.google.com/business/answer/7674102) The input is not needed for a vetted account. Token that is associated to the location. Token that is associated to the location."
         },
         "mailerContact": {
-          "description": "Optional. The input for ADDRESS method. Contact name the mail should be sent to.",
-          "type": "string"
-        },
-        "context": {
-          "$ref": "ServiceBusinessContext",
-          "description": "Optional. Extra context information for the verification of service businesses. It is only required for the locations whose business type is CUSTOMER_LOCATION_ONLY. For ADDRESS verification, the address will be used to send out postcard. For other methods, it should be the same as the one that is passed to GetVerificationOptions. INVALID_ARGUMENT will be thrown if it is set for other types of business locations."
-        },
-        "trustedPartnerToken": {
-          "description": "The input for TRUSTED_PARTNER method The verification token that is associated to the location.",
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "description": "Request message for Verifications.VerifyLocation.",
-      "id": "VerifyLocationRequest"
-    },
-    "VerificationToken": {
-      "properties": {
-        "tokenString": {
-          "description": "The token string.",
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "id": "VerificationToken",
-      "description": "Token generated by a vetted [partner](https://support.google.com/business/answer/7674102)."
-    },
-    "CompleteVerificationResponse": {
-      "type": "object",
-      "properties": {
-        "verification": {
-          "$ref": "Verification",
-          "description": "The completed verification."
-        }
-      },
-      "description": "Response message for Verifications.CompleteVerificationAction.",
-      "id": "CompleteVerificationResponse"
-    },
-    "PostalAddress": {
-      "properties": {
-        "addressLines": {
-          "description": "Unstructured address lines describing the lower levels of an address. Because values in `address_lines` do not have type information and may sometimes contain multiple values in a single field (for example, \"Austin, TX\"), it is important that the line order is clear. The order of address lines should be \"envelope order\" for the country or region of the address. In places where this can vary (for example, Japan), `address_language` is used to make it explicit (for example, \"ja\" for large-to-small ordering and \"ja-Latn\" or \"en\" for small-to-large). In this way, the most specific line of an address can be selected based on the language. The minimum permitted structural representation of an address consists of a `region_code` with all remaining information placed in the `address_lines`. It would be possible to format such an address very approximately without geocoding, but no semantic reasoning could be made about any of the address components until it was at least partially resolved. Creating an address only containing a `region_code` and `address_lines` and then geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the address should be localities or administrative areas).",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "regionCode": {
-          "description": "Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the user to ensure the value is correct. See https://cldr.unicode.org/ and https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: \"CH\" for Switzerland.",
-          "type": "string"
+          "type": "string",
+          "description": "Optional. The input for ADDRESS method. Contact name the mail should be sent to."
         },
         "languageCode": {
           "type": "string",
-          "description": "Optional. BCP-47 language code of the contents of this address (if known). This is often the UI language of the input form or is expected to match one of the languages used in the address' country/region, or their transliterated equivalents. This can affect formatting in certain countries, but is not critical to the correctness of the data and will never affect any validation or other non-formatting related operations. If this value is not known, it should be omitted (rather than specifying a possibly incorrect default). Examples: \"zh-Hant\", \"ja\", \"ja-Latn\", \"en\"."
+          "description": "Optional. The BCP 47 language code representing the language that is to be used for the verification process."
         },
-        "revision": {
-          "description": "The schema revision of the `PostalAddress`. This must be set to 0, which is the latest revision. All new revisions **must** be backward compatible with old revisions.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "administrativeArea": {
+        "phoneNumber": {
           "type": "string",
-          "description": "Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state, a province, an oblast, or a prefecture. For Spain, this is the province and not the autonomous community (for example, \"Barcelona\" and not \"Catalonia\"). Many countries don't use an administrative area in postal addresses. For example, in Switzerland, this should be left unpopulated."
+          "description": "Optional. The input for PHONE_CALL/SMS method The phone number that should be called or be sent SMS to. It must be one of the phone numbers in the eligible options."
+        }
+      },
+      "id": "VerifyLocationRequest",
+      "type": "object"
+    },
+    "WaitForVoiceOfMerchant": {
+      "type": "object",
+      "properties": {},
+      "description": "Indicates that the location will gain voice of merchant after passing review.",
+      "id": "WaitForVoiceOfMerchant"
+    },
+    "VoiceOfMerchantState": {
+      "description": "Response message for VoiceOfMerchant.GetVoiceOfMerchantState.",
+      "properties": {
+        "hasVoiceOfMerchant": {
+          "description": "Indicates whether the location is in good standing and has control over the business on Google. Any edits made to the location will propagate to Maps after passing the review phase.",
+          "type": "boolean"
         },
-        "sortingCode": {
-          "type": "string",
-          "description": "Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used, the value is either a string like \"CEDEX\", optionally followed by a number (for example, \"CEDEX 7\"), or just a number alone, representing the \"sector code\" (Jamaica), \"delivery area indicator\" (Malawi) or \"post office indicator\" (Côte d'Ivoire)."
+        "verify": {
+          "description": "Start or continue the verification process.",
+          "$ref": "Verify"
         },
-        "sublocality": {
-          "description": "Optional. Sublocality of the address. For example, this can be a neighborhood, borough, or district.",
+        "hasBusinessAuthority": {
+          "description": "Indicates whether the location has the authority (ownership) over the business on Google. If true, another location cannot take over and become the dominant listing on Maps. However, edits will not become live unless Voice of Merchant is gained (i.e. has_voice_of_merchant is true).",
+          "type": "boolean"
+        },
+        "waitForVoiceOfMerchant": {
+          "description": "Wait to gain Voice of Merchant. The location is under review for quality purposes.",
+          "$ref": "WaitForVoiceOfMerchant"
+        },
+        "resolveOwnershipConflict": {
+          "description": "This location duplicates another location that is in good standing. If you have access to the location in good standing, use that location's id to perform operations. Otherwise, request access from the current owner.",
+          "$ref": "ResolveOwnershipConflict"
+        },
+        "complyWithGuidelines": {
+          "description": "The location fails to comply with our [guidelines](https://support.google.com/business/answer/3038177) and requires additional steps for reinstatement. To fix this issue, consult the [Help Center Article](https://support.google.com/business/answer/4569145).",
+          "$ref": "ComplyWithGuidelines"
+        }
+      },
+      "id": "VoiceOfMerchantState",
+      "type": "object"
+    },
+    "Verification": {
+      "properties": {
+        "method": {
+          "enumDescriptions": [
+            "Default value, will result in errors.",
+            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
+            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
+            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Verify the location without additional user action. This option may not be available for all locations.",
+            "Verify the location via a trusted partner."
+          ],
+          "enum": [
+            "VERIFICATION_METHOD_UNSPECIFIED",
+            "ADDRESS",
+            "EMAIL",
+            "PHONE_CALL",
+            "SMS",
+            "AUTO",
+            "TRUSTED_PARTNER"
+          ],
+          "description": "The method of the verification.",
           "type": "string"
         },
-        "postalCode": {
-          "description": "Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where they are used, they may trigger additional validation with other parts of the address (for example, state or zip code validation in the United States).",
+        "state": {
+          "description": "The state of the verification.",
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "PENDING",
+            "COMPLETED",
+            "FAILED"
+          ],
+          "enumDescriptions": [
+            "Default value, will result in errors.",
+            "The verification is pending.",
+            "The verification is completed.",
+            "The verification is failed."
+          ],
           "type": "string"
         },
-        "recipients": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Optional. The recipient at the address. This field may, under certain circumstances, contain multiline information. For example, it might contain \"care of\" information."
-        },
-        "locality": {
+        "createTime": {
           "type": "string",
-          "description": "Optional. Generally refers to the city or town portion of the address. Examples: US city, IT comune, UK post town. In regions of the world where localities are not well defined or do not fit into this structure well, leave `locality` empty and use `address_lines`."
+          "description": "The timestamp when the verification is requested.",
+          "format": "google-datetime"
         },
-        "organization": {
-          "description": "Optional. The name of the organization at the address.",
+        "announcement": {
+          "description": "Optional. Response announcement set only if the method is VETTED_PARTNER.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Resource name of the verification.",
           "type": "string"
         }
       },
-      "id": "PostalAddress",
-      "description": "Represents a postal address, such as for postal delivery or payments addresses. With a postal address, a postal service can deliver items to a premise, P.O. box, or similar. A postal address is not intended to model geographical locations like roads, towns, or mountains. In typical usage, an address would be created by user input or from importing existing data, depending on the type of process. Advice on address input or editing: - Use an internationalization-ready address widget such as https://github.com/google/libaddressinput. - Users should not be presented with UI elements for input or editing of fields outside countries where that field is used. For more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478.",
+      "id": "Verification",
+      "description": "A verification represents a verification attempt on a location.",
       "type": "object"
     },
     "GenerateInstantVerificationTokenResponse": {
-      "type": "object",
-      "id": "GenerateInstantVerificationTokenResponse",
-      "description": "Response message for Verifications.GenerateInstantVerificationToken.",
       "properties": {
         "result": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The result of the instant verification token generation.",
           "enum": [
             "RESULT_UNSPECIFIED",
             "SUCCEEDED",
@@ -404,335 +553,186 @@
             "Default value, will result in errors.",
             "The instant verification token was generated successfully.",
             "The instant verification token was not generated.."
-          ]
+          ],
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. The result of the instant verification token generation."
         },
         "instantVerificationToken": {
-          "type": "string",
-          "description": "The generated instant verification token."
-        }
-      }
-    },
-    "ResolveOwnershipConflict": {
-      "description": "Indicates that the location duplicates another location that is in good standing.",
-      "id": "ResolveOwnershipConflict",
-      "type": "object",
-      "properties": {}
-    },
-    "FetchVerificationOptionsResponse": {
-      "type": "object",
-      "description": "Response message for Verifications.FetchVerificationOptions.",
-      "id": "FetchVerificationOptionsResponse",
-      "properties": {
-        "options": {
-          "type": "array",
-          "description": "The available verification options.",
-          "items": {
-            "$ref": "VerificationOption"
-          }
-        }
-      }
-    },
-    "Verify": {
-      "properties": {
-        "hasPendingVerification": {
-          "description": "Indicates whether a verification process has already started, and can be completed by the location.",
-          "type": "boolean"
-        }
-      },
-      "id": "Verify",
-      "description": "Indicates that the location requires verification. Contains information about the current verification actions performed on the location.",
-      "type": "object"
-    },
-    "ServiceBusinessContext": {
-      "id": "ServiceBusinessContext",
-      "properties": {
-        "address": {
-          "description": "The verification address of the location. It is used to either enable more verification options or send a postcard.",
-          "$ref": "PostalAddress"
-        }
-      },
-      "description": "Additional data for service business verification.",
-      "type": "object"
-    },
-    "CompleteVerificationRequest": {
-      "type": "object",
-      "description": "Request message for Verifications.CompleteVerificationAction.",
-      "id": "CompleteVerificationRequest",
-      "properties": {
-        "pin": {
-          "description": "Required. PIN code received by the merchant to complete the verification.",
+          "description": "The generated instant verification token.",
           "type": "string"
         }
-      }
+      },
+      "description": "Response message for Verifications.GenerateInstantVerificationToken.",
+      "id": "GenerateInstantVerificationTokenResponse",
+      "type": "object"
     },
-    "VerifyLocationResponse": {
-      "id": "VerifyLocationResponse",
+    "VerificationOption": {
+      "type": "object",
       "properties": {
-        "verification": {
-          "$ref": "Verification",
-          "description": "The created verification request."
+        "verificationMethod": {
+          "enum": [
+            "VERIFICATION_METHOD_UNSPECIFIED",
+            "ADDRESS",
+            "EMAIL",
+            "PHONE_CALL",
+            "SMS",
+            "AUTO",
+            "TRUSTED_PARTNER"
+          ],
+          "type": "string",
+          "enumDescriptions": [
+            "Default value, will result in errors.",
+            "Send a postcard with a verification PIN to a specific mailing address. The PIN is used to complete verification with Google.",
+            "Send an email with a verification PIN to a specific email address. The PIN is used to complete verification with Google.",
+            "Make a phone call with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Send an SMS with a verification PIN to a specific phone number. The PIN is used to complete verification with Google.",
+            "Verify the location without additional user action. This option may not be available for all locations.",
+            "Verify the location via a trusted partner."
+          ],
+          "description": "Method to verify the location."
+        },
+        "announcement": {
+          "type": "string",
+          "description": "Set only if the method is VETTED_PARTNER."
+        },
+        "addressData": {
+          "$ref": "AddressVerificationData",
+          "description": "Set only if the method is MAIL."
+        },
+        "phoneNumber": {
+          "description": "Set only if the method is PHONE_CALL or SMS. Phone number that the PIN will be sent to.",
+          "type": "string"
+        },
+        "emailData": {
+          "description": "Set only if the method is EMAIL.",
+          "$ref": "EmailVerificationData"
         }
       },
-      "description": "Response message for Verifications.VerifyLocation.",
+      "description": "The verification option represents how to verify the location (indicated by verification method) and where the verification will be sent to (indicated by display data).",
+      "id": "VerificationOption"
+    },
+    "ComplyWithGuidelines": {
+      "properties": {
+        "recommendationReason": {
+          "type": "string",
+          "enumDescriptions": [
+            "Not specified.",
+            "The business location is suspended. To fix this issue, consult the [Help Center article](https://support.google.com/business/answer/4569145).",
+            "The business location is disabled. To fix this issue, consult the [Help Center article](https://support.google.com/business/answer/9334246)."
+          ],
+          "enum": [
+            "RECOMMENDATION_REASON_UNSPECIFIED",
+            "BUSINESS_LOCATION_SUSPENDED",
+            "BUSINESS_LOCATION_DISABLED"
+          ],
+          "description": "The reason why the location is being recommended to comply with guidelines."
+        }
+      },
+      "description": "Indicates that the location fails to comply with our [guidelines](https://support.google.com/business/answer/3038177).",
+      "type": "object",
+      "id": "ComplyWithGuidelines"
+    },
+    "CompleteVerificationResponse": {
+      "description": "Response message for Verifications.CompleteVerificationAction.",
+      "id": "CompleteVerificationResponse",
+      "properties": {
+        "verification": {
+          "description": "The completed verification.",
+          "$ref": "Verification"
+        }
+      },
       "type": "object"
     }
   },
+  "batchPath": "batch",
+  "discoveryVersion": "v1",
+  "fullyEncodeReservedExpansion": true,
+  "version": "v1",
+  "mtlsRootUrl": "https://mybusinessverifications.mtls.googleapis.com/",
+  "title": "My Business Verifications API",
+  "documentationLink": "https://developers.google.com/my-business/",
   "basePath": "",
   "canonicalName": "My Business Verifications",
-  "mtlsRootUrl": "https://mybusinessverifications.mtls.googleapis.com/",
-  "description": "The My Business Verifications API provides an interface for taking verifications related actions for locations.",
-  "ownerDomain": "google.com",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "rootUrl": "https://mybusinessverifications.googleapis.com/",
-  "id": "mybusinessverifications:v1",
-  "name": "mybusinessverifications",
-  "documentationLink": "https://developers.google.com/my-business/",
+  "kind": "discovery#restDescription",
   "parameters": {
-    "quotaUser": {
+    "callback": {
+      "type": "string",
       "location": "query",
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "alt": {
-      "default": "json",
-      "description": "Data format for response.",
-      "type": "string",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "location": "query"
+      "description": "JSONP"
     },
     "fields": {
-      "description": "Selector specifying which fields to include in a partial response.",
       "type": "string",
-      "location": "query"
-    },
-    "upload_protocol": {
       "location": "query",
-      "type": "string",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    },
-    "uploadType": {
-      "type": "string",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
-      "location": "query"
+      "description": "Selector specifying which fields to include in a partial response."
     },
     "key": {
       "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
-      "location": "query",
-      "type": "string"
-    },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
       "type": "string",
       "location": "query"
     },
-    "prettyPrint": {
+    "$.xgafv": {
       "location": "query",
-      "description": "Returns response with indentations and line breaks.",
+      "type": "string",
+      "enum": [
+        "1",
+        "2"
+      ],
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "description": "V1 error format."
+    },
+    "prettyPrint": {
       "default": "true",
-      "type": "boolean"
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean",
+      "location": "query"
     },
     "access_token": {
       "location": "query",
       "type": "string",
       "description": "OAuth access token."
     },
-    "callback": {
+    "oauth_token": {
       "location": "query",
-      "type": "string",
-      "description": "JSONP"
+      "description": "OAuth 2.0 token for the current user.",
+      "type": "string"
     },
-    "$.xgafv": {
-      "description": "V1 error format.",
-      "type": "string",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
+    "alt": {
+      "description": "Data format for response.",
+      "enum": [
+        "json",
+        "media",
+        "proto"
       ],
       "location": "query",
-      "enum": [
-        "1",
-        "2"
+      "type": "string",
+      "default": "json",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
       ]
+    },
+    "quotaUser": {
+      "location": "query",
+      "type": "string",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "uploadType": {
+      "location": "query",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "type": "string"
+    },
+    "upload_protocol": {
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "type": "string",
+      "location": "query"
     }
   },
-  "kind": "discovery#restDescription",
-  "revision": "20260916",
-  "batchPath": "batch",
-  "title": "My Business Verifications API",
-  "discoveryVersion": "v1",
-  "servicePath": "",
   "ownerName": "Google",
-  "resources": {
-    "verificationTokens": {
-      "methods": {
-        "generate": {
-          "flatPath": "v1/verificationTokens:generate",
-          "httpMethod": "POST",
-          "id": "mybusinessverifications.verificationTokens.generate",
-          "request": {
-            "$ref": "GenerateInstantVerificationTokenRequest"
-          },
-          "description": "Generate a token for the provided location data to verify the location.",
-          "path": "v1/verificationTokens:generate",
-          "parameters": {},
-          "parameterOrder": [],
-          "response": {
-            "$ref": "GenerateInstantVerificationTokenResponse"
-          }
-        }
-      }
-    },
-    "locations": {
-      "methods": {
-        "verify": {
-          "parameterOrder": [
-            "name"
-          ],
-          "httpMethod": "POST",
-          "flatPath": "v1/locations/{locationsId}:verify",
-          "description": "Starts the verification process for a location.",
-          "response": {
-            "$ref": "VerifyLocationResponse"
-          },
-          "request": {
-            "$ref": "VerifyLocationRequest"
-          },
-          "path": "v1/{+name}:verify",
-          "id": "mybusinessverifications.locations.verify",
-          "parameters": {
-            "name": {
-              "pattern": "^locations/[^/]+$",
-              "required": true,
-              "type": "string",
-              "description": "Required. Resource name of the location to verify.",
-              "location": "path"
-            }
-          }
-        },
-        "fetchVerificationOptions": {
-          "httpMethod": "POST",
-          "flatPath": "v1/locations/{locationsId}:fetchVerificationOptions",
-          "description": "Reports all eligible verification options for a location in a specific language.",
-          "parameterOrder": [
-            "location"
-          ],
-          "path": "v1/{+location}:fetchVerificationOptions",
-          "parameters": {
-            "location": {
-              "location": "path",
-              "pattern": "^locations/[^/]+$",
-              "type": "string",
-              "description": "Required. The location to verify.",
-              "required": true
-            }
-          },
-          "response": {
-            "$ref": "FetchVerificationOptionsResponse"
-          },
-          "request": {
-            "$ref": "FetchVerificationOptionsRequest"
-          },
-          "id": "mybusinessverifications.locations.fetchVerificationOptions"
-        },
-        "getVoiceOfMerchantState": {
-          "id": "mybusinessverifications.locations.getVoiceOfMerchantState",
-          "httpMethod": "GET",
-          "parameters": {
-            "name": {
-              "required": true,
-              "description": "Required. Resource name of the location.",
-              "type": "string",
-              "pattern": "^locations/[^/]+$",
-              "location": "path"
-            }
-          },
-          "description": "Gets the VoiceOfMerchant state.",
-          "response": {
-            "$ref": "VoiceOfMerchantState"
-          },
-          "path": "v1/{+name}/VoiceOfMerchantState",
-          "parameterOrder": [
-            "name"
-          ],
-          "flatPath": "v1/locations/{locationsId}/VoiceOfMerchantState"
-        }
-      },
-      "resources": {
-        "verifications": {
-          "methods": {
-            "complete": {
-              "response": {
-                "$ref": "CompleteVerificationResponse"
-              },
-              "parameters": {
-                "name": {
-                  "location": "path",
-                  "description": "Required. Resource name of the verification to complete.",
-                  "pattern": "^locations/[^/]+/verifications/[^/]+$",
-                  "required": true,
-                  "type": "string"
-                }
-              },
-              "parameterOrder": [
-                "name"
-              ],
-              "request": {
-                "$ref": "CompleteVerificationRequest"
-              },
-              "path": "v1/{+name}:complete",
-              "description": "Completes a `PENDING` verification. It is only necessary for non `AUTO` verification methods. `AUTO` verification request is instantly `VERIFIED` upon creation.",
-              "id": "mybusinessverifications.locations.verifications.complete",
-              "httpMethod": "POST",
-              "flatPath": "v1/locations/{locationsId}/verifications/{verificationsId}:complete"
-            },
-            "list": {
-              "id": "mybusinessverifications.locations.verifications.list",
-              "flatPath": "v1/locations/{locationsId}/verifications",
-              "response": {
-                "$ref": "ListVerificationsResponse"
-              },
-              "description": "List verifications of a location, ordered by create time.",
-              "httpMethod": "GET",
-              "parameters": {
-                "pageToken": {
-                  "description": "If specified, returns the next page of verifications.",
-                  "location": "query",
-                  "type": "string"
-                },
-                "parent": {
-                  "type": "string",
-                  "location": "path",
-                  "pattern": "^locations/[^/]+$",
-                  "description": "Required. Resource name of the location that verification requests belong to.",
-                  "required": true
-                },
-                "pageSize": {
-                  "format": "int32",
-                  "description": "How many verification to include per page. Minimum is 1, and the default and maximum page size is 100.",
-                  "type": "integer",
-                  "location": "query"
-                }
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "path": "v1/{+parent}/verifications"
-            }
-          }
-        }
-      }
-    }
-  }
+  "version_module": true,
+  "servicePath": ""
 }
