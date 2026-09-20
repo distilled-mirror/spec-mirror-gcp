@@ -1,72 +1,133 @@
 {
-  "version": "conversions_v1beta",
-  "title": "Merchant API",
-  "id": "merchantapi:conversions_v1beta",
-  "protocol": "rest",
   "servicePath": "",
-  "revision": "20260910",
-  "batchPath": "batch",
+  "description": "Programmatically manage your Merchant Center Accounts.",
+  "kind": "discovery#restDescription",
   "schemas": {
-    "GoogleAnalyticsLink": {
-      "type": "object",
-      "id": "GoogleAnalyticsLink",
+    "ConversionType": {
       "properties": {
-        "property": {
+        "report": {
+          "type": "boolean",
+          "description": "Output only. Option indicating if the type should be included in Merchant Center reporting.",
+          "readOnly": true
+        },
+        "name": {
           "readOnly": true,
           "type": "string",
-          "description": "Output only. Name of the Google Analytics property the merchant is linked to."
-        },
-        "propertyId": {
-          "description": "Required. Immutable. ID of the Google Analytics property the merchant is linked to.",
-          "format": "int64",
-          "type": "string"
-        },
-        "attributionSettings": {
-          "readOnly": true,
-          "$ref": "AttributionSettings",
-          "description": "Output only. Attribution settings for the linked Google Analytics property."
+          "description": "Output only. Conversion event name, as it'll be reported by the client."
         }
       },
-      "description": "\"Google Analytics Link\" sources can be used to get conversion data from an existing Google Analytics property into the linked Merchant Center account."
+      "type": "object",
+      "description": "Message representing the type of a conversion event.",
+      "id": "ConversionType"
+    },
+    "AttributionSettings": {
+      "properties": {
+        "attributionModel": {
+          "description": "Required. Attribution model.",
+          "type": "string",
+          "enum": [
+            "ATTRIBUTION_MODEL_UNSPECIFIED",
+            "CROSS_CHANNEL_LAST_CLICK",
+            "ADS_PREFERRED_LAST_CLICK",
+            "CROSS_CHANNEL_DATA_DRIVEN",
+            "CROSS_CHANNEL_FIRST_CLICK",
+            "CROSS_CHANNEL_LINEAR",
+            "CROSS_CHANNEL_POSITION_BASED",
+            "CROSS_CHANNEL_TIME_DECAY"
+          ],
+          "enumDescriptions": [
+            "Unspecified model.",
+            "Cross-channel Last Click model.",
+            "Ads-preferred Last Click model.",
+            "Cross-channel Data Driven model.",
+            "Cross-channel First Click model.",
+            "Cross-channel Linear model.",
+            "Cross-channel Position Based model.",
+            "Cross-channel Time Decay model."
+          ]
+        },
+        "conversionType": {
+          "type": "array",
+          "items": {
+            "$ref": "ConversionType"
+          },
+          "description": "Immutable. Unordered list. List of different conversion types a conversion event can be classified as. A standard \"purchase\" type will be automatically created if this list is empty at creation time."
+        },
+        "attributionLookbackWindowDays": {
+          "type": "integer",
+          "description": "Required. Lookback window (in days) used for attribution in this source. Supported values are `7`, `30` & `40`.",
+          "format": "int32"
+        }
+      },
+      "id": "AttributionSettings",
+      "description": "Represents attribution settings for conversion sources receiving pre-attribution data.",
+      "type": "object"
+    },
+    "UndeleteConversionSourceRequest": {
+      "type": "object",
+      "properties": {},
+      "description": "Request message for the UndeleteConversionSource method.",
+      "id": "UndeleteConversionSourceRequest"
+    },
+    "Empty": {
+      "id": "Empty",
+      "properties": {},
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "type": "object"
+    },
+    "GoogleAnalyticsLink": {
+      "description": "\"Google Analytics Link\" sources can be used to get conversion data from an existing Google Analytics property into the linked Merchant Center account.",
+      "id": "GoogleAnalyticsLink",
+      "properties": {
+        "attributionSettings": {
+          "$ref": "AttributionSettings",
+          "description": "Output only. Attribution settings for the linked Google Analytics property.",
+          "readOnly": true
+        },
+        "property": {
+          "description": "Output only. Name of the Google Analytics property the merchant is linked to.",
+          "type": "string",
+          "readOnly": true
+        },
+        "propertyId": {
+          "type": "string",
+          "description": "Required. Immutable. ID of the Google Analytics property the merchant is linked to.",
+          "format": "int64"
+        }
+      },
+      "type": "object"
     },
     "ProductStatusChangeMessage": {
-      "id": "ProductStatusChangeMessage",
       "type": "object",
       "properties": {
-        "account": {
-          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`",
+        "attribute": {
+          "type": "string",
+          "enum": [
+            "ATTRIBUTE_UNSPECIFIED",
+            "STATUS"
+          ],
+          "enumDescriptions": [
+            "Unspecified attribute",
+            "Status of the changed entity"
+          ],
+          "description": "The attribute in the resource that changed, in this case it will be always `Status`."
+        },
+        "resource": {
+          "description": "The product name. Format: `accounts/{account}/products/{product}`",
           "type": "string"
         },
-        "resourceId": {
-          "type": "string",
-          "description": "The product id."
-        },
-        "changes": {
-          "items": {
-            "$ref": "ProductChange"
-          },
-          "description": "A message to describe the change that happened to the product",
-          "type": "array"
+        "eventTime": {
+          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications.",
+          "format": "google-datetime",
+          "type": "string"
         },
         "managingAccount": {
           "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`",
           "type": "string"
         },
-        "attribute": {
-          "description": "The attribute in the resource that changed, in this case it will be always `Status`.",
-          "enumDescriptions": [
-            "Unspecified attribute",
-            "Status of the changed entity"
-          ],
-          "enum": [
-            "ATTRIBUTE_UNSPECIFIED",
-            "STATUS"
-          ],
-          "type": "string"
-        },
         "expirationTime": {
-          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
           "type": "string",
+          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
           "format": "google-datetime"
         },
         "resourceType": {
@@ -75,43 +136,142 @@
             "Resource type : product",
             "Account service"
           ],
+          "type": "string",
+          "description": "The resource that changed, in this case it will always be `Product`.",
           "enum": [
             "RESOURCE_UNSPECIFIED",
             "PRODUCT",
             "ACCOUNT_SERVICE"
-          ],
-          "description": "The resource that changed, in this case it will always be `Product`.",
+          ]
+        },
+        "resourceId": {
+          "description": "The product id.",
           "type": "string"
         },
-        "resource": {
-          "description": "The product name. Format: `accounts/{account}/products/{product}`",
+        "account": {
+          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`",
           "type": "string"
         },
-        "eventTime": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications."
+        "changes": {
+          "items": {
+            "$ref": "ProductChange"
+          },
+          "type": "array",
+          "description": "A message to describe the change that happened to the product"
         }
       },
-      "description": "The message that the merchant will receive to notify about product status change event"
+      "description": "The message that the merchant will receive to notify about product status change event",
+      "id": "ProductStatusChangeMessage"
     },
-    "ProductChange": {
-      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
+    "MerchantCenterDestination": {
+      "description": "\"Merchant Center Destination\" sources can be used to send conversion events from an online store using a Google tag directly to a Merchant Center account where the source is created.",
       "properties": {
-        "regionCode": {
-          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format.",
+        "destination": {
+          "readOnly": true,
+          "description": "Output only. Merchant Center Destination ID.",
           "type": "string"
         },
-        "oldValue": {
+        "displayName": {
           "type": "string",
-          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
+          "description": "Required. Merchant-specified display name for the destination. This is the name that identifies the conversion source within the Merchant Center UI. The maximum length is 64 characters."
         },
+        "attributionSettings": {
+          "$ref": "AttributionSettings",
+          "description": "Required. Attribution settings used for the Merchant Center Destination."
+        },
+        "currencyCode": {
+          "type": "string",
+          "description": "Required. Three-letter currency code (ISO 4217). The currency code defines in which currency the conversions sent to this destination will be reported in Merchant Center."
+        }
+      },
+      "id": "MerchantCenterDestination",
+      "type": "object"
+    },
+    "ListConversionSourcesResponse": {
+      "description": "Response message for the ListConversionSources method.",
+      "type": "object",
+      "id": "ListConversionSourcesResponse",
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "Token to be used to fetch the next results page."
+        },
+        "conversionSources": {
+          "description": "List of conversion sources.",
+          "type": "array",
+          "items": {
+            "$ref": "ConversionSource"
+          }
+        }
+      }
+    },
+    "ConversionSource": {
+      "properties": {
+        "state": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Current state of this conversion source. Can't be edited through the API.",
+          "enumDescriptions": [
+            "Conversion source has unspecified state.",
+            "Conversion source is fully functional.",
+            "Conversion source has been archived in the last 30 days and is currently not functional. Can be restored using the undelete method.",
+            "Conversion source creation has started but not fully finished yet."
+          ],
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "ACTIVE",
+            "ARCHIVED",
+            "PENDING"
+          ]
+        },
+        "name": {
+          "readOnly": true,
+          "description": "Output only. Identifier. Generated by the Content API upon creation of a new `ConversionSource`. Format: `[a-z]{4}:.+` The four characters before the colon represent the type of conversion source. Content after the colon represents the ID of the conversion source within that type. The ID of two different conversion sources might be the same across different types. The following type prefixes are supported: * `galk`: For GoogleAnalyticsLink sources. * `mcdn`: For MerchantCenterDestination sources.",
+          "type": "string"
+        },
+        "googleAnalyticsLink": {
+          "description": "Immutable. Conversion Source of type \"Link to Google Analytics Property\".",
+          "$ref": "GoogleAnalyticsLink"
+        },
+        "expireTime": {
+          "readOnly": true,
+          "format": "google-datetime",
+          "type": "string",
+          "description": "Output only. The time when an archived conversion source becomes permanently deleted and is no longer available to undelete."
+        },
+        "merchantCenterDestination": {
+          "description": "Conversion Source of type \"Merchant Center Tag Destination\".",
+          "$ref": "MerchantCenterDestination"
+        },
+        "controller": {
+          "readOnly": true,
+          "enum": [
+            "CONTROLLER_UNSPECIFIED",
+            "MERCHANT",
+            "YOUTUBE_AFFILIATES"
+          ],
+          "type": "string",
+          "description": "Output only. Controller of the conversion source.",
+          "enumDescriptions": [
+            "Default value. This value is unused.",
+            "Controlled by the Merchant who owns the Conversion Source.",
+            "Controlled by the Youtube Affiliates program."
+          ]
+        }
+      },
+      "type": "object",
+      "description": "Represents a conversion source owned by a Merchant account. A merchant account can have up to 200 conversion sources.",
+      "id": "ConversionSource"
+    },
+    "ProductChange": {
+      "type": "object",
+      "properties": {
         "newValue": {
           "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
           "type": "string"
         },
         "reportingContext": {
-          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
+          "type": "string",
           "enumDescriptions": [
             "Not specified.",
             "[Shopping ads](https://support.google.com/merchants/answer/6149970).",
@@ -135,7 +295,6 @@
             "YouTube Checkout .",
             "Real Estate Rental Ads. ."
           ],
-          "type": "string",
           "enumDeprecated": [
             false,
             false,
@@ -181,187 +340,32 @@
             "MERCHANT_REVIEWS",
             "YOUTUBE_CHECKOUT",
             "RENTAL_ADS"
-          ]
-        }
-      },
-      "id": "ProductChange",
-      "type": "object"
-    },
-    "ConversionType": {
-      "type": "object",
-      "description": "Message representing the type of a conversion event.",
-      "properties": {
-        "report": {
-          "description": "Output only. Option indicating if the type should be included in Merchant Center reporting.",
-          "readOnly": true,
-          "type": "boolean"
-        },
-        "name": {
-          "type": "string",
-          "description": "Output only. Conversion event name, as it'll be reported by the client.",
-          "readOnly": true
-        }
-      },
-      "id": "ConversionType"
-    },
-    "Empty": {
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
-      "properties": {},
-      "id": "Empty",
-      "type": "object"
-    },
-    "MerchantCenterDestination": {
-      "type": "object",
-      "description": "\"Merchant Center Destination\" sources can be used to send conversion events from an online store using a Google tag directly to a Merchant Center account where the source is created.",
-      "properties": {
-        "displayName": {
-          "description": "Required. Merchant-specified display name for the destination. This is the name that identifies the conversion source within the Merchant Center UI. The maximum length is 64 characters.",
-          "type": "string"
-        },
-        "destination": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. Merchant Center Destination ID."
-        },
-        "currencyCode": {
-          "description": "Required. Three-letter currency code (ISO 4217). The currency code defines in which currency the conversions sent to this destination will be reported in Merchant Center.",
-          "type": "string"
-        },
-        "attributionSettings": {
-          "description": "Required. Attribution settings used for the Merchant Center Destination.",
-          "$ref": "AttributionSettings"
-        }
-      },
-      "id": "MerchantCenterDestination"
-    },
-    "ConversionSource": {
-      "description": "Represents a conversion source owned by a Merchant account. A merchant account can have up to 200 conversion sources.",
-      "properties": {
-        "expireTime": {
-          "type": "string",
-          "format": "google-datetime",
-          "description": "Output only. The time when an archived conversion source becomes permanently deleted and is no longer available to undelete.",
-          "readOnly": true
-        },
-        "googleAnalyticsLink": {
-          "$ref": "GoogleAnalyticsLink",
-          "description": "Immutable. Conversion Source of type \"Link to Google Analytics Property\"."
-        },
-        "controller": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. Controller of the conversion source.",
-          "enumDescriptions": [
-            "Default value. This value is unused.",
-            "Controlled by the Merchant who owns the Conversion Source.",
-            "Controlled by the Youtube Affiliates program."
           ],
-          "enum": [
-            "CONTROLLER_UNSPECIFIED",
-            "MERCHANT",
-            "YOUTUBE_AFFILIATES"
-          ]
+          "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)"
         },
-        "merchantCenterDestination": {
-          "description": "Conversion Source of type \"Merchant Center Tag Destination\".",
-          "$ref": "MerchantCenterDestination"
-        },
-        "name": {
-          "description": "Output only. Identifier. Generated by the Content API upon creation of a new `ConversionSource`. Format: `[a-z]{4}:.+` The four characters before the colon represent the type of conversion source. Content after the colon represents the ID of the conversion source within that type. The ID of two different conversion sources might be the same across different types. The following type prefixes are supported: * `galk`: For GoogleAnalyticsLink sources. * `mcdn`: For MerchantCenterDestination sources.",
-          "readOnly": true,
-          "type": "string"
-        },
-        "state": {
-          "description": "Output only. Current state of this conversion source. Can't be edited through the API.",
-          "readOnly": true,
+        "oldValue": {
           "type": "string",
-          "enumDescriptions": [
-            "Conversion source has unspecified state.",
-            "Conversion source is fully functional.",
-            "Conversion source has been archived in the last 30 days and is currently not functional. Can be restored using the undelete method.",
-            "Conversion source creation has started but not fully finished yet."
-          ],
-          "enum": [
-            "STATE_UNSPECIFIED",
-            "ACTIVE",
-            "ARCHIVED",
-            "PENDING"
-          ]
+          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
+        },
+        "regionCode": {
+          "type": "string",
+          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format."
         }
       },
-      "id": "ConversionSource",
-      "type": "object"
-    },
-    "UndeleteConversionSourceRequest": {
-      "description": "Request message for the UndeleteConversionSource method.",
-      "id": "UndeleteConversionSourceRequest",
-      "type": "object",
-      "properties": {}
-    },
-    "AttributionSettings": {
-      "description": "Represents attribution settings for conversion sources receiving pre-attribution data.",
-      "id": "AttributionSettings",
-      "properties": {
-        "attributionModel": {
-          "enumDescriptions": [
-            "Unspecified model.",
-            "Cross-channel Last Click model.",
-            "Ads-preferred Last Click model.",
-            "Cross-channel Data Driven model.",
-            "Cross-channel First Click model.",
-            "Cross-channel Linear model.",
-            "Cross-channel Position Based model.",
-            "Cross-channel Time Decay model."
-          ],
-          "description": "Required. Attribution model.",
-          "type": "string",
-          "enum": [
-            "ATTRIBUTION_MODEL_UNSPECIFIED",
-            "CROSS_CHANNEL_LAST_CLICK",
-            "ADS_PREFERRED_LAST_CLICK",
-            "CROSS_CHANNEL_DATA_DRIVEN",
-            "CROSS_CHANNEL_FIRST_CLICK",
-            "CROSS_CHANNEL_LINEAR",
-            "CROSS_CHANNEL_POSITION_BASED",
-            "CROSS_CHANNEL_TIME_DECAY"
-          ]
-        },
-        "attributionLookbackWindowDays": {
-          "description": "Required. Lookback window (in days) used for attribution in this source. Supported values are `7`, `30` & `40`.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "conversionType": {
-          "description": "Immutable. Unordered list. List of different conversion types a conversion event can be classified as. A standard \"purchase\" type will be automatically created if this list is empty at creation time.",
-          "items": {
-            "$ref": "ConversionType"
-          },
-          "type": "array"
-        }
-      },
-      "type": "object"
-    },
-    "ListConversionSourcesResponse": {
-      "description": "Response message for the ListConversionSources method.",
-      "type": "object",
-      "id": "ListConversionSourcesResponse",
-      "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "Token to be used to fetch the next results page."
-        },
-        "conversionSources": {
-          "type": "array",
-          "items": {
-            "$ref": "ConversionSource"
-          },
-          "description": "List of conversion sources."
-        }
-      }
+      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
+      "id": "ProductChange"
     }
   },
-  "name": "merchantapi",
-  "rootUrl": "https://merchantapi.googleapis.com/",
+  "protocol": "rest",
+  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
+  "version": "conversions_v1beta",
+  "ownerDomain": "google.com",
+  "baseUrl": "https://merchantapi.googleapis.com/",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "batchPath": "batch",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -371,288 +375,284 @@
       }
     }
   },
-  "version_module": true,
-  "kind": "discovery#restDescription",
-  "ownerDomain": "google.com",
-  "canonicalName": "Merchant",
-  "discoveryVersion": "v1",
-  "fullyEncodeReservedExpansion": true,
-  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
-  "resources": {
-    "accounts": {
-      "resources": {
-        "conversionSources": {
-          "methods": {
-            "create": {
-              "request": {
-                "$ref": "ConversionSource"
-              },
-              "parameters": {
-                "parent": {
-                  "required": true,
-                  "location": "path",
-                  "type": "string",
-                  "pattern": "^accounts/[^/]+$",
-                  "description": "Required. The merchant account that will own the new conversion source. Format: `accounts/{account}`"
-                }
-              },
-              "path": "conversions/v1beta/{+parent}/conversionSources",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "response": {
-                "$ref": "ConversionSource"
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources",
-              "description": "Creates a new conversion source.",
-              "id": "merchantapi.accounts.conversionSources.create",
-              "httpMethod": "POST"
-            },
-            "get": {
-              "httpMethod": "GET",
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}",
-              "id": "merchantapi.accounts.conversionSources.get",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "path": "conversions/v1beta/{+name}",
-              "description": "Fetches a conversion source.",
-              "parameterOrder": [
-                "name"
-              ],
-              "parameters": {
-                "name": {
-                  "description": "Required. The name of the conversion source to be fetched. Format: `accounts/{account}/conversionSources/{conversion_source}`",
-                  "type": "string",
-                  "location": "path",
-                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$",
-                  "required": true
-                }
-              },
-              "response": {
-                "$ref": "ConversionSource"
-              }
-            },
-            "list": {
-              "parameters": {
-                "showDeleted": {
-                  "description": "Optional. Show deleted (archived) conversion sources. By default, deleted conversion sources are not returned.",
-                  "type": "boolean",
-                  "location": "query"
-                },
-                "pageSize": {
-                  "format": "int32",
-                  "description": "Optional. The maximum number of conversion sources to return in a page. If no `page_size` is specified, `100` is used as the default value. The maximum value is `200`. Values above `200` will be coerced to `200`. Regardless of pagination, at most `200` conversion sources are returned in total.",
-                  "location": "query",
-                  "type": "integer"
-                },
-                "parent": {
-                  "location": "path",
-                  "type": "string",
-                  "required": true,
-                  "description": "Required. The merchant account who owns the collection of conversion sources. Format: `accounts/{account}`",
-                  "pattern": "^accounts/[^/]+$"
-                },
-                "pageToken": {
-                  "description": "Optional. Page token.",
-                  "location": "query",
-                  "type": "string"
-                }
-              },
-              "id": "merchantapi.accounts.conversionSources.list",
-              "response": {
-                "$ref": "ListConversionSourcesResponse"
-              },
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources",
-              "parameterOrder": [
-                "parent"
-              ],
-              "httpMethod": "GET",
-              "description": "Retrieves the list of conversion sources the caller has access to.",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "path": "conversions/v1beta/{+parent}/conversionSources"
-            },
-            "patch": {
-              "httpMethod": "PATCH",
-              "parameterOrder": [
-                "name"
-              ],
-              "description": "Updates information of an existing conversion source. Available only for Merchant Center Destination conversion sources.",
-              "request": {
-                "$ref": "ConversionSource"
-              },
-              "response": {
-                "$ref": "ConversionSource"
-              },
-              "id": "merchantapi.accounts.conversionSources.patch",
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}",
-              "path": "conversions/v1beta/{+name}",
-              "parameters": {
-                "name": {
-                  "required": true,
-                  "location": "path",
-                  "description": "Output only. Identifier. Generated by the Content API upon creation of a new `ConversionSource`. Format: `[a-z]{4}:.+` The four characters before the colon represent the type of conversion source. Content after the colon represents the ID of the conversion source within that type. The ID of two different conversion sources might be the same across different types. The following type prefixes are supported: * `galk`: For GoogleAnalyticsLink sources. * `mcdn`: For MerchantCenterDestination sources.",
-                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$",
-                  "type": "string"
-                },
-                "updateMask": {
-                  "format": "google-fieldmask",
-                  "description": "Optional. List of fields being updated.",
-                  "location": "query",
-                  "type": "string"
-                }
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ]
-            },
-            "delete": {
-              "id": "merchantapi.accounts.conversionSources.delete",
-              "parameters": {
-                "name": {
-                  "type": "string",
-                  "required": true,
-                  "description": "Required. The name of the conversion source to be deleted. Format: `accounts/{account}/conversionSources/{conversion_source}`",
-                  "location": "path",
-                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$"
-                }
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "parameterOrder": [
-                "name"
-              ],
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}",
-              "description": "Archives an existing conversion source. If the conversion source is a Merchant Center Destination, it will be recoverable for 30 days. If the conversion source is a Google Analytics Link, it will be deleted immediately and can be restored by creating a new one.",
-              "response": {
-                "$ref": "Empty"
-              },
-              "httpMethod": "DELETE",
-              "path": "conversions/v1beta/{+name}"
-            },
-            "undelete": {
-              "parameters": {
-                "name": {
-                  "type": "string",
-                  "required": true,
-                  "location": "path",
-                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$",
-                  "description": "Required. The name of the conversion source to be undeleted. Format: `accounts/{account}/conversionSources/{conversion_source}`"
-                }
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "description": "Re-enables an archived conversion source. Only Available for Merchant Center Destination conversion sources.",
-              "response": {
-                "$ref": "ConversionSource"
-              },
-              "parameterOrder": [
-                "name"
-              ],
-              "request": {
-                "$ref": "UndeleteConversionSourceRequest"
-              },
-              "id": "merchantapi.accounts.conversionSources.undelete",
-              "httpMethod": "POST",
-              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}:undelete",
-              "path": "conversions/v1beta/{+name}:undelete"
-            }
-          }
-        }
-      }
-    }
-  },
-  "basePath": "",
-  "icons": {
-    "x32": "http://www.google.com/images/icons/product/search-32.gif",
-    "x16": "http://www.google.com/images/icons/product/search-16.gif"
-  },
+  "revision": "20260910",
   "documentationLink": "https://developers.google.com/merchant/api",
-  "ownerName": "Google",
+  "name": "merchantapi",
+  "basePath": "",
+  "id": "merchantapi:conversions_v1beta",
   "parameters": {
-    "$.xgafv": {
-      "type": "string",
-      "description": "V1 error format.",
+    "upload_protocol": {
       "location": "query",
+      "type": "string",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
+    },
+    "callback": {
+      "description": "JSONP",
+      "location": "query",
+      "type": "string"
+    },
+    "fields": {
+      "location": "query",
+      "description": "Selector specifying which fields to include in a partial response.",
+      "type": "string"
+    },
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "location": "query",
+      "type": "string"
+    },
+    "access_token": {
+      "description": "OAuth access token.",
+      "type": "string",
+      "location": "query"
+    },
+    "$.xgafv": {
       "enum": [
         "1",
         "2"
       ],
+      "description": "V1 error format.",
       "enumDescriptions": [
         "v1 error format",
         "v2 error format"
-      ]
-    },
-    "upload_protocol": {
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
-      "type": "string",
-      "location": "query"
-    },
-    "access_token": {
-      "type": "string",
+      ],
       "location": "query",
-      "description": "OAuth access token."
-    },
-    "uploadType": {
-      "type": "string",
-      "location": "query",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
-    },
-    "key": {
-      "location": "query",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
       "type": "string"
     },
-    "callback": {
-      "type": "string",
-      "description": "JSONP",
-      "location": "query"
-    },
-    "oauth_token": {
-      "type": "string",
-      "description": "OAuth 2.0 token for the current user.",
-      "location": "query"
-    },
-    "quotaUser": {
-      "location": "query",
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
     "alt": {
-      "location": "query",
       "type": "string",
+      "default": "json",
       "enum": [
         "json",
         "media",
         "proto"
       ],
       "description": "Data format for response.",
-      "default": "json",
+      "location": "query",
       "enumDescriptions": [
         "Responses with Content-Type of application/json",
         "Media download with context-dependent Content-Type",
         "Responses with Content-Type of application/x-protobuf"
       ]
     },
-    "fields": {
+    "oauth_token": {
       "type": "string",
-      "description": "Selector specifying which fields to include in a partial response.",
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user."
+    },
+    "quotaUser": {
+      "location": "query",
+      "type": "string",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
+    },
+    "uploadType": {
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
       "location": "query"
     },
     "prettyPrint": {
       "description": "Returns response with indentations and line breaks.",
+      "location": "query",
       "default": "true",
-      "type": "boolean",
-      "location": "query"
+      "type": "boolean"
     }
   },
-  "baseUrl": "https://merchantapi.googleapis.com/",
-  "description": "Programmatically manage your Merchant Center Accounts."
+  "discoveryVersion": "v1",
+  "resources": {
+    "accounts": {
+      "resources": {
+        "conversionSources": {
+          "methods": {
+            "delete": {
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "parameterOrder": [
+                "name"
+              ],
+              "description": "Archives an existing conversion source. If the conversion source is a Merchant Center Destination, it will be recoverable for 30 days. If the conversion source is a Google Analytics Link, it will be deleted immediately and can be restored by creating a new one.",
+              "path": "conversions/v1beta/{+name}",
+              "id": "merchantapi.accounts.conversionSources.delete",
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "description": "Required. The name of the conversion source to be deleted. Format: `accounts/{account}/conversionSources/{conversion_source}`",
+                  "type": "string",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$"
+                }
+              },
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}",
+              "response": {
+                "$ref": "Empty"
+              },
+              "httpMethod": "DELETE"
+            },
+            "get": {
+              "path": "conversions/v1beta/{+name}",
+              "id": "merchantapi.accounts.conversionSources.get",
+              "parameterOrder": [
+                "name"
+              ],
+              "httpMethod": "GET",
+              "response": {
+                "$ref": "ConversionSource"
+              },
+              "description": "Fetches a conversion source.",
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "description": "Required. The name of the conversion source to be fetched. Format: `accounts/{account}/conversionSources/{conversion_source}`",
+                  "type": "string",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$"
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}"
+            },
+            "patch": {
+              "path": "conversions/v1beta/{+name}",
+              "response": {
+                "$ref": "ConversionSource"
+              },
+              "httpMethod": "PATCH",
+              "id": "merchantapi.accounts.conversionSources.patch",
+              "parameterOrder": [
+                "name"
+              ],
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}",
+              "request": {
+                "$ref": "ConversionSource"
+              },
+              "parameters": {
+                "updateMask": {
+                  "format": "google-fieldmask",
+                  "type": "string",
+                  "description": "Optional. List of fields being updated.",
+                  "location": "query"
+                },
+                "name": {
+                  "type": "string",
+                  "location": "path",
+                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$",
+                  "required": true,
+                  "description": "Output only. Identifier. Generated by the Content API upon creation of a new `ConversionSource`. Format: `[a-z]{4}:.+` The four characters before the colon represent the type of conversion source. Content after the colon represents the ID of the conversion source within that type. The ID of two different conversion sources might be the same across different types. The following type prefixes are supported: * `galk`: For GoogleAnalyticsLink sources. * `mcdn`: For MerchantCenterDestination sources."
+                }
+              },
+              "description": "Updates information of an existing conversion source. Available only for Merchant Center Destination conversion sources."
+            },
+            "list": {
+              "description": "Retrieves the list of conversion sources the caller has access to.",
+              "response": {
+                "$ref": "ListConversionSourcesResponse"
+              },
+              "parameters": {
+                "pageToken": {
+                  "description": "Optional. Page token.",
+                  "type": "string",
+                  "location": "query"
+                },
+                "showDeleted": {
+                  "location": "query",
+                  "type": "boolean",
+                  "description": "Optional. Show deleted (archived) conversion sources. By default, deleted conversion sources are not returned."
+                },
+                "pageSize": {
+                  "description": "Optional. The maximum number of conversion sources to return in a page. If no `page_size` is specified, `100` is used as the default value. The maximum value is `200`. Values above `200` will be coerced to `200`. Regardless of pagination, at most `200` conversion sources are returned in total.",
+                  "format": "int32",
+                  "location": "query",
+                  "type": "integer"
+                },
+                "parent": {
+                  "required": true,
+                  "description": "Required. The merchant account who owns the collection of conversion sources. Format: `accounts/{account}`",
+                  "type": "string",
+                  "location": "path",
+                  "pattern": "^accounts/[^/]+$"
+                }
+              },
+              "id": "merchantapi.accounts.conversionSources.list",
+              "parameterOrder": [
+                "parent"
+              ],
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources",
+              "httpMethod": "GET",
+              "path": "conversions/v1beta/{+parent}/conversionSources"
+            },
+            "undelete": {
+              "path": "conversions/v1beta/{+name}:undelete",
+              "id": "merchantapi.accounts.conversionSources.undelete",
+              "parameters": {
+                "name": {
+                  "required": true,
+                  "pattern": "^accounts/[^/]+/conversionSources/[^/]+$",
+                  "description": "Required. The name of the conversion source to be undeleted. Format: `accounts/{account}/conversionSources/{conversion_source}`",
+                  "type": "string",
+                  "location": "path"
+                }
+              },
+              "response": {
+                "$ref": "ConversionSource"
+              },
+              "request": {
+                "$ref": "UndeleteConversionSourceRequest"
+              },
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources/{conversionSourcesId}:undelete",
+              "httpMethod": "POST",
+              "description": "Re-enables an archived conversion source. Only Available for Merchant Center Destination conversion sources.",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "parameterOrder": [
+                "name"
+              ]
+            },
+            "create": {
+              "request": {
+                "$ref": "ConversionSource"
+              },
+              "response": {
+                "$ref": "ConversionSource"
+              },
+              "description": "Creates a new conversion source.",
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "location": "path",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+$",
+                  "description": "Required. The merchant account that will own the new conversion source. Format: `accounts/{account}`"
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "id": "merchantapi.accounts.conversionSources.create",
+              "flatPath": "conversions/v1beta/accounts/{accountsId}/conversionSources",
+              "httpMethod": "POST",
+              "parameterOrder": [
+                "parent"
+              ],
+              "path": "conversions/v1beta/{+parent}/conversionSources"
+            }
+          }
+        }
+      }
+    }
+  },
+  "title": "Merchant API",
+  "version_module": true,
+  "fullyEncodeReservedExpansion": true,
+  "rootUrl": "https://merchantapi.googleapis.com/",
+  "ownerName": "Google",
+  "canonicalName": "Merchant"
 }

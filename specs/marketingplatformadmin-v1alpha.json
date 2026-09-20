@@ -1,6 +1,296 @@
 {
-  "batchPath": "batch",
+  "documentationLink": "https://developers.google.com/analytics/devguides/config/gmp/v1",
+  "basePath": "",
+  "ownerName": "Google",
+  "description": "The Google Marketing Platform Admin API allows for programmatic access to the Google Marketing Platform configuration data. You can use the Google Marketing Platform Admin API to manage links between your Google Marketing Platform organization and Google Analytics accounts, and to set the service level of your GA4 properties.",
   "schemas": {
+    "Empty": {
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "type": "object",
+      "id": "Empty",
+      "properties": {}
+    },
+    "ReportPropertyUsageRequest": {
+      "type": "object",
+      "description": "Request message for ReportPropertyUsage RPC.",
+      "properties": {
+        "month": {
+          "description": "Required. The target month to list property usages. Format: YYYY-MM. For example, \"2025-05\"",
+          "type": "string"
+        }
+      },
+      "id": "ReportPropertyUsageRequest"
+    },
+    "ListUserGroupMembersResponse": {
+      "id": "ListUserGroupMembersResponse",
+      "type": "object",
+      "properties": {
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
+          "type": "string"
+        },
+        "userGroupMembers": {
+          "items": {
+            "$ref": "UserGroupMember"
+          },
+          "type": "array",
+          "description": "User group members in the user group."
+        }
+      },
+      "description": "Response message for ListUserGroupMembers RPC."
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "currencyCode": {
+          "type": "string",
+          "description": "The three-letter currency code defined in ISO 4217."
+        },
+        "units": {
+          "format": "int64",
+          "type": "string",
+          "description": "The whole units of the amount. For example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar."
+        },
+        "nanos": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Number of nano (10^-9) units of the amount. The value must be between -999,999,999 and +999,999,999 inclusive. If `units` is positive, `nanos` must be positive or zero. If `units` is zero, `nanos` can be positive, zero, or negative. If `units` is negative, `nanos` must be negative or zero. For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000."
+        }
+      },
+      "description": "Represents an amount of money with its currency type.",
+      "id": "Money"
+    },
+    "AdminAccessBinding": {
+      "properties": {
+        "userEmail": {
+          "description": "Email address of the user.",
+          "type": "string"
+        },
+        "organizationRoles": {
+          "description": "Optional. A list of roles granted to the parent organization. USER_ADMIN_ROLE and BILLING_ADMIN_ROLE will be automatically added if ORG_ADMIN_ROLE is assigned. No roles will be assigned if no roles are specified.",
+          "items": {
+            "enumDescriptions": [
+              "Unknown or unspecified organization role.",
+              "Organization admin role that grants all administrative privileges.",
+              "User admin role that grants access to the Users section to perform various user management functions.",
+              "Billing admin role that grants access to the Billing section to perform various billing-related functions."
+            ],
+            "enum": [
+              "ORGANIZATION_ROLE_UNSPECIFIED",
+              "ORG_ADMIN_ROLE",
+              "USER_ADMIN_ROLE",
+              "BILLING_ADMIN_ROLE"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "Identifier. The resource name of this AdminAccessBinding. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id} Example: \"organizations/123abc/adminAccessBindings/456def\"",
+          "type": "string"
+        },
+        "userGroup": {
+          "description": "Resource name of the user group.",
+          "type": "string"
+        }
+      },
+      "id": "AdminAccessBinding",
+      "type": "object",
+      "description": "A resource message representing a binding to a set of roles."
+    },
+    "PropertyUsage": {
+      "description": "Contains the count of events received by the property, along with metadata that influences the volume of `billable` events.",
+      "type": "object",
+      "id": "PropertyUsage",
+      "properties": {
+        "totalEventCount": {
+          "description": "Total event count that the property received during the requested month.",
+          "type": "string",
+          "format": "int64"
+        },
+        "billableEventCount": {
+          "description": "The number of events for which the property is billed in the requested month.",
+          "type": "string",
+          "format": "int64"
+        },
+        "serviceLevel": {
+          "type": "string",
+          "description": "The service level of the property.",
+          "enum": [
+            "ANALYTICS_SERVICE_LEVEL_UNSPECIFIED",
+            "ANALYTICS_SERVICE_LEVEL_STANDARD",
+            "ANALYTICS_SERVICE_LEVEL_360"
+          ],
+          "enumDescriptions": [
+            "Service level unspecified.",
+            "The standard version of Google Analytics.",
+            "The premium version of Google Analytics."
+          ]
+        },
+        "propertyType": {
+          "enum": [
+            "ANALYTICS_PROPERTY_TYPE_UNSPECIFIED",
+            "ANALYTICS_PROPERTY_TYPE_ORDINARY",
+            "ANALYTICS_PROPERTY_TYPE_SUBPROPERTY",
+            "ANALYTICS_PROPERTY_TYPE_ROLLUP"
+          ],
+          "type": "string",
+          "enumDescriptions": [
+            "Unknown or unspecified property type",
+            "Ordinary Google Analytics property",
+            "Google Analytics subproperty",
+            "Google Analytics rollup property"
+          ],
+          "description": "The subtype of the analytics property. This affects the billable event count."
+        },
+        "accountId": {
+          "type": "string",
+          "description": "The ID of the property's parent account.",
+          "format": "int64"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the property."
+        },
+        "property": {
+          "type": "string",
+          "description": "The name of the Google Analytics Admin API property resource. Format: analyticsadmin.googleapis.com/properties/{property_id}"
+        }
+      }
+    },
+    "AnalyticsAccountLink": {
+      "type": "object",
+      "properties": {
+        "linkVerificationState": {
+          "enum": [
+            "LINK_VERIFICATION_STATE_UNSPECIFIED",
+            "LINK_VERIFICATION_STATE_VERIFIED",
+            "LINK_VERIFICATION_STATE_NOT_VERIFIED"
+          ],
+          "enumDescriptions": [
+            "The link state is unknown.",
+            "The link is established.",
+            "The link is requested, but hasn't been approved by the product account admin."
+          ],
+          "readOnly": true,
+          "description": "Output only. The verification state of the link between the Analytics account and the parent organization.",
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Output only. The human-readable name for the Analytics account.",
+          "readOnly": true
+        },
+        "analyticsAccount": {
+          "type": "string",
+          "description": "Required. Immutable. The resource name of the AnalyticsAdmin API account. The account ID will be used as the ID of this AnalyticsAccountLink resource, which will become the final component of the resource name. Format: analyticsadmin.googleapis.com/accounts/{account_id}"
+        },
+        "name": {
+          "description": "Identifier. Resource name of this AnalyticsAccountLink. Note the resource ID is the same as the ID of the Analtyics account. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id} Example: \"organizations/xyz/analyticsAccountLinks/1234\"",
+          "type": "string"
+        }
+      },
+      "description": "A resource message representing the link between a Google Analytics account and a Google Marketing Platform organization.",
+      "id": "AnalyticsAccountLink"
+    },
+    "Date": {
+      "id": "Date",
+      "properties": {
+        "day": {
+          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "year": {
+          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "month": {
+          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp"
+    },
+    "ListUserGroupsResponse": {
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
+        },
+        "userGroups": {
+          "type": "array",
+          "description": "User groups in the organization.",
+          "items": {
+            "$ref": "UserGroup"
+          }
+        }
+      },
+      "id": "ListUserGroupsResponse",
+      "description": "Response message for ListUserGroups RPC.",
+      "type": "object"
+    },
+    "SetPropertyServiceLevelResponse": {
+      "type": "object",
+      "id": "SetPropertyServiceLevelResponse",
+      "properties": {},
+      "description": "Response message for SetPropertyServiceLevel RPC."
+    },
+    "ClientData": {
+      "properties": {
+        "organization": {
+          "$ref": "Organization",
+          "description": "The end client that has/had contract with the requested sales org."
+        },
+        "endDate": {
+          "description": "The end date of the contract between the sales org and the end client.",
+          "$ref": "Date"
+        },
+        "startDate": {
+          "$ref": "Date",
+          "description": "The start date of the contract between the sales org and the end client."
+        }
+      },
+      "description": "Contains the client data.",
+      "id": "ClientData",
+      "type": "object"
+    },
+    "UserGroup": {
+      "description": "A resource message representing a user group in a GMP organization.",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "Optional. The human-readable name for the user group."
+        },
+        "name": {
+          "description": "Identifier. Resource name of this UserGroup. Format: organizations/{org_id}/userGroups/{user_group_id} Example: \"organizations/123abc/userGroups/456def\"",
+          "type": "string"
+        },
+        "description": {
+          "description": "Optional. The description of the user group.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "id": "UserGroup"
+    },
+    "FindSalesPartnerManagedClientsResponse": {
+      "properties": {
+        "clientData": {
+          "items": {
+            "$ref": "ClientData"
+          },
+          "description": "The clients managed by the sales org.",
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "id": "FindSalesPartnerManagedClientsResponse",
+      "description": "Response message for FindSalesPartnerManagedClients RPC."
+    },
     "ReportPropertyUsageResponse": {
       "type": "object",
       "properties": {
@@ -16,209 +306,29 @@
           "$ref": "BillInfo"
         }
       },
-      "description": "Response message for ReportPropertyUsage RPC.",
-      "id": "ReportPropertyUsageResponse"
-    },
-    "SetPropertyServiceLevelResponse": {
-      "id": "SetPropertyServiceLevelResponse",
-      "properties": {},
-      "type": "object",
-      "description": "Response message for SetPropertyServiceLevel RPC."
-    },
-    "AdminAccessBinding": {
-      "description": "A resource message representing a binding to a set of roles.",
-      "id": "AdminAccessBinding",
-      "type": "object",
-      "properties": {
-        "organizationRoles": {
-          "items": {
-            "type": "string",
-            "enumDescriptions": [
-              "Unknown or unspecified organization role.",
-              "Organization admin role that grants all administrative privileges.",
-              "User admin role that grants access to the Users section to perform various user management functions.",
-              "Billing admin role that grants access to the Billing section to perform various billing-related functions."
-            ],
-            "enum": [
-              "ORGANIZATION_ROLE_UNSPECIFIED",
-              "ORG_ADMIN_ROLE",
-              "USER_ADMIN_ROLE",
-              "BILLING_ADMIN_ROLE"
-            ]
-          },
-          "description": "Optional. A list of roles granted to the parent organization. USER_ADMIN_ROLE and BILLING_ADMIN_ROLE will be automatically added if ORG_ADMIN_ROLE is assigned. No roles will be assigned if no roles are specified.",
-          "type": "array"
-        },
-        "userEmail": {
-          "description": "Email address of the user.",
-          "type": "string"
-        },
-        "name": {
-          "description": "Identifier. The resource name of this AdminAccessBinding. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id} Example: \"organizations/123abc/adminAccessBindings/456def\"",
-          "type": "string"
-        },
-        "userGroup": {
-          "type": "string",
-          "description": "Resource name of the user group."
-        }
-      }
-    },
-    "BillInfo": {
-      "type": "object",
-      "id": "BillInfo",
-      "description": "Contains the bill amount.",
-      "properties": {
-        "baseFee": {
-          "$ref": "Money",
-          "description": "The amount of the monthly base fee."
-        },
-        "priceProtectionCredit": {
-          "$ref": "Money",
-          "description": "The amount of the price protection credit, this is only available for eligible customers."
-        },
-        "total": {
-          "description": "The total amount of the bill.",
-          "$ref": "Money"
-        },
-        "eventFee": {
-          "description": "The amount of the event fee.",
-          "$ref": "Money"
-        }
-      }
+      "id": "ReportPropertyUsageResponse",
+      "description": "Response message for ReportPropertyUsage RPC."
     },
     "ListAdminAccessBindingsResponse": {
-      "description": "Response message for ListAdminAccessBindings RPC.",
       "id": "ListAdminAccessBindingsResponse",
+      "description": "Response message for ListAdminAccessBindings RPC.",
       "type": "object",
       "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
-        },
         "adminAccessBindings": {
+          "type": "array",
+          "description": "Admin Access Bindings in the organization.",
           "items": {
             "$ref": "AdminAccessBinding"
-          },
-          "type": "array",
-          "description": "Admin Access Bindings in the organization."
-        }
-      }
-    },
-    "FindSalesPartnerManagedClientsResponse": {
-      "type": "object",
-      "id": "FindSalesPartnerManagedClientsResponse",
-      "description": "Response message for FindSalesPartnerManagedClients RPC.",
-      "properties": {
-        "clientData": {
-          "items": {
-            "$ref": "ClientData"
-          },
-          "type": "array",
-          "description": "The clients managed by the sales org."
-        }
-      }
-    },
-    "AnalyticsAccountLink": {
-      "id": "AnalyticsAccountLink",
-      "properties": {
-        "name": {
-          "description": "Identifier. Resource name of this AnalyticsAccountLink. Note the resource ID is the same as the ID of the Analtyics account. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id} Example: \"organizations/xyz/analyticsAccountLinks/1234\"",
-          "type": "string"
+          }
         },
-        "analyticsAccount": {
-          "description": "Required. Immutable. The resource name of the AnalyticsAdmin API account. The account ID will be used as the ID of this AnalyticsAccountLink resource, which will become the final component of the resource name. Format: analyticsadmin.googleapis.com/accounts/{account_id}",
-          "type": "string"
-        },
-        "displayName": {
-          "readOnly": true,
-          "description": "Output only. The human-readable name for the Analytics account.",
-          "type": "string"
-        },
-        "linkVerificationState": {
-          "enum": [
-            "LINK_VERIFICATION_STATE_UNSPECIFIED",
-            "LINK_VERIFICATION_STATE_VERIFIED",
-            "LINK_VERIFICATION_STATE_NOT_VERIFIED"
-          ],
-          "enumDescriptions": [
-            "The link state is unknown.",
-            "The link is established.",
-            "The link is requested, but hasn't been approved by the product account admin."
-          ],
-          "type": "string",
-          "description": "Output only. The verification state of the link between the Analytics account and the parent organization.",
-          "readOnly": true
-        }
-      },
-      "type": "object",
-      "description": "A resource message representing the link between a Google Analytics account and a Google Marketing Platform organization."
-    },
-    "ClientData": {
-      "id": "ClientData",
-      "description": "Contains the client data.",
-      "type": "object",
-      "properties": {
-        "endDate": {
-          "$ref": "Date",
-          "description": "The end date of the contract between the sales org and the end client."
-        },
-        "organization": {
-          "description": "The end client that has/had contract with the requested sales org.",
-          "$ref": "Organization"
-        },
-        "startDate": {
-          "description": "The start date of the contract between the sales org and the end client.",
-          "$ref": "Date"
-        }
-      }
-    },
-    "UserGroupMember": {
-      "description": "A resource message representing a member of a user group.",
-      "id": "UserGroupMember",
-      "properties": {
-        "userGroup": {
-          "description": "User group resource name of the group member.",
-          "type": "string"
-        },
-        "membershipRole": {
-          "type": "string",
-          "description": "Optional. The role of the member in the user group.",
-          "enum": [
-            "MEMBERSHIP_ROLE_UNSPECIFIED",
-            "MEMBERSHIP_ROLE_OWNER",
-            "MEMBERSHIP_ROLE_MEMBER"
-          ],
-          "enumDescriptions": [
-            "Unspecified membership role.",
-            "Owner role that can add and remove group members.",
-            "Member role that receives all permissions assigned to the group."
-          ]
-        },
-        "name": {
-          "type": "string",
-          "description": "Identifier. The resource name of this UserGroupMember. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id} Example: \"organizations/123abc/userGroups/456def/members/789ghi\""
-        },
-        "userEmail": {
-          "description": "Email address of the user member.",
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "ReportPropertyUsageRequest": {
-      "type": "object",
-      "description": "Request message for ReportPropertyUsage RPC.",
-      "id": "ReportPropertyUsageRequest",
-      "properties": {
-        "month": {
-          "description": "Required. The target month to list property usages. Format: YYYY-MM. For example, \"2025-05\"",
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
           "type": "string"
         }
       }
     },
     "Organization": {
       "type": "object",
-      "description": "A resource message representing a Google Marketing Platform organization.",
       "properties": {
         "displayName": {
           "description": "The human-readable name for the organization.",
@@ -229,109 +339,109 @@
           "description": "Identifier. The resource name of the GMP organization. Format: organizations/{org_id}"
         }
       },
-      "id": "Organization"
+      "id": "Organization",
+      "description": "A resource message representing a Google Marketing Platform organization."
     },
-    "ListUserGroupMembersResponse": {
+    "BillInfo": {
       "type": "object",
-      "description": "Response message for ListUserGroupMembers RPC.",
-      "id": "ListUserGroupMembersResponse",
+      "description": "Contains the bill amount.",
       "properties": {
-        "userGroupMembers": {
-          "items": {
-            "$ref": "UserGroupMember"
-          },
-          "description": "User group members in the user group.",
-          "type": "array"
+        "baseFee": {
+          "description": "The amount of the monthly base fee.",
+          "$ref": "Money"
         },
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
-        }
-      }
-    },
-    "Empty": {
-      "id": "Empty",
-      "properties": {},
-      "type": "object",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
-    },
-    "UserGroup": {
-      "id": "UserGroup",
-      "properties": {
-        "description": {
-          "description": "Optional. The description of the user group.",
-          "type": "string"
+        "eventFee": {
+          "description": "The amount of the event fee.",
+          "$ref": "Money"
         },
-        "name": {
-          "description": "Identifier. Resource name of this UserGroup. Format: organizations/{org_id}/userGroups/{user_group_id} Example: \"organizations/123abc/userGroups/456def\"",
-          "type": "string"
+        "total": {
+          "description": "The total amount of the bill.",
+          "$ref": "Money"
         },
-        "displayName": {
-          "description": "Optional. The human-readable name for the user group.",
-          "type": "string"
+        "priceProtectionCredit": {
+          "$ref": "Money",
+          "description": "The amount of the price protection credit, this is only available for eligible customers."
         }
       },
-      "type": "object",
-      "description": "A resource message representing a user group in a GMP organization."
+      "id": "BillInfo"
     },
     "ListAnalyticsAccountLinksResponse": {
+      "type": "object",
       "properties": {
         "analyticsAccountLinks": {
-          "description": "Analytics account links in this organization.",
           "items": {
             "$ref": "AnalyticsAccountLink"
           },
+          "description": "Analytics account links in this organization.",
           "type": "array"
         },
         "nextPageToken": {
-          "type": "string",
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
+          "type": "string"
         }
       },
-      "type": "object",
-      "description": "Response message for ListAnalyticsAccountLinks RPC.",
-      "id": "ListAnalyticsAccountLinksResponse"
+      "id": "ListAnalyticsAccountLinksResponse",
+      "description": "Response message for ListAnalyticsAccountLinks RPC."
     },
-    "Date": {
+    "FindSalesPartnerManagedClientsRequest": {
+      "id": "FindSalesPartnerManagedClientsRequest",
+      "type": "object",
       "properties": {
-        "year": {
-          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.",
-          "format": "int32",
-          "type": "integer"
-        },
-        "month": {
-          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.",
-          "type": "integer",
-          "format": "int32"
-        },
-        "day": {
-          "format": "int32",
-          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant.",
-          "type": "integer"
+        "isActive": {
+          "description": "Optional. If set, only active and just ended clients will be returned.",
+          "type": "boolean"
         }
       },
-      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp",
-      "id": "Date",
-      "type": "object"
+      "description": "Request message for FindSalesPartnerManagedClients RPC."
     },
-    "Money": {
-      "description": "Represents an amount of money with its currency type.",
-      "type": "object",
-      "id": "Money",
+    "UserGroupMember": {
+      "id": "UserGroupMember",
+      "description": "A resource message representing a member of a user group.",
       "properties": {
-        "units": {
-          "format": "int64",
+        "membershipRole": {
+          "enumDescriptions": [
+            "Unspecified membership role.",
+            "Owner role that can add and remove group members.",
+            "Member role that receives all permissions assigned to the group."
+          ],
+          "enum": [
+            "MEMBERSHIP_ROLE_UNSPECIFIED",
+            "MEMBERSHIP_ROLE_OWNER",
+            "MEMBERSHIP_ROLE_MEMBER"
+          ],
           "type": "string",
-          "description": "The whole units of the amount. For example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar."
+          "description": "Optional. The role of the member in the user group."
         },
-        "currencyCode": {
-          "description": "The three-letter currency code defined in ISO 4217.",
+        "userEmail": {
+          "description": "Email address of the user member.",
           "type": "string"
         },
-        "nanos": {
-          "type": "integer",
-          "description": "Number of nano (10^-9) units of the amount. The value must be between -999,999,999 and +999,999,999 inclusive. If `units` is positive, `nanos` must be positive or zero. If `units` is zero, `nanos` can be positive, zero, or negative. If `units` is negative, `nanos` must be negative or zero. For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.",
-          "format": "int32"
+        "userGroup": {
+          "type": "string",
+          "description": "User group resource name of the group member."
+        },
+        "name": {
+          "description": "Identifier. The resource name of this UserGroupMember. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id} Example: \"organizations/123abc/userGroups/456def/members/789ghi\"",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ListOrganizationsResponse": {
+      "type": "object",
+      "id": "ListOrganizationsResponse",
+      "description": "Response message for ListOrganizations RPC.",
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
+        },
+        "organizations": {
+          "description": "The Organization resource that the user has access to, which includes the org id and display name.",
+          "items": {
+            "$ref": "Organization"
+          },
+          "type": "array"
         }
       }
     },
@@ -340,209 +450,75 @@
       "type": "object",
       "description": "Request message for SetPropertyServiceLevel RPC.",
       "properties": {
-        "analyticsProperty": {
-          "description": "Required. The Analytics property to change the ServiceLevel setting. This field is the name of the Google Analytics Admin API property resource. Format: analyticsadmin.googleapis.com/properties/{property_id}",
-          "type": "string"
-        },
         "serviceLevel": {
+          "enumDescriptions": [
+            "Service level unspecified.",
+            "The standard version of Google Analytics.",
+            "The premium version of Google Analytics."
+          ],
+          "type": "string",
           "enum": [
             "ANALYTICS_SERVICE_LEVEL_UNSPECIFIED",
             "ANALYTICS_SERVICE_LEVEL_STANDARD",
             "ANALYTICS_SERVICE_LEVEL_360"
           ],
-          "description": "Required. The service level to set for this property.",
+          "description": "Required. The service level to set for this property."
+        },
+        "analyticsProperty": {
           "type": "string",
-          "enumDescriptions": [
-            "Service level unspecified.",
-            "The standard version of Google Analytics.",
-            "The premium version of Google Analytics."
-          ]
+          "description": "Required. The Analytics property to change the ServiceLevel setting. This field is the name of the Google Analytics Admin API property resource. Format: analyticsadmin.googleapis.com/properties/{property_id}"
         }
       }
-    },
-    "PropertyUsage": {
-      "description": "Contains the count of events received by the property, along with metadata that influences the volume of `billable` events.",
-      "type": "object",
-      "properties": {
-        "totalEventCount": {
-          "description": "Total event count that the property received during the requested month.",
-          "type": "string",
-          "format": "int64"
-        },
-        "property": {
-          "type": "string",
-          "description": "The name of the Google Analytics Admin API property resource. Format: analyticsadmin.googleapis.com/properties/{property_id}"
-        },
-        "billableEventCount": {
-          "format": "int64",
-          "type": "string",
-          "description": "The number of events for which the property is billed in the requested month."
-        },
-        "accountId": {
-          "format": "int64",
-          "type": "string",
-          "description": "The ID of the property's parent account."
-        },
-        "displayName": {
-          "description": "The display name of the property.",
-          "type": "string"
-        },
-        "serviceLevel": {
-          "type": "string",
-          "enum": [
-            "ANALYTICS_SERVICE_LEVEL_UNSPECIFIED",
-            "ANALYTICS_SERVICE_LEVEL_STANDARD",
-            "ANALYTICS_SERVICE_LEVEL_360"
-          ],
-          "enumDescriptions": [
-            "Service level unspecified.",
-            "The standard version of Google Analytics.",
-            "The premium version of Google Analytics."
-          ],
-          "description": "The service level of the property."
-        },
-        "propertyType": {
-          "description": "The subtype of the analytics property. This affects the billable event count.",
-          "type": "string",
-          "enumDescriptions": [
-            "Unknown or unspecified property type",
-            "Ordinary Google Analytics property",
-            "Google Analytics subproperty",
-            "Google Analytics rollup property"
-          ],
-          "enum": [
-            "ANALYTICS_PROPERTY_TYPE_UNSPECIFIED",
-            "ANALYTICS_PROPERTY_TYPE_ORDINARY",
-            "ANALYTICS_PROPERTY_TYPE_SUBPROPERTY",
-            "ANALYTICS_PROPERTY_TYPE_ROLLUP"
-          ]
-        }
-      },
-      "id": "PropertyUsage"
-    },
-    "ListOrganizationsResponse": {
-      "type": "object",
-      "id": "ListOrganizationsResponse",
-      "properties": {
-        "organizations": {
-          "description": "The Organization resource that the user has access to, which includes the org id and display name.",
-          "type": "array",
-          "items": {
-            "$ref": "Organization"
-          }
-        },
-        "nextPageToken": {
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
-          "type": "string"
-        }
-      },
-      "description": "Response message for ListOrganizations RPC."
-    },
-    "ListUserGroupsResponse": {
-      "properties": {
-        "userGroups": {
-          "items": {
-            "$ref": "UserGroup"
-          },
-          "description": "User groups in the organization.",
-          "type": "array"
-        },
-        "nextPageToken": {
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "description": "Response message for ListUserGroups RPC.",
-      "id": "ListUserGroupsResponse"
-    },
-    "FindSalesPartnerManagedClientsRequest": {
-      "description": "Request message for FindSalesPartnerManagedClients RPC.",
-      "type": "object",
-      "properties": {
-        "isActive": {
-          "type": "boolean",
-          "description": "Optional. If set, only active and just ended clients will be returned."
-        }
-      },
-      "id": "FindSalesPartnerManagedClientsRequest"
     }
   },
-  "ownerDomain": "google.com",
-  "fullyEncodeReservedExpansion": true,
-  "description": "The Google Marketing Platform Admin API allows for programmatic access to the Google Marketing Platform configuration data. You can use the Google Marketing Platform Admin API to manage links between your Google Marketing Platform organization and Google Analytics accounts, and to set the service level of your GA4 properties.",
-  "icons": {
-    "x32": "http://www.google.com/images/icons/product/search-32.gif",
-    "x16": "http://www.google.com/images/icons/product/search-16.gif"
-  },
   "kind": "discovery#restDescription",
-  "title": "Google Marketing Platform Admin API",
+  "canonicalName": "Google Marketing Platform Admin API",
+  "ownerDomain": "google.com",
+  "discoveryVersion": "v1",
+  "protocol": "rest",
+  "revision": "20260917",
   "resources": {
     "organizations": {
       "methods": {
         "get": {
-          "path": "v1alpha/{+name}",
-          "id": "marketingplatformadmin.organizations.get",
-          "parameters": {
-            "name": {
-              "type": "string",
-              "pattern": "^organizations/[^/]+$",
-              "required": true,
-              "description": "Required. The name of the Organization to retrieve. Format: organizations/{org_id}",
-              "location": "path"
-            }
-          },
           "flatPath": "v1alpha/organizations/{organizationsId}",
           "response": {
             "$ref": "Organization"
           },
+          "description": "Looks up a single organization.",
           "scopes": [
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
           ],
-          "description": "Looks up a single organization.",
-          "httpMethod": "GET",
-          "parameterOrder": [
-            "name"
-          ]
-        },
-        "findSalesPartnerManagedClients": {
-          "flatPath": "v1alpha/organizations/{organizationsId}:findSalesPartnerManagedClients",
-          "response": {
-            "$ref": "FindSalesPartnerManagedClientsResponse"
-          },
-          "description": "Returns a list of clients managed by the sales partner organization. User needs to be an OrgAdmin/BillingAdmin on the sales partner organization in order to view the end clients.",
-          "httpMethod": "POST",
           "parameters": {
-            "organization": {
-              "pattern": "^organizations/[^/]+$",
-              "type": "string",
-              "description": "Required. The name of the sales partner organization. Format: organizations/{org_id}",
+            "name": {
+              "required": true,
+              "description": "Required. The name of the Organization to retrieve. Format: organizations/{org_id}",
               "location": "path",
-              "required": true
+              "pattern": "^organizations/[^/]+$",
+              "type": "string"
             }
           },
-          "scopes": [
-            "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
-            "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-          ],
+          "path": "v1alpha/{+name}",
           "parameterOrder": [
-            "organization"
+            "name"
           ],
-          "request": {
-            "$ref": "FindSalesPartnerManagedClientsRequest"
-          },
-          "path": "v1alpha/{+organization}:findSalesPartnerManagedClients",
-          "id": "marketingplatformadmin.organizations.findSalesPartnerManagedClients"
+          "id": "marketingplatformadmin.organizations.get",
+          "httpMethod": "GET"
         },
         "list": {
-          "description": "Returns a list of organizations that the user has access to.",
-          "path": "v1alpha/organizations",
-          "parameterOrder": [],
           "scopes": [
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
           ],
+          "flatPath": "v1alpha/organizations",
+          "response": {
+            "$ref": "ListOrganizationsResponse"
+          },
+          "parameterOrder": [],
+          "path": "v1alpha/organizations",
+          "id": "marketingplatformadmin.organizations.list",
+          "httpMethod": "GET",
           "parameters": {
             "pageToken": {
               "description": "Optional. A page token, received from a previous ListOrganizations call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListOrganizations` must match the call that provided the page token.",
@@ -556,326 +532,183 @@
               "location": "query"
             }
           },
-          "httpMethod": "GET",
-          "flatPath": "v1alpha/organizations",
-          "response": {
-            "$ref": "ListOrganizationsResponse"
-          },
-          "id": "marketingplatformadmin.organizations.list"
+          "description": "Returns a list of organizations that the user has access to."
         },
         "reportPropertyUsage": {
           "parameters": {
             "organization": {
-              "description": "Required. Specifies the organization whose property usage will be listed. Format: organizations/{org_id}",
-              "type": "string",
-              "required": true,
+              "pattern": "^organizations/[^/]+$",
               "location": "path",
-              "pattern": "^organizations/[^/]+$"
+              "required": true,
+              "type": "string",
+              "description": "Required. Specifies the organization whose property usage will be listed. Format: organizations/{org_id}"
             }
           },
-          "id": "marketingplatformadmin.organizations.reportPropertyUsage",
-          "httpMethod": "POST",
           "flatPath": "v1alpha/organizations/{organizationsId}:reportPropertyUsage",
           "response": {
             "$ref": "ReportPropertyUsageResponse"
           },
-          "request": {
-            "$ref": "ReportPropertyUsageRequest"
-          },
-          "parameterOrder": [
-            "organization"
-          ],
+          "httpMethod": "POST",
+          "description": "Gets the usage and billing data for properties within the organization for the specified month. Per direct client org, user needs to be OrgAdmin/BillingAdmin on the organization in order to view the billing and usage data. Per sales partner client org, user needs to be OrgAdmin/BillingAdmin on the sales partner org in order to view the billing and usage data, or OrgAdmin/BillingAdmin on the sales partner client org in order to view the usage data only.",
+          "id": "marketingplatformadmin.organizations.reportPropertyUsage",
           "scopes": [
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
             "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
           ],
-          "description": "Gets the usage and billing data for properties within the organization for the specified month. Per direct client org, user needs to be OrgAdmin/BillingAdmin on the organization in order to view the billing and usage data. Per sales partner client org, user needs to be OrgAdmin/BillingAdmin on the sales partner org in order to view the billing and usage data, or OrgAdmin/BillingAdmin on the sales partner client org in order to view the usage data only.",
-          "path": "v1alpha/{+organization}:reportPropertyUsage"
+          "path": "v1alpha/{+organization}:reportPropertyUsage",
+          "parameterOrder": [
+            "organization"
+          ],
+          "request": {
+            "$ref": "ReportPropertyUsageRequest"
+          }
+        },
+        "findSalesPartnerManagedClients": {
+          "request": {
+            "$ref": "FindSalesPartnerManagedClientsRequest"
+          },
+          "httpMethod": "POST",
+          "parameters": {
+            "organization": {
+              "required": true,
+              "description": "Required. The name of the sales partner organization. Format: organizations/{org_id}",
+              "location": "path",
+              "pattern": "^organizations/[^/]+$",
+              "type": "string"
+            }
+          },
+          "path": "v1alpha/{+organization}:findSalesPartnerManagedClients",
+          "id": "marketingplatformadmin.organizations.findSalesPartnerManagedClients",
+          "scopes": [
+            "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
+            "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+          ],
+          "parameterOrder": [
+            "organization"
+          ],
+          "flatPath": "v1alpha/organizations/{organizationsId}:findSalesPartnerManagedClients",
+          "response": {
+            "$ref": "FindSalesPartnerManagedClientsResponse"
+          },
+          "description": "Returns a list of clients managed by the sales partner organization. User needs to be an OrgAdmin/BillingAdmin on the sales partner organization in order to view the end clients."
         }
       },
       "resources": {
         "userGroups": {
-          "methods": {
-            "get": {
-              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
-              "response": {
-                "$ref": "UserGroup"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "description": "Looks up a single user group.",
-              "parameterOrder": [
-                "name"
-              ],
-              "parameters": {
-                "name": {
-                  "type": "string",
-                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
-                  "location": "path",
-                  "description": "Required. The name of the UserGroup to retrieve. Format: organizations/{org_id}/userGroups/{user_group_id}",
-                  "required": true
-                }
-              },
-              "httpMethod": "GET",
-              "id": "marketingplatformadmin.organizations.userGroups.get",
-              "path": "v1alpha/{+name}"
-            },
-            "list": {
-              "path": "v1alpha/{+parent}/userGroups",
-              "parameterOrder": [
-                "parent"
-              ],
-              "description": "Returns a list of user groups in the specified GMP organization.",
-              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups",
-              "response": {
-                "$ref": "ListUserGroupsResponse"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "httpMethod": "GET",
-              "id": "marketingplatformadmin.organizations.userGroups.list",
-              "parameters": {
-                "pageToken": {
-                  "description": "Optional. A page token, received from a previous ListUserGroups call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListUserGroups` must match the call that provided the page token.",
-                  "type": "string",
-                  "location": "query"
-                },
-                "parent": {
-                  "type": "string",
-                  "location": "path",
-                  "required": true,
-                  "pattern": "^organizations/[^/]+$",
-                  "description": "Required. The parent org where this UserGroup will be listed. Format: organizations/{org_id}"
-                },
-                "pageSize": {
-                  "location": "query",
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "Optional. The maximum number of user groups to return in one call. The service may return fewer than this value. If unspecified, at most 50 user groups will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000."
-                }
-              }
-            },
-            "patch": {
-              "parameters": {
-                "name": {
-                  "description": "Identifier. Resource name of this UserGroup. Format: organizations/{org_id}/userGroups/{user_group_id} Example: \"organizations/123abc/userGroups/456def\"",
-                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
-                  "required": true,
-                  "location": "path",
-                  "type": "string"
-                },
-                "updateMask": {
-                  "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields.",
-                  "type": "string",
-                  "location": "query",
-                  "format": "google-fieldmask"
-                }
-              },
-              "request": {
-                "$ref": "UserGroup"
-              },
-              "description": "Updates a user group in the specified GMP organization.",
-              "httpMethod": "PATCH",
-              "id": "marketingplatformadmin.organizations.userGroups.patch",
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "parameterOrder": [
-                "name"
-              ],
-              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
-              "response": {
-                "$ref": "UserGroup"
-              },
-              "path": "v1alpha/{+name}"
-            },
-            "delete": {
-              "path": "v1alpha/{+name}",
-              "description": "Deletes a user group in the specified GMP organization.",
-              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
-              "response": {
-                "$ref": "Empty"
-              },
-              "id": "marketingplatformadmin.organizations.userGroups.delete",
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "parameters": {
-                "name": {
-                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
-                  "description": "Required. The name of the user group to delete. Format: organizations/{org_id}/userGroups/{user_group_id}",
-                  "type": "string",
-                  "location": "path",
-                  "required": true
-                }
-              },
-              "httpMethod": "DELETE",
-              "parameterOrder": [
-                "name"
-              ]
-            },
-            "create": {
-              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups",
-              "response": {
-                "$ref": "UserGroup"
-              },
-              "request": {
-                "$ref": "UserGroup"
-              },
-              "description": "Creates a user group in the specified GMP organization.",
-              "httpMethod": "POST",
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "path": "v1alpha/{+parent}/userGroups",
-              "parameters": {
-                "parent": {
-                  "type": "string",
-                  "pattern": "^organizations/[^/]+$",
-                  "description": "Required. The parent resource where this UserGroup will be created. Format: organizations/{org_id}",
-                  "location": "path",
-                  "required": true
-                }
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "id": "marketingplatformadmin.organizations.userGroups.create"
-            }
-          },
           "resources": {
             "members": {
               "methods": {
-                "delete": {
-                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
-                  "response": {
-                    "$ref": "Empty"
-                  },
-                  "description": "Deletes a member in the specified GMP user group.",
-                  "httpMethod": "DELETE",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "id": "marketingplatformadmin.organizations.userGroups.members.delete",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "type": "string",
-                      "required": true,
-                      "pattern": "^organizations/[^/]+/userGroups/[^/]+/members/[^/]+$",
-                      "description": "Required. The name of the user group member to delete. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id}"
-                    }
-                  },
-                  "path": "v1alpha/{+name}",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-                  ]
-                },
-                "create": {
-                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members",
-                  "response": {
-                    "$ref": "UserGroupMember"
-                  },
-                  "httpMethod": "POST",
+                "list": {
+                  "path": "v1alpha/{+parent}/members",
                   "parameterOrder": [
                     "parent"
                   ],
-                  "parameters": {
-                    "parent": {
-                      "description": "Required. The parent resource where this UserGroupMember will be created. Format: organizations/{org_id}/userGroups/{user_group_id}",
-                      "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
-                      "required": true,
-                      "type": "string",
-                      "location": "path"
-                    }
-                  },
-                  "path": "v1alpha/{+parent}/members",
-                  "request": {
-                    "$ref": "UserGroupMember"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-                  ],
-                  "id": "marketingplatformadmin.organizations.userGroups.members.create",
-                  "description": "Adds a member to the specified GMP user group."
-                },
-                "patch": {
-                  "httpMethod": "PATCH",
-                  "description": "Updates a member in the specified GMP user group.",
-                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
-                  "response": {
-                    "$ref": "UserGroupMember"
-                  },
-                  "parameters": {
-                    "updateMask": {
-                      "type": "string",
-                      "format": "google-fieldmask",
-                      "location": "query",
-                      "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields."
-                    },
-                    "name": {
-                      "required": true,
-                      "type": "string",
-                      "description": "Identifier. The resource name of this UserGroupMember. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id} Example: \"organizations/123abc/userGroups/456def/members/789ghi\"",
-                      "location": "path",
-                      "pattern": "^organizations/[^/]+/userGroups/[^/]+/members/[^/]+$"
-                    }
-                  },
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "path": "v1alpha/{+name}",
-                  "id": "marketingplatformadmin.organizations.userGroups.members.patch",
-                  "request": {
-                    "$ref": "UserGroupMember"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-                  ]
-                },
-                "list": {
-                  "httpMethod": "GET",
-                  "id": "marketingplatformadmin.organizations.userGroups.members.list",
-                  "description": "Returns a list of members in the specified user group.",
                   "scopes": [
                     "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
                     "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-                  ],
-                  "parameters": {
-                    "pageToken": {
-                      "type": "string",
-                      "location": "query",
-                      "description": "Optional. A page token, received from a previous ListUserGroupMembers call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListUserGroupMembers` must match the call that provided the page token."
-                    },
-                    "pageSize": {
-                      "type": "integer",
-                      "format": "int32",
-                      "description": "Optional. The maximum number of user group members to return in one call. The service may return fewer than this value. If unspecified, at most 50 user group members will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
-                      "location": "query"
-                    },
-                    "parent": {
-                      "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
-                      "description": "Required. The parent user group where this UserGroupMember will be listed. Format: organizations/{org_id}/userGroups/{user_group_id}",
-                      "location": "path",
-                      "type": "string",
-                      "required": true
-                    }
-                  },
-                  "parameterOrder": [
-                    "parent"
                   ],
                   "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members",
                   "response": {
                     "$ref": "ListUserGroupMembersResponse"
                   },
-                  "path": "v1alpha/{+parent}/members"
+                  "parameters": {
+                    "pageSize": {
+                      "description": "Optional. The maximum number of user group members to return in one call. The service may return fewer than this value. If unspecified, at most 50 user group members will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
+                      "location": "query",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "parent": {
+                      "location": "path",
+                      "description": "Required. The parent user group where this UserGroupMember will be listed. Format: organizations/{org_id}/userGroups/{user_group_id}",
+                      "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
+                      "required": true,
+                      "type": "string"
+                    },
+                    "pageToken": {
+                      "location": "query",
+                      "type": "string",
+                      "description": "Optional. A page token, received from a previous ListUserGroupMembers call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListUserGroupMembers` must match the call that provided the page token."
+                    }
+                  },
+                  "description": "Returns a list of members in the specified user group.",
+                  "httpMethod": "GET",
+                  "id": "marketingplatformadmin.organizations.userGroups.members.list"
+                },
+                "patch": {
+                  "httpMethod": "PATCH",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "description": "Identifier. The resource name of this UserGroupMember. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id} Example: \"organizations/123abc/userGroups/456def/members/789ghi\"",
+                      "type": "string",
+                      "pattern": "^organizations/[^/]+/userGroups/[^/]+/members/[^/]+$",
+                      "location": "path",
+                      "required": true
+                    },
+                    "updateMask": {
+                      "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields.",
+                      "format": "google-fieldmask",
+                      "location": "query",
+                      "type": "string"
+                    }
+                  },
+                  "id": "marketingplatformadmin.organizations.userGroups.members.patch",
+                  "description": "Updates a member in the specified GMP user group.",
+                  "path": "v1alpha/{+name}",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+                  ],
+                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
+                  "response": {
+                    "$ref": "UserGroupMember"
+                  },
+                  "request": {
+                    "$ref": "UserGroupMember"
+                  }
+                },
+                "delete": {
+                  "scopes": [
+                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+                  ],
+                  "id": "marketingplatformadmin.organizations.userGroups.members.delete",
+                  "parameters": {
+                    "name": {
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^organizations/[^/]+/userGroups/[^/]+/members/[^/]+$",
+                      "location": "path",
+                      "description": "Required. The name of the user group member to delete. Format: organizations/{org_id}/userGroups/{user_group_id}/members/{member_id}"
+                    }
+                  },
+                  "description": "Deletes a member in the specified GMP user group.",
+                  "httpMethod": "DELETE",
+                  "path": "v1alpha/{+name}",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
+                  "response": {
+                    "$ref": "Empty"
+                  }
                 },
                 "get": {
+                  "scopes": [
+                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
+                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+                  ],
+                  "parameterOrder": [
+                    "name"
+                  ],
                   "description": "Looks up a single user group member.",
+                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
+                  "response": {
+                    "$ref": "UserGroupMember"
+                  },
+                  "path": "v1alpha/{+name}",
+                  "httpMethod": "GET",
                   "parameters": {
                     "name": {
                       "required": true,
@@ -885,21 +718,188 @@
                       "type": "string"
                     }
                   },
-                  "httpMethod": "GET",
+                  "id": "marketingplatformadmin.organizations.userGroups.members.get"
+                },
+                "create": {
+                  "parameters": {
+                    "parent": {
+                      "required": true,
+                      "type": "string",
+                      "location": "path",
+                      "description": "Required. The parent resource where this UserGroupMember will be created. Format: organizations/{org_id}/userGroups/{user_group_id}",
+                      "pattern": "^organizations/[^/]+/userGroups/[^/]+$"
+                    }
+                  },
+                  "id": "marketingplatformadmin.organizations.userGroups.members.create",
+                  "description": "Adds a member to the specified GMP user group.",
+                  "request": {
+                    "$ref": "UserGroupMember"
+                  },
+                  "path": "v1alpha/{+parent}/members",
                   "scopes": [
-                    "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
                     "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
                   ],
-                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members/{membersId}",
+                  "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}/members",
                   "response": {
                     "$ref": "UserGroupMember"
                   },
-                  "path": "v1alpha/{+name}",
-                  "id": "marketingplatformadmin.organizations.userGroups.members.get",
+                  "httpMethod": "POST",
                   "parameterOrder": [
-                    "name"
+                    "parent"
                   ]
                 }
+              }
+            }
+          },
+          "methods": {
+            "list": {
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "parameterOrder": [
+                "parent"
+              ],
+              "path": "v1alpha/{+parent}/userGroups",
+              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups",
+              "response": {
+                "$ref": "ListUserGroupsResponse"
+              },
+              "description": "Returns a list of user groups in the specified GMP organization.",
+              "id": "marketingplatformadmin.organizations.userGroups.list",
+              "httpMethod": "GET",
+              "parameters": {
+                "pageSize": {
+                  "type": "integer",
+                  "format": "int32",
+                  "location": "query",
+                  "description": "Optional. The maximum number of user groups to return in one call. The service may return fewer than this value. If unspecified, at most 50 user groups will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000."
+                },
+                "pageToken": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "Optional. A page token, received from a previous ListUserGroups call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListUserGroups` must match the call that provided the page token."
+                },
+                "parent": {
+                  "required": true,
+                  "description": "Required. The parent org where this UserGroup will be listed. Format: organizations/{org_id}",
+                  "location": "path",
+                  "type": "string",
+                  "pattern": "^organizations/[^/]+$"
+                }
+              }
+            },
+            "get": {
+              "httpMethod": "GET",
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "required": true,
+                  "location": "path",
+                  "description": "Required. The name of the UserGroup to retrieve. Format: organizations/{org_id}/userGroups/{user_group_id}",
+                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$"
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
+              "response": {
+                "$ref": "UserGroup"
+              },
+              "id": "marketingplatformadmin.organizations.userGroups.get",
+              "description": "Looks up a single user group.",
+              "path": "v1alpha/{+name}"
+            },
+            "delete": {
+              "description": "Deletes a user group in the specified GMP organization.",
+              "parameterOrder": [
+                "name"
+              ],
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
+              "response": {
+                "$ref": "Empty"
+              },
+              "id": "marketingplatformadmin.organizations.userGroups.delete",
+              "path": "v1alpha/{+name}",
+              "parameters": {
+                "name": {
+                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$",
+                  "location": "path",
+                  "required": true,
+                  "description": "Required. The name of the user group to delete. Format: organizations/{org_id}/userGroups/{user_group_id}",
+                  "type": "string"
+                }
+              },
+              "httpMethod": "DELETE"
+            },
+            "create": {
+              "parameters": {
+                "parent": {
+                  "pattern": "^organizations/[^/]+$",
+                  "description": "Required. The parent resource where this UserGroup will be created. Format: organizations/{org_id}",
+                  "type": "string",
+                  "location": "path",
+                  "required": true
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "parameterOrder": [
+                "parent"
+              ],
+              "description": "Creates a user group in the specified GMP organization.",
+              "httpMethod": "POST",
+              "request": {
+                "$ref": "UserGroup"
+              },
+              "id": "marketingplatformadmin.organizations.userGroups.create",
+              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups",
+              "response": {
+                "$ref": "UserGroup"
+              },
+              "path": "v1alpha/{+parent}/userGroups"
+            },
+            "patch": {
+              "description": "Updates a user group in the specified GMP organization.",
+              "parameters": {
+                "updateMask": {
+                  "format": "google-fieldmask",
+                  "type": "string",
+                  "location": "query",
+                  "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields."
+                },
+                "name": {
+                  "description": "Identifier. Resource name of this UserGroup. Format: organizations/{org_id}/userGroups/{user_group_id} Example: \"organizations/123abc/userGroups/456def\"",
+                  "type": "string",
+                  "required": true,
+                  "location": "path",
+                  "pattern": "^organizations/[^/]+/userGroups/[^/]+$"
+                }
+              },
+              "request": {
+                "$ref": "UserGroup"
+              },
+              "httpMethod": "PATCH",
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "path": "v1alpha/{+name}",
+              "parameterOrder": [
+                "name"
+              ],
+              "id": "marketingplatformadmin.organizations.userGroups.patch",
+              "flatPath": "v1alpha/organizations/{organizationsId}/userGroups/{userGroupsId}",
+              "response": {
+                "$ref": "UserGroup"
               }
             }
           }
@@ -907,11 +907,32 @@
         "adminAccessBindings": {
           "methods": {
             "list": {
-              "id": "marketingplatformadmin.organizations.adminAccessBindings.list",
+              "httpMethod": "GET",
               "parameterOrder": [
                 "parent"
               ],
-              "path": "v1alpha/{+parent}/adminAccessBindings",
+              "id": "marketingplatformadmin.organizations.adminAccessBindings.list",
+              "description": "Returns a list of admin access bindings in the specified GMP organization.",
+              "parameters": {
+                "pageToken": {
+                  "location": "query",
+                  "description": "Optional. A page token, received from a previous ListAdminAccessBindings call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAdminAccessBindings` must match the call that provided the page token.",
+                  "type": "string"
+                },
+                "parent": {
+                  "pattern": "^organizations/[^/]+$",
+                  "description": "Required. The parent organization, which owns this collection of Admin Access Bindings. Format: organizations/{org_id}",
+                  "type": "string",
+                  "location": "path",
+                  "required": true
+                },
+                "pageSize": {
+                  "type": "integer",
+                  "description": "Optional. The maximum number of Admin Access Bindings to return in one call. The service may return fewer than this value. If unspecified, at most 50 Admin Access Bindings will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
+                  "location": "query",
+                  "format": "int32"
+                }
+              },
               "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings",
               "response": {
                 "$ref": "ListAdminAccessBindingsResponse"
@@ -920,335 +941,236 @@
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
               ],
-              "parameters": {
-                "pageSize": {
-                  "location": "query",
-                  "description": "Optional. The maximum number of Admin Access Bindings to return in one call. The service may return fewer than this value. If unspecified, at most 50 Admin Access Bindings will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "pageToken": {
-                  "location": "query",
-                  "description": "Optional. A page token, received from a previous ListAdminAccessBindings call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAdminAccessBindings` must match the call that provided the page token.",
-                  "type": "string"
-                },
-                "parent": {
-                  "location": "path",
-                  "required": true,
-                  "description": "Required. The parent organization, which owns this collection of Admin Access Bindings. Format: organizations/{org_id}",
-                  "type": "string",
-                  "pattern": "^organizations/[^/]+$"
-                }
-              },
-              "description": "Returns a list of admin access bindings in the specified GMP organization.",
-              "httpMethod": "GET"
+              "path": "v1alpha/{+parent}/adminAccessBindings"
             },
             "patch": {
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
               "httpMethod": "PATCH",
-              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings/{adminAccessBindingsId}",
-              "response": {
-                "$ref": "AdminAccessBinding"
-              },
+              "id": "marketingplatformadmin.organizations.adminAccessBindings.patch",
+              "path": "v1alpha/{+name}",
               "parameters": {
-                "updateMask": {
-                  "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields.",
-                  "location": "query",
-                  "format": "google-fieldmask",
-                  "type": "string"
-                },
                 "name": {
+                  "location": "path",
+                  "description": "Identifier. The resource name of this AdminAccessBinding. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id} Example: \"organizations/123abc/adminAccessBindings/456def\"",
                   "required": true,
                   "type": "string",
-                  "location": "path",
-                  "pattern": "^organizations/[^/]+/adminAccessBindings/[^/]+$",
-                  "description": "Identifier. The resource name of this AdminAccessBinding. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id} Example: \"organizations/123abc/adminAccessBindings/456def\""
+                  "pattern": "^organizations/[^/]+/adminAccessBindings/[^/]+$"
+                },
+                "updateMask": {
+                  "format": "google-fieldmask",
+                  "location": "query",
+                  "type": "string",
+                  "description": "Required. The list of fields to update. Field names must be in snake case (for example, \"field_to_update\"). Omitted fields will not be updated. To replace the entire entity, use one path with the string \"*\" to match all fields."
                 }
               },
-              "request": {
+              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings/{adminAccessBindingsId}",
+              "response": {
                 "$ref": "AdminAccessBinding"
               },
               "parameterOrder": [
                 "name"
               ],
-              "description": "Updates an admin access binding in the specified GMP organization.",
-              "id": "marketingplatformadmin.organizations.adminAccessBindings.patch",
-              "path": "v1alpha/{+name}"
+              "request": {
+                "$ref": "AdminAccessBinding"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "description": "Updates an admin access binding in the specified GMP organization."
             },
-            "get": {
+            "create": {
+              "parameterOrder": [
+                "parent"
+              ],
+              "path": "v1alpha/{+parent}/adminAccessBindings",
+              "id": "marketingplatformadmin.organizations.adminAccessBindings.create",
+              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings",
+              "response": {
+                "$ref": "AdminAccessBinding"
+              },
+              "httpMethod": "POST",
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
               "parameters": {
-                "name": {
-                  "description": "Required. The name of the AdminAccessBinding to retrieve. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id}",
+                "parent": {
+                  "description": "Required. The parent organization, which owns this Admin Access Binding. Format: organizations/{org_id}",
                   "type": "string",
-                  "required": true,
-                  "pattern": "^organizations/[^/]+/adminAccessBindings/[^/]+$",
-                  "location": "path"
+                  "pattern": "^organizations/[^/]+$",
+                  "location": "path",
+                  "required": true
                 }
               },
-              "path": "v1alpha/{+name}",
-              "httpMethod": "GET",
-              "id": "marketingplatformadmin.organizations.adminAccessBindings.get",
+              "request": {
+                "$ref": "AdminAccessBinding"
+              },
+              "description": "Creates an admin access binding in the specified GMP organization."
+            },
+            "get": {
+              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings/{adminAccessBindingsId}",
+              "response": {
+                "$ref": "AdminAccessBinding"
+              },
               "scopes": [
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
               ],
               "description": "Looks up a single admin access binding.",
-              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings/{adminAccessBindingsId}",
-              "response": {
-                "$ref": "AdminAccessBinding"
+              "httpMethod": "GET",
+              "id": "marketingplatformadmin.organizations.adminAccessBindings.get",
+              "path": "v1alpha/{+name}",
+              "parameters": {
+                "name": {
+                  "required": true,
+                  "location": "path",
+                  "description": "Required. The name of the AdminAccessBinding to retrieve. Format: organizations/{org_id}/adminAccessBindings/{admin_access_binding_id}",
+                  "type": "string",
+                  "pattern": "^organizations/[^/]+/adminAccessBindings/[^/]+$"
+                }
               },
               "parameterOrder": [
                 "name"
               ]
-            },
-            "create": {
-              "id": "marketingplatformadmin.organizations.adminAccessBindings.create",
-              "parameters": {
-                "parent": {
-                  "required": true,
-                  "location": "path",
-                  "description": "Required. The parent organization, which owns this Admin Access Binding. Format: organizations/{org_id}",
-                  "type": "string",
-                  "pattern": "^organizations/[^/]+$"
-                }
-              },
-              "path": "v1alpha/{+parent}/adminAccessBindings",
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "parameterOrder": [
-                "parent"
-              ],
-              "flatPath": "v1alpha/organizations/{organizationsId}/adminAccessBindings",
-              "response": {
-                "$ref": "AdminAccessBinding"
-              },
-              "request": {
-                "$ref": "AdminAccessBinding"
-              },
-              "description": "Creates an admin access binding in the specified GMP organization.",
-              "httpMethod": "POST"
             }
           }
         },
         "analyticsAccountLinks": {
           "methods": {
-            "setPropertyServiceLevel": {
-              "scopes": [
-                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ],
-              "parameters": {
-                "analyticsAccountLink": {
-                  "pattern": "^organizations/[^/]+/analyticsAccountLinks/[^/]+$",
-                  "description": "Required. The parent AnalyticsAccountLink scope where this property is in. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id}",
-                  "location": "path",
-                  "type": "string",
-                  "required": true
-                }
-              },
-              "path": "v1alpha/{+analyticsAccountLink}:setPropertyServiceLevel",
-              "httpMethod": "POST",
-              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.setPropertyServiceLevel",
-              "parameterOrder": [
-                "analyticsAccountLink"
-              ],
-              "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks/{analyticsAccountLinksId}:setPropertyServiceLevel",
-              "response": {
-                "$ref": "SetPropertyServiceLevelResponse"
-              },
-              "description": "Updates the service level for an Analytics property.",
-              "request": {
-                "$ref": "SetPropertyServiceLevelRequest"
-              }
-            },
             "delete": {
-              "parameters": {
-                "name": {
-                  "pattern": "^organizations/[^/]+/analyticsAccountLinks/[^/]+$",
-                  "type": "string",
-                  "location": "path",
-                  "description": "Required. The name of the Analytics account link to delete. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id}",
-                  "required": true
-                }
-              },
-              "parameterOrder": [
-                "name"
-              ],
-              "description": "Deletes the AnalyticsAccountLink, which detaches the Analytics account from the Google Marketing Platform organization. User needs to be an org user, and admin on the Analytics account in order to delete the link.",
+              "httpMethod": "DELETE",
               "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks/{analyticsAccountLinksId}",
               "response": {
                 "$ref": "Empty"
               },
+              "parameterOrder": [
+                "name"
+              ],
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "location": "path",
+                  "description": "Required. The name of the Analytics account link to delete. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id}",
+                  "required": true,
+                  "pattern": "^organizations/[^/]+/analyticsAccountLinks/[^/]+$"
+                }
+              },
+              "description": "Deletes the AnalyticsAccountLink, which detaches the Analytics account from the Google Marketing Platform organization. User needs to be an org user, and admin on the Analytics account in order to delete the link.",
               "path": "v1alpha/{+name}",
               "scopes": [
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
               ],
-              "httpMethod": "DELETE",
               "id": "marketingplatformadmin.organizations.analyticsAccountLinks.delete"
             },
             "list": {
+              "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks",
+              "response": {
+                "$ref": "ListAnalyticsAccountLinksResponse"
+              },
               "description": "Lists the Google Analytics accounts link to the specified Google Marketing Platform organization.",
               "httpMethod": "GET",
               "parameterOrder": [
                 "parent"
               ],
-              "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks",
-              "response": {
-                "$ref": "ListAnalyticsAccountLinksResponse"
-              },
-              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.list",
+              "path": "v1alpha/{+parent}/analyticsAccountLinks",
               "scopes": [
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.read",
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
               ],
               "parameters": {
-                "parent": {
-                  "location": "path",
-                  "pattern": "^organizations/[^/]+$",
-                  "required": true,
-                  "description": "Required. The parent organization, which owns this collection of Analytics account links. Format: organizations/{org_id}",
-                  "type": "string"
-                },
                 "pageSize": {
-                  "description": "Optional. The maximum number of Analytics account links to return in one call. The service may return fewer than this value. If unspecified, at most 50 Analytics account links will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
                   "location": "query",
                   "type": "integer",
-                  "format": "int32"
+                  "format": "int32",
+                  "description": "Optional. The maximum number of Analytics account links to return in one call. The service may return fewer than this value. If unspecified, at most 50 Analytics account links will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000."
                 },
                 "pageToken": {
                   "type": "string",
-                  "description": "Optional. A page token, received from a previous ListAnalyticsAccountLinks call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAnalyticsAccountLinks` must match the call that provided the page token.",
-                  "location": "query"
+                  "location": "query",
+                  "description": "Optional. A page token, received from a previous ListAnalyticsAccountLinks call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAnalyticsAccountLinks` must match the call that provided the page token."
+                },
+                "parent": {
+                  "pattern": "^organizations/[^/]+$",
+                  "description": "Required. The parent organization, which owns this collection of Analytics account links. Format: organizations/{org_id}",
+                  "type": "string",
+                  "required": true,
+                  "location": "path"
                 }
               },
-              "path": "v1alpha/{+parent}/analyticsAccountLinks"
+              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.list"
             },
             "create": {
-              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.create",
-              "httpMethod": "POST",
-              "path": "v1alpha/{+parent}/analyticsAccountLinks",
               "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks",
               "response": {
                 "$ref": "AnalyticsAccountLink"
               },
+              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.create",
               "parameters": {
                 "parent": {
-                  "pattern": "^organizations/[^/]+$",
                   "description": "Required. The parent resource where this Analytics account link will be created. Format: organizations/{org_id}",
+                  "pattern": "^organizations/[^/]+$",
                   "type": "string",
-                  "location": "path",
-                  "required": true
+                  "required": true,
+                  "location": "path"
                 }
               },
-              "request": {
-                "$ref": "AnalyticsAccountLink"
-              },
+              "httpMethod": "POST",
+              "path": "v1alpha/{+parent}/analyticsAccountLinks",
               "description": "Creates the link between the Analytics account and the Google Marketing Platform organization. User needs to be an org user, and admin on the Analytics account to create the link. If the account is already linked to an organization, user needs to unlink the account from the current organization, then try link again.",
               "parameterOrder": [
                 "parent"
               ],
               "scopes": [
                 "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
-              ]
+              ],
+              "request": {
+                "$ref": "AnalyticsAccountLink"
+              }
+            },
+            "setPropertyServiceLevel": {
+              "scopes": [
+                "https://www.googleapis.com/auth/marketingplatformadmin.analytics.update"
+              ],
+              "id": "marketingplatformadmin.organizations.analyticsAccountLinks.setPropertyServiceLevel",
+              "flatPath": "v1alpha/organizations/{organizationsId}/analyticsAccountLinks/{analyticsAccountLinksId}:setPropertyServiceLevel",
+              "response": {
+                "$ref": "SetPropertyServiceLevelResponse"
+              },
+              "path": "v1alpha/{+analyticsAccountLink}:setPropertyServiceLevel",
+              "parameterOrder": [
+                "analyticsAccountLink"
+              ],
+              "httpMethod": "POST",
+              "parameters": {
+                "analyticsAccountLink": {
+                  "pattern": "^organizations/[^/]+/analyticsAccountLinks/[^/]+$",
+                  "type": "string",
+                  "description": "Required. The parent AnalyticsAccountLink scope where this property is in. Format: organizations/{org_id}/analyticsAccountLinks/{analytics_account_link_id}",
+                  "location": "path",
+                  "required": true
+                }
+              },
+              "request": {
+                "$ref": "SetPropertyServiceLevelRequest"
+              },
+              "description": "Updates the service level for an Analytics property."
             }
           }
         }
       }
     }
   },
-  "documentationLink": "https://developers.google.com/analytics/devguides/config/gmp/v1",
-  "parameters": {
-    "alt": {
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "location": "query",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "default": "json",
-      "type": "string",
-      "description": "Data format for response."
-    },
-    "access_token": {
-      "location": "query",
-      "description": "OAuth access token.",
-      "type": "string"
-    },
-    "fields": {
-      "description": "Selector specifying which fields to include in a partial response.",
-      "type": "string",
-      "location": "query"
-    },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "type": "string",
-      "location": "query"
-    },
-    "$.xgafv": {
-      "type": "string",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "description": "V1 error format.",
-      "location": "query",
-      "enum": [
-        "1",
-        "2"
-      ]
-    },
-    "uploadType": {
-      "location": "query",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
-      "type": "string"
-    },
-    "upload_protocol": {
-      "type": "string",
-      "location": "query",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    },
-    "quotaUser": {
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
-      "location": "query"
-    },
-    "key": {
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
-      "location": "query",
-      "type": "string"
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "location": "query",
-      "description": "Returns response with indentations and line breaks.",
-      "default": "true"
-    },
-    "callback": {
-      "description": "JSONP",
-      "type": "string",
-      "location": "query"
-    }
-  },
-  "basePath": "",
-  "version_module": true,
-  "version": "v1alpha",
-  "baseUrl": "https://marketingplatformadmin.googleapis.com/",
-  "canonicalName": "Google Marketing Platform Admin API",
-  "protocol": "rest",
-  "revision": "20260917",
-  "rootUrl": "https://marketingplatformadmin.googleapis.com/",
   "mtlsRootUrl": "https://marketingplatformadmin.mtls.googleapis.com/",
-  "discoveryVersion": "v1",
+  "fullyEncodeReservedExpansion": true,
+  "rootUrl": "https://marketingplatformadmin.googleapis.com/",
   "servicePath": "",
-  "name": "marketingplatformadmin",
   "id": "marketingplatformadmin:v1alpha",
+  "title": "Google Marketing Platform Admin API",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "batchPath": "batch",
+  "version_module": true,
+  "baseUrl": "https://marketingplatformadmin.googleapis.com/",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -1261,5 +1183,83 @@
       }
     }
   },
-  "ownerName": "Google"
+  "parameters": {
+    "prettyPrint": {
+      "default": "true",
+      "description": "Returns response with indentations and line breaks.",
+      "type": "boolean",
+      "location": "query"
+    },
+    "upload_protocol": {
+      "type": "string",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "location": "query"
+    },
+    "access_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth access token."
+    },
+    "key": {
+      "location": "query",
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "type": "string"
+    },
+    "uploadType": {
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "location": "query",
+      "type": "string"
+    },
+    "fields": {
+      "description": "Selector specifying which fields to include in a partial response.",
+      "location": "query",
+      "type": "string"
+    },
+    "callback": {
+      "location": "query",
+      "description": "JSONP",
+      "type": "string"
+    },
+    "quotaUser": {
+      "type": "string",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "location": "query"
+    },
+    "$.xgafv": {
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "type": "string",
+      "description": "V1 error format.",
+      "location": "query",
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "alt": {
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "location": "query",
+      "default": "json",
+      "type": "string",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "description": "Data format for response."
+    },
+    "oauth_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user."
+    }
+  },
+  "name": "marketingplatformadmin",
+  "version": "v1alpha"
 }
