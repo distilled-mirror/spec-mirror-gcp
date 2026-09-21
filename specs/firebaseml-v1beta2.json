@@ -1,5 +1,263 @@
 {
+  "version": "v1beta2",
+  "description": "Access custom machine learning models hosted via Firebase ML.",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "schemas": {
+    "Status": {
+      "id": "Status",
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
+      "properties": {
+        "code": {
+          "format": "int32",
+          "type": "integer",
+          "description": "The status code, which should be an enum value of google.rpc.Code."
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
+            }
+          },
+          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use."
+        },
+        "message": {
+          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "Model": {
+      "properties": {
+        "name": {
+          "description": "The resource name of the Model. Model names have the form `projects/{project_id}/models/{model_id}` The name is ignored when creating a model.",
+          "type": "string"
+        },
+        "etag": {
+          "description": "Output only. See RFC7232 https://tools.ietf.org/html/rfc7232#section-2.3",
+          "readOnly": true,
+          "type": "string"
+        },
+        "state": {
+          "description": "State common to all model types. Includes publishing and validation information.",
+          "$ref": "ModelState"
+        },
+        "modelHash": {
+          "readOnly": true,
+          "description": "Output only. The model_hash will change if a new file is available for download.",
+          "type": "string"
+        },
+        "activeOperations": {
+          "description": "Output only. Lists operation ids associated with this model whose status is NOT done.",
+          "readOnly": true,
+          "items": {
+            "$ref": "Operation"
+          },
+          "type": "array"
+        },
+        "createTime": {
+          "type": "string",
+          "description": "Output only. Timestamp when this model was created in Firebase ML.",
+          "readOnly": true,
+          "format": "google-datetime"
+        },
+        "updateTime": {
+          "format": "google-datetime",
+          "description": "Output only. Timestamp when this model was updated in Firebase ML.",
+          "readOnly": true,
+          "type": "string"
+        },
+        "displayName": {
+          "description": "Required. The name of the model to create. The name can be up to 32 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscores(_) and ASCII digits 0-9. It must start with a letter.",
+          "type": "string"
+        },
+        "tfliteModel": {
+          "$ref": "TfLiteModel",
+          "description": "A TFLite Model"
+        },
+        "tags": {
+          "description": "User defined tags which can be used to group/filter models during listing",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "id": "Model",
+      "description": "An ML model hosted in Firebase ML",
+      "type": "object"
+    },
+    "Empty": {
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "type": "object",
+      "properties": {},
+      "id": "Empty"
+    },
+    "DownloadModelResponse": {
+      "type": "object",
+      "properties": {
+        "modelFormat": {
+          "enumDescriptions": [
+            "Unknown format",
+            "TFLite model"
+          ],
+          "readOnly": true,
+          "enum": [
+            "MODEL_FORMAT_UNSPECIFIED",
+            "TFLITE"
+          ],
+          "type": "string",
+          "description": "Output only. The format of the model being downloaded."
+        },
+        "sizeBytes": {
+          "type": "string",
+          "format": "int64",
+          "description": "Output only. The size of the file(s), if this information is available.",
+          "readOnly": true
+        },
+        "downloadUri": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. A download URI for the model/zip file."
+        },
+        "expireTime": {
+          "type": "string",
+          "description": "Output only. The time that the download URI link expires. If the link has expired, the REST call must be repeated.",
+          "format": "google-datetime",
+          "readOnly": true
+        }
+      },
+      "description": "The response for downloading a model to device.",
+      "id": "DownloadModelResponse"
+    },
+    "ListModelsResponse": {
+      "id": "ListModelsResponse",
+      "description": "The response for list models",
+      "properties": {
+        "models": {
+          "description": "The list of models",
+          "type": "array",
+          "items": {
+            "$ref": "Model"
+          }
+        },
+        "nextPageToken": {
+          "type": "string",
+          "description": "Token to retrieve the next page of results, or empty if there are no more results in the list."
+        }
+      },
+      "type": "object"
+    },
+    "ModelState": {
+      "description": "State common to all model types. Includes publishing and validation information.",
+      "id": "ModelState",
+      "type": "object",
+      "properties": {
+        "published": {
+          "type": "boolean",
+          "description": "Indicates if this model has been published."
+        },
+        "validationError": {
+          "readOnly": true,
+          "$ref": "Status",
+          "description": "Output only. Indicates the latest validation error on the model if any. A model may have validation errors if there were problems during the model creation/update. e.g. in the case of a TfLiteModel, if a tflite model file was missing or in the wrong format. This field will be empty for valid models."
+        }
+      }
+    },
+    "Operation": {
+      "description": "This resource represents a long-running operation that is the result of a network API call.",
+      "properties": {
+        "response": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`."
+        },
+        "metadata": {
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
+          "type": "object"
+        },
+        "error": {
+          "description": "The error result of the operation in case of failure or cancellation.",
+          "$ref": "Status"
+        },
+        "name": {
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
+          "type": "string"
+        },
+        "done": {
+          "type": "boolean",
+          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available."
+        }
+      },
+      "type": "object",
+      "id": "Operation"
+    },
+    "ModelOperationMetadata": {
+      "type": "object",
+      "description": "This is returned in the longrunning operations for create/update.",
+      "properties": {
+        "name": {
+          "description": "The name of the model we are creating/updating The name must have the form `projects/{project_id}/models/{model_id}`",
+          "type": "string"
+        },
+        "basicOperationStatus": {
+          "type": "string",
+          "enum": [
+            "BASIC_OPERATION_STATUS_UNSPECIFIED",
+            "BASIC_OPERATION_STATUS_UPLOADING",
+            "BASIC_OPERATION_STATUS_VERIFYING"
+          ],
+          "enumDescriptions": [
+            "The status is unspecified",
+            "The model file is being uploaded",
+            "The model file is being verified"
+          ]
+        }
+      },
+      "id": "ModelOperationMetadata"
+    },
+    "TfLiteModel": {
+      "id": "TfLiteModel",
+      "properties": {
+        "gcsTfliteUri": {
+          "type": "string",
+          "description": "The TfLite file containing the model. (Stored in Google Cloud). The gcs_tflite_uri should have form: gs://some-bucket/some-model.tflite Note: If you update the file in the original location, it is necessary to call UpdateModel for ML to pick up and validate the updated file."
+        },
+        "sizeBytes": {
+          "readOnly": true,
+          "description": "Output only. The size of the TFLite model",
+          "type": "string"
+        },
+        "automlModel": {
+          "description": "The AutoML model id referencing a model you created with the AutoML API. The name should have format 'projects//locations//models/' (This is the model resource name returned from the AutoML API)",
+          "type": "string"
+        }
+      },
+      "description": "Information that is specific to TfLite models.",
+      "type": "object"
+    }
+  },
   "basePath": "",
+  "ownerDomain": "google.com",
+  "name": "firebaseml",
+  "revision": "20260916",
+  "canonicalName": "Firebase ML",
+  "mtlsRootUrl": "https://firebaseml.mtls.googleapis.com/",
+  "rootUrl": "https://firebaseml.googleapis.com/",
+  "protocol": "rest",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -9,293 +267,50 @@
       }
     }
   },
-  "revision": "20260916",
-  "schemas": {
-    "ModelOperationMetadata": {
-      "description": "This is returned in the longrunning operations for create/update.",
-      "id": "ModelOperationMetadata",
-      "type": "object",
-      "properties": {
-        "basicOperationStatus": {
-          "enumDescriptions": [
-            "The status is unspecified",
-            "The model file is being uploaded",
-            "The model file is being verified"
-          ],
-          "enum": [
-            "BASIC_OPERATION_STATUS_UNSPECIFIED",
-            "BASIC_OPERATION_STATUS_UPLOADING",
-            "BASIC_OPERATION_STATUS_VERIFYING"
-          ],
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the model we are creating/updating The name must have the form `projects/{project_id}/models/{model_id}`"
-        }
-      }
-    },
-    "ListModelsResponse": {
-      "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "Token to retrieve the next page of results, or empty if there are no more results in the list."
-        },
-        "models": {
-          "items": {
-            "$ref": "Model"
-          },
-          "type": "array",
-          "description": "The list of models"
-        }
-      },
-      "id": "ListModelsResponse",
-      "description": "The response for list models",
-      "type": "object"
-    },
-    "Empty": {
-      "id": "Empty",
-      "properties": {},
-      "type": "object",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
-    },
-    "DownloadModelResponse": {
-      "type": "object",
-      "properties": {
-        "downloadUri": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. A download URI for the model/zip file."
-        },
-        "modelFormat": {
-          "enumDescriptions": [
-            "Unknown format",
-            "TFLite model"
-          ],
-          "enum": [
-            "MODEL_FORMAT_UNSPECIFIED",
-            "TFLITE"
-          ],
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The format of the model being downloaded."
-        },
-        "sizeBytes": {
-          "type": "string",
-          "description": "Output only. The size of the file(s), if this information is available.",
-          "readOnly": true,
-          "format": "int64"
-        },
-        "expireTime": {
-          "readOnly": true,
-          "description": "Output only. The time that the download URI link expires. If the link has expired, the REST call must be repeated.",
-          "format": "google-datetime",
-          "type": "string"
-        }
-      },
-      "id": "DownloadModelResponse",
-      "description": "The response for downloading a model to device."
-    },
-    "Status": {
-      "properties": {
-        "code": {
-          "format": "int32",
-          "description": "The status code, which should be an enum value of google.rpc.Code.",
-          "type": "integer"
-        },
-        "message": {
-          "type": "string",
-          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client."
-        },
-        "details": {
-          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
-          "items": {
-            "type": "object",
-            "additionalProperties": {
-              "description": "Properties of the object. Contains field @type with type URL.",
-              "type": "any"
-            }
-          },
-          "type": "array"
-        }
-      },
-      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
-      "type": "object",
-      "id": "Status"
-    },
-    "ModelState": {
-      "properties": {
-        "published": {
-          "description": "Indicates if this model has been published.",
-          "type": "boolean"
-        },
-        "validationError": {
-          "readOnly": true,
-          "$ref": "Status",
-          "description": "Output only. Indicates the latest validation error on the model if any. A model may have validation errors if there were problems during the model creation/update. e.g. in the case of a TfLiteModel, if a tflite model file was missing or in the wrong format. This field will be empty for valid models."
-        }
-      },
-      "type": "object",
-      "id": "ModelState",
-      "description": "State common to all model types. Includes publishing and validation information."
-    },
-    "TfLiteModel": {
-      "properties": {
-        "automlModel": {
-          "type": "string",
-          "description": "The AutoML model id referencing a model you created with the AutoML API. The name should have format 'projects//locations//models/' (This is the model resource name returned from the AutoML API)"
-        },
-        "gcsTfliteUri": {
-          "type": "string",
-          "description": "The TfLite file containing the model. (Stored in Google Cloud). The gcs_tflite_uri should have form: gs://some-bucket/some-model.tflite Note: If you update the file in the original location, it is necessary to call UpdateModel for ML to pick up and validate the updated file."
-        },
-        "sizeBytes": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The size of the TFLite model"
-        }
-      },
-      "description": "Information that is specific to TfLite models.",
-      "type": "object",
-      "id": "TfLiteModel"
-    },
-    "Operation": {
-      "properties": {
-        "metadata": {
-          "type": "object",
-          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          }
-        },
-        "name": {
-          "type": "string",
-          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
-        },
-        "error": {
-          "description": "The error result of the operation in case of failure or cancellation.",
-          "$ref": "Status"
-        },
-        "response": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`."
-        },
-        "done": {
-          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
-          "type": "boolean"
-        }
-      },
-      "type": "object",
-      "id": "Operation",
-      "description": "This resource represents a long-running operation that is the result of a network API call."
-    },
-    "Model": {
-      "type": "object",
-      "description": "An ML model hosted in Firebase ML",
-      "properties": {
-        "tfliteModel": {
-          "description": "A TFLite Model",
-          "$ref": "TfLiteModel"
-        },
-        "activeOperations": {
-          "type": "array",
-          "description": "Output only. Lists operation ids associated with this model whose status is NOT done.",
-          "items": {
-            "$ref": "Operation"
-          },
-          "readOnly": true
-        },
-        "state": {
-          "description": "State common to all model types. Includes publishing and validation information.",
-          "$ref": "ModelState"
-        },
-        "createTime": {
-          "readOnly": true,
-          "description": "Output only. Timestamp when this model was created in Firebase ML.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "etag": {
-          "description": "Output only. See RFC7232 https://tools.ietf.org/html/rfc7232#section-2.3",
-          "type": "string",
-          "readOnly": true
-        },
-        "modelHash": {
-          "description": "Output only. The model_hash will change if a new file is available for download.",
-          "readOnly": true,
-          "type": "string"
-        },
-        "tags": {
-          "items": {
-            "type": "string"
-          },
-          "description": "User defined tags which can be used to group/filter models during listing",
-          "type": "array"
-        },
-        "displayName": {
-          "type": "string",
-          "description": "Required. The name of the model to create. The name can be up to 32 characters long and can consist only of ASCII Latin letters A-Z and a-z, underscores(_) and ASCII digits 0-9. It must start with a letter."
-        },
-        "name": {
-          "type": "string",
-          "description": "The resource name of the Model. Model names have the form `projects/{project_id}/models/{model_id}` The name is ignored when creating a model."
-        },
-        "updateTime": {
-          "format": "google-datetime",
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. Timestamp when this model was updated in Firebase ML."
-        }
-      },
-      "id": "Model"
-    }
-  },
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "description": "Access custom machine learning models hosted via Firebase ML.",
+  "servicePath": "",
+  "batchPath": "batch",
+  "id": "firebaseml:v1beta2",
   "parameters": {
     "uploadType": {
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
-      "type": "string",
-      "location": "query"
-    },
-    "fields": {
       "location": "query",
-      "description": "Selector specifying which fields to include in a partial response.",
+      "type": "string",
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
+    },
+    "oauth_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user."
+    },
+    "quotaUser": {
+      "location": "query",
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
       "type": "string"
     },
-    "upload_protocol": {
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
       "type": "string",
       "location": "query"
+    },
+    "upload_protocol": {
+      "location": "query",
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "type": "string"
     },
     "alt": {
       "default": "json",
-      "description": "Data format for response.",
-      "type": "string",
+      "location": "query",
       "enumDescriptions": [
         "Responses with Content-Type of application/json",
         "Media download with context-dependent Content-Type",
         "Responses with Content-Type of application/x-protobuf"
       ],
-      "location": "query",
+      "description": "Data format for response.",
       "enum": [
         "json",
         "media",
         "proto"
-      ]
-    },
-    "quotaUser": {
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
-      "location": "query"
+      ],
+      "type": "string"
     },
     "prettyPrint": {
       "default": "true",
@@ -303,270 +318,255 @@
       "description": "Returns response with indentations and line breaks.",
       "location": "query"
     },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "type": "string",
-      "location": "query"
-    },
-    "$.xgafv": {
-      "description": "V1 error format.",
-      "type": "string",
-      "location": "query",
-      "enum": [
-        "1",
-        "2"
-      ],
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ]
-    },
-    "key": {
-      "type": "string",
-      "location": "query",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
-    },
     "access_token": {
       "location": "query",
-      "description": "OAuth access token.",
+      "type": "string",
+      "description": "OAuth access token."
+    },
+    "fields": {
+      "location": "query",
+      "description": "Selector specifying which fields to include in a partial response.",
       "type": "string"
     },
     "callback": {
       "type": "string",
       "description": "JSONP",
       "location": "query"
+    },
+    "$.xgafv": {
+      "location": "query",
+      "description": "V1 error format.",
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
     }
   },
-  "servicePath": "",
+  "documentationLink": "https://firebase.google.com",
+  "discoveryVersion": "v1",
+  "kind": "discovery#restDescription",
+  "ownerName": "Google",
+  "baseUrl": "https://firebaseml.googleapis.com/",
+  "fullyEncodeReservedExpansion": true,
+  "version_module": true,
+  "title": "Firebase ML API",
   "resources": {
     "projects": {
       "resources": {
+        "operations": {
+          "methods": {
+            "get": {
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^projects/[^/]+/operations/[^/]+$",
+                  "required": true,
+                  "description": "The name of the operation resource.",
+                  "location": "path"
+                }
+              },
+              "flatPath": "v1beta2/projects/{projectsId}/operations/{operationsId}",
+              "httpMethod": "GET",
+              "id": "firebaseml.projects.operations.get",
+              "response": {
+                "$ref": "Operation"
+              },
+              "path": "v1beta2/{+name}",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+              "parameterOrder": [
+                "name"
+              ]
+            }
+          }
+        },
         "models": {
           "methods": {
-            "download": {
-              "path": "v1beta2/{+name}:download",
-              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}:download",
+            "create": {
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "path": "v1beta2/{+parent}/models",
+              "parameterOrder": [
+                "parent"
+              ],
+              "description": "Creates a model in Firebase ML. The longrunning operation will eventually return a Model",
+              "httpMethod": "POST",
+              "id": "firebaseml.projects.models.create",
+              "flatPath": "v1beta2/projects/{projectsId}/models",
+              "request": {
+                "$ref": "Model"
+              },
+              "response": {
+                "$ref": "Operation"
+              },
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "description": "Required. The parent project resource where the model is to be created. The parent must have the form `projects/{project_id}`",
+                  "location": "path",
+                  "pattern": "^projects/[^/]+$",
+                  "required": true
+                }
+              }
+            },
+            "list": {
+              "parameters": {
+                "parent": {
+                  "type": "string",
+                  "description": "Required. The name of the parent to list models for. The parent must have the form `projects/{project_id}'",
+                  "location": "path",
+                  "pattern": "^projects/[^/]+$",
+                  "required": true
+                },
+                "pageSize": {
+                  "type": "integer",
+                  "format": "int32",
+                  "description": "The maximum number of items to return",
+                  "location": "query"
+                },
+                "filter": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "A filter for the list e.g. 'tags: abc' to list models which are tagged with \"abc\""
+                },
+                "pageToken": {
+                  "description": "The next_page_token value returned from a previous List request, if any.",
+                  "location": "query",
+                  "type": "string"
+                }
+              },
+              "flatPath": "v1beta2/projects/{projectsId}/models",
               "httpMethod": "GET",
+              "id": "firebaseml.projects.models.list",
+              "response": {
+                "$ref": "ListModelsResponse"
+              },
+              "path": "v1beta2/{+parent}/models",
+              "description": "Lists the models",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "parameterOrder": [
+                "parent"
+              ]
+            },
+            "patch": {
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "pattern": "^projects/[^/]+/models/[^/]+$",
+                  "required": true,
+                  "type": "string",
+                  "description": "The resource name of the Model. Model names have the form `projects/{project_id}/models/{model_id}` The name is ignored when creating a model."
+                },
+                "updateMask": {
+                  "format": "google-fieldmask",
+                  "type": "string",
+                  "description": "The update mask",
+                  "location": "query"
+                }
+              },
+              "path": "v1beta2/{+name}",
+              "httpMethod": "PATCH",
+              "request": {
+                "$ref": "Model"
+              },
+              "response": {
+                "$ref": "Operation"
+              },
+              "id": "firebaseml.projects.models.patch",
+              "parameterOrder": [
+                "name"
+              ],
+              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}",
+              "description": "Updates a model. The longrunning operation will eventually return a Model."
+            },
+            "delete": {
+              "path": "v1beta2/{+name}",
+              "httpMethod": "DELETE",
+              "parameters": {
+                "name": {
+                  "pattern": "^projects/[^/]+/models/[^/]+$",
+                  "type": "string",
+                  "required": true,
+                  "description": "Required. The name of the model to delete. The name must have the form `projects/{project_id}/models/{model_id}`",
+                  "location": "path"
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "id": "firebaseml.projects.models.delete",
+              "response": {
+                "$ref": "Empty"
+              },
+              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}",
+              "description": "Deletes a model",
+              "parameterOrder": [
+                "name"
+              ]
+            },
+            "download": {
+              "httpMethod": "GET",
+              "id": "firebaseml.projects.models.download",
+              "path": "v1beta2/{+name}:download",
+              "description": "Gets Download information for a model. This is meant for downloading model resources onto devices. It gives very limited information about the model.",
               "response": {
                 "$ref": "DownloadModelResponse"
               },
               "parameters": {
                 "name": {
                   "description": "Required. The name of the model to download. The name must have the form `projects/{project}/models/{model}`",
-                  "pattern": "^projects/[^/]+/models/[^/]+$",
-                  "required": true,
                   "type": "string",
-                  "location": "path"
+                  "location": "path",
+                  "pattern": "^projects/[^/]+/models/[^/]+$",
+                  "required": true
                 }
               },
-              "id": "firebaseml.projects.models.download",
-              "description": "Gets Download information for a model. This is meant for downloading model resources onto devices. It gives very limited information about the model.",
               "parameterOrder": [
                 "name"
-              ]
-            },
-            "list": {
-              "id": "firebaseml.projects.models.list",
-              "httpMethod": "GET",
-              "path": "v1beta2/{+parent}/models",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
               ],
-              "response": {
-                "$ref": "ListModelsResponse"
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "parameters": {
-                "parent": {
-                  "location": "path",
-                  "description": "Required. The name of the parent to list models for. The parent must have the form `projects/{project_id}'",
-                  "required": true,
-                  "pattern": "^projects/[^/]+$",
-                  "type": "string"
-                },
-                "pageSize": {
-                  "format": "int32",
-                  "location": "query",
-                  "description": "The maximum number of items to return",
-                  "type": "integer"
-                },
-                "pageToken": {
-                  "type": "string",
-                  "description": "The next_page_token value returned from a previous List request, if any.",
-                  "location": "query"
-                },
-                "filter": {
-                  "type": "string",
-                  "description": "A filter for the list e.g. 'tags: abc' to list models which are tagged with \"abc\"",
-                  "location": "query"
-                }
-              },
-              "description": "Lists the models",
-              "flatPath": "v1beta2/projects/{projectsId}/models"
-            },
-            "create": {
-              "flatPath": "v1beta2/projects/{projectsId}/models",
-              "parameterOrder": [
-                "parent"
-              ],
-              "request": {
-                "$ref": "Model"
-              },
-              "parameters": {
-                "parent": {
-                  "pattern": "^projects/[^/]+$",
-                  "location": "path",
-                  "description": "Required. The parent project resource where the model is to be created. The parent must have the form `projects/{project_id}`",
-                  "required": true,
-                  "type": "string"
-                }
-              },
-              "response": {
-                "$ref": "Operation"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "id": "firebaseml.projects.models.create",
-              "path": "v1beta2/{+parent}/models",
-              "description": "Creates a model in Firebase ML. The longrunning operation will eventually return a Model",
-              "httpMethod": "POST"
+              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}:download"
             },
             "get": {
-              "httpMethod": "GET",
-              "description": "Gets a model resource.",
-              "path": "v1beta2/{+name}",
-              "response": {
-                "$ref": "Model"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "id": "firebaseml.projects.models.get",
               "parameterOrder": [
                 "name"
               ],
+              "id": "firebaseml.projects.models.get",
+              "path": "v1beta2/{+name}",
               "parameters": {
                 "name": {
                   "description": "Required. The name of the model to get. The name must have the form `projects/{project_id}/models/{model_id}`",
-                  "pattern": "^projects/[^/]+/models/[^/]+$",
-                  "location": "path",
                   "required": true,
-                  "type": "string"
-                }
-              },
-              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}"
-            },
-            "patch": {
-              "response": {
-                "$ref": "Operation"
-              },
-              "parameters": {
-                "name": {
-                  "required": true,
-                  "location": "path",
                   "type": "string",
-                  "description": "The resource name of the Model. Model names have the form `projects/{project_id}/models/{model_id}` The name is ignored when creating a model.",
+                  "location": "path",
                   "pattern": "^projects/[^/]+/models/[^/]+$"
-                },
-                "updateMask": {
-                  "description": "The update mask",
-                  "format": "google-fieldmask",
-                  "location": "query",
-                  "type": "string"
                 }
               },
-              "path": "v1beta2/{+name}",
+              "description": "Gets a model resource.",
               "scopes": [
                 "https://www.googleapis.com/auth/cloud-platform"
               ],
-              "request": {
-                "$ref": "Model"
-              },
-              "id": "firebaseml.projects.models.patch",
               "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}",
-              "parameterOrder": [
-                "name"
-              ],
-              "httpMethod": "PATCH",
-              "description": "Updates a model. The longrunning operation will eventually return a Model."
-            },
-            "delete": {
-              "parameterOrder": [
-                "name"
-              ],
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "parameters": {
-                "name": {
-                  "location": "path",
-                  "type": "string",
-                  "required": true,
-                  "pattern": "^projects/[^/]+/models/[^/]+$",
-                  "description": "Required. The name of the model to delete. The name must have the form `projects/{project_id}/models/{model_id}`"
-                }
-              },
-              "response": {
-                "$ref": "Empty"
-              },
-              "httpMethod": "DELETE",
-              "description": "Deletes a model",
-              "path": "v1beta2/{+name}",
-              "flatPath": "v1beta2/projects/{projectsId}/models/{modelsId}",
-              "id": "firebaseml.projects.models.delete"
-            }
-          }
-        },
-        "operations": {
-          "methods": {
-            "get": {
-              "id": "firebaseml.projects.operations.get",
-              "parameters": {
-                "name": {
-                  "location": "path",
-                  "type": "string",
-                  "description": "The name of the operation resource.",
-                  "required": true,
-                  "pattern": "^projects/[^/]+/operations/[^/]+$"
-                }
-              },
-              "parameterOrder": [
-                "name"
-              ],
-              "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
-              "response": {
-                "$ref": "Operation"
-              },
               "httpMethod": "GET",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "flatPath": "v1beta2/projects/{projectsId}/operations/{operationsId}",
-              "path": "v1beta2/{+name}"
+              "response": {
+                "$ref": "Model"
+              }
             }
           }
         }
       }
     }
-  },
-  "version_module": true,
-  "version": "v1beta2",
-  "ownerDomain": "google.com",
-  "discoveryVersion": "v1",
-  "rootUrl": "https://firebaseml.googleapis.com/",
-  "canonicalName": "Firebase ML",
-  "name": "firebaseml",
-  "baseUrl": "https://firebaseml.googleapis.com/",
-  "kind": "discovery#restDescription",
-  "mtlsRootUrl": "https://firebaseml.mtls.googleapis.com/",
-  "protocol": "rest",
-  "documentationLink": "https://firebase.google.com",
-  "title": "Firebase ML API",
-  "batchPath": "batch",
-  "id": "firebaseml:v1beta2",
-  "fullyEncodeReservedExpansion": true,
-  "ownerName": "Google"
+  }
 }
