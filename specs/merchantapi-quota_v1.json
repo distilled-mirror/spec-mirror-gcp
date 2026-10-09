@@ -1,81 +1,220 @@
 {
-  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
-  "revision": "20261006",
-  "baseUrl": "https://merchantapi.googleapis.com/",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "ownerName": "Google",
-  "id": "merchantapi:quota_v1",
-  "description": "Programmatically manage your Merchant Center Accounts.",
   "name": "merchantapi",
+  "batchPath": "batch",
+  "rootUrl": "https://merchantapi.googleapis.com/",
+  "id": "merchantapi:quota_v1",
   "schemas": {
+    "ListAccountLimitsResponse": {
+      "id": "ListAccountLimitsResponse",
+      "description": "Response message for the `ListAccountLimits` method.",
+      "type": "object",
+      "properties": {
+        "nextPageToken": {
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages.",
+          "type": "string"
+        },
+        "accountLimits": {
+          "items": {
+            "$ref": "AccountLimit"
+          },
+          "description": "The limits for the given account.",
+          "type": "array"
+        }
+      }
+    },
+    "ListQuotaGroupsResponse": {
+      "id": "ListQuotaGroupsResponse",
+      "type": "object",
+      "properties": {
+        "nextPageToken": {
+          "type": "string",
+          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
+        },
+        "quotaGroups": {
+          "type": "array",
+          "items": {
+            "$ref": "QuotaGroup"
+          },
+          "description": "The methods, current quota usage and limits per each group. The quota is shared between all methods in the group. The groups are sorted in descending order based on quota_usage."
+        }
+      },
+      "description": "Response message for the ListMethodGroups method."
+    },
+    "ProductLimit": {
+      "description": "The limit for products.",
+      "type": "object",
+      "id": "ProductLimit",
+      "properties": {
+        "scope": {
+          "enum": [
+            "SCOPE_UNSPECIFIED",
+            "ADS_NON_EEA",
+            "ADS_EEA"
+          ],
+          "type": "string",
+          "enumDescriptions": [
+            "Default value. Should not be used.",
+            "Limit for products in non-EEA countries.",
+            "Limit for products in EEA countries."
+          ],
+          "description": "Required. The scope of the product limit."
+        },
+        "limit": {
+          "description": "Required. The maximum number of products that are allowed in the account in the given scope.",
+          "format": "int64",
+          "type": "string"
+        }
+      }
+    },
     "AccountLimit": {
-      "description": "A limit of a certain type that is applied to an account.",
       "id": "AccountLimit",
       "type": "object",
       "properties": {
         "products": {
-          "description": "The limit for products.",
-          "$ref": "ProductLimit"
+          "$ref": "ProductLimit",
+          "description": "The limit for products."
         },
         "name": {
           "description": "Identifier. The limit part of the name will be a combination of the type and the scope. For example: `accounts/123/limits/products~ADS_NON_EEA` Format: `accounts/{account}/limits/{limit}`",
           "type": "string"
         }
-      }
+      },
+      "description": "A limit of a certain type that is applied to an account."
     },
-    "ListAccountLimitsResponse": {
-      "type": "object",
-      "id": "ListAccountLimitsResponse",
-      "description": "Response message for the `ListAccountLimits` method.",
+    "ProductStatusChangeMessage": {
+      "description": "The message that the merchant will receive to notify about product status change event",
       "properties": {
-        "accountLimits": {
-          "description": "The limits for the given account.",
+        "resourceId": {
+          "description": "The product id.",
+          "type": "string"
+        },
+        "changes": {
           "type": "array",
+          "description": "A message to describe the change that happened to the product",
           "items": {
-            "$ref": "AccountLimit"
+            "$ref": "ProductChange"
           }
         },
-        "nextPageToken": {
+        "expirationTime": {
           "type": "string",
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
-        }
-      }
-    },
-    "ProductChange": {
-      "type": "object",
-      "properties": {
-        "regionCode": {
-          "type": "string",
-          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format."
+          "format": "google-datetime",
+          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event."
         },
-        "reportingContext": {
-          "enum": [
-            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
-            "SHOPPING_ADS",
-            "DISCOVERY_ADS",
-            "DEMAND_GEN_ADS",
-            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
-            "VIDEO_ADS",
-            "DISPLAY_ADS",
-            "LOCAL_INVENTORY_ADS",
-            "VEHICLE_INVENTORY_ADS",
-            "FREE_LISTINGS",
-            "FREE_LISTINGS_UCP_CHECKOUT",
-            "FREE_LOCAL_LISTINGS",
-            "FREE_LOCAL_VEHICLE_LISTINGS",
-            "YOUTUBE_AFFILIATE",
-            "YOUTUBE_SHOPPING",
-            "CLOUD_RETAIL",
-            "LOCAL_CLOUD_RETAIL",
-            "PRODUCT_REVIEWS",
-            "MERCHANT_REVIEWS",
-            "YOUTUBE_CHECKOUT",
-            "RENTAL_ADS"
+        "account": {
+          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`",
+          "type": "string"
+        },
+        "attribute": {
+          "enumDescriptions": [
+            "Unspecified attribute",
+            "Status of the changed entity"
           ],
           "type": "string",
+          "enum": [
+            "ATTRIBUTE_UNSPECIFIED",
+            "STATUS"
+          ],
+          "description": "The attribute in the resource that changed, in this case it will be always `Status`."
+        },
+        "resourceType": {
+          "enum": [
+            "RESOURCE_UNSPECIFIED",
+            "PRODUCT",
+            "ACCOUNT_SERVICE"
+          ],
+          "type": "string",
+          "enumDescriptions": [
+            "Unspecified resource",
+            "Resource type : product",
+            "Account service"
+          ],
+          "description": "The resource that changed, in this case it will always be `Product`."
+        },
+        "eventTime": {
+          "format": "google-datetime",
+          "type": "string",
+          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications."
+        },
+        "managingAccount": {
+          "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`",
+          "type": "string"
+        },
+        "resource": {
+          "type": "string",
+          "description": "The product name. Format: `accounts/{account}/products/{product}`"
+        }
+      },
+      "id": "ProductStatusChangeMessage",
+      "type": "object"
+    },
+    "MethodDetails": {
+      "type": "object",
+      "id": "MethodDetails",
+      "properties": {
+        "subapi": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. The sub-API that the method belongs to."
+        },
+        "path": {
+          "type": "string",
+          "description": "Output only. The path for the method such as `products/v1/productInputs.insert`",
+          "readOnly": true
+        },
+        "version": {
+          "description": "Output only. The API version that the method belongs to.",
+          "readOnly": true,
+          "type": "string"
+        },
+        "method": {
+          "readOnly": true,
+          "description": "Output only. The name of the method for example `products.list`.",
+          "type": "string"
+        }
+      },
+      "description": "The method details per method in the Merchant API."
+    },
+    "ProductChange": {
+      "id": "ProductChange",
+      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context.",
+      "properties": {
+        "newValue": {
+          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
+          "type": "string"
+        },
+        "regionCode": {
+          "description": "Countries that have the change (if applicable). Represented in the ISO 3166 format.",
+          "type": "string"
+        },
+        "oldValue": {
+          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
+          "type": "string"
+        },
+        "reportingContext": {
+          "type": "string",
+          "enumDescriptions": [
+            "Not specified.",
+            "[Shopping ads](https://support.google.com/merchants/answer/6149970).",
+            "Deprecated: Use `DEMAND_GEN_ADS` instead. [Discovery and Demand Gen ads](https://support.google.com/merchants/answer/13389785).",
+            "[Demand Gen ads](https://support.google.com/merchants/answer/13389785).",
+            "[Demand Gen ads on Discover surface](https://support.google.com/merchants/answer/13389785).",
+            "[Video ads](https://support.google.com/google-ads/answer/6340491).",
+            "[Display ads](https://support.google.com/merchants/answer/6069387).",
+            "[Local inventory ads](https://support.google.com/merchants/answer/3271956).",
+            "[Vehicle inventory ads](https://support.google.com/merchants/answer/11544533).",
+            "[Free product listings](https://support.google.com/merchants/answer/9199328).",
+            "[Free product listings on UCP checkout](https://developers.google.com/merchant/ucp).",
+            "[Free local product listings](https://support.google.com/merchants/answer/9825611).",
+            "[Free local vehicle listings](https://support.google.com/merchants/answer/11544533).",
+            "[Youtube Affiliate](https://support.google.com/youtube/answer/13376398).",
+            "[YouTube Shopping](https://support.google.com/merchants/answer/13478370).",
+            "[Cloud retail](https://cloud.google.com/solutions/retail).",
+            "[Local cloud retail](https://cloud.google.com/solutions/retail).",
+            "[Product Reviews](https://support.google.com/merchants/answer/14620732).",
+            "[Merchant Reviews](https://developers.google.com/merchant-review-feeds).",
+            "YouTube Checkout .",
+            "Real Estate Rental Ads. ."
+          ],
           "description": "Reporting contexts that have the change (if applicable). Currently this field supports only (`SHOPPING_ADS`, `LOCAL_INVENTORY_ADS`, `YOUTUBE_SHOPPING`, `YOUTUBE_CHECKOUT`, `YOUTUBE_AFFILIATE`) from the enum value [ReportingContextEnum](/merchant/api/reference/rest/Shared.Types/ReportingContextEnum)",
           "enumDeprecated": [
             false,
@@ -100,203 +239,58 @@
             false,
             false
           ],
-          "enumDescriptions": [
-            "Not specified.",
-            "[Shopping ads](https://support.google.com/merchants/answer/6149970).",
-            "Deprecated: Use `DEMAND_GEN_ADS` instead. [Discovery and Demand Gen ads](https://support.google.com/merchants/answer/13389785).",
-            "[Demand Gen ads](https://support.google.com/merchants/answer/13389785).",
-            "[Demand Gen ads on Discover surface](https://support.google.com/merchants/answer/13389785).",
-            "[Video ads](https://support.google.com/google-ads/answer/6340491).",
-            "[Display ads](https://support.google.com/merchants/answer/6069387).",
-            "[Local inventory ads](https://support.google.com/merchants/answer/3271956).",
-            "[Vehicle inventory ads](https://support.google.com/merchants/answer/11544533).",
-            "[Free product listings](https://support.google.com/merchants/answer/9199328).",
-            "[Free product listings on UCP checkout](https://developers.google.com/merchant/ucp).",
-            "[Free local product listings](https://support.google.com/merchants/answer/9825611).",
-            "[Free local vehicle listings](https://support.google.com/merchants/answer/11544533).",
-            "[Youtube Affiliate](https://support.google.com/youtube/answer/13376398).",
-            "[YouTube Shopping](https://support.google.com/merchants/answer/13478370).",
-            "[Cloud retail](https://cloud.google.com/solutions/retail).",
-            "[Local cloud retail](https://cloud.google.com/solutions/retail).",
-            "[Product Reviews](https://support.google.com/merchants/answer/14620732).",
-            "[Merchant Reviews](https://developers.google.com/merchant-review-feeds).",
-            "YouTube Checkout .",
-            "Real Estate Rental Ads. ."
+          "enum": [
+            "REPORTING_CONTEXT_ENUM_UNSPECIFIED",
+            "SHOPPING_ADS",
+            "DISCOVERY_ADS",
+            "DEMAND_GEN_ADS",
+            "DEMAND_GEN_ADS_DISCOVER_SURFACE",
+            "VIDEO_ADS",
+            "DISPLAY_ADS",
+            "LOCAL_INVENTORY_ADS",
+            "VEHICLE_INVENTORY_ADS",
+            "FREE_LISTINGS",
+            "FREE_LISTINGS_UCP_CHECKOUT",
+            "FREE_LOCAL_LISTINGS",
+            "FREE_LOCAL_VEHICLE_LISTINGS",
+            "YOUTUBE_AFFILIATE",
+            "YOUTUBE_SHOPPING",
+            "CLOUD_RETAIL",
+            "LOCAL_CLOUD_RETAIL",
+            "PRODUCT_REVIEWS",
+            "MERCHANT_REVIEWS",
+            "YOUTUBE_CHECKOUT",
+            "RENTAL_ADS"
           ]
-        },
-        "oldValue": {
-          "description": "The old value of the changed resource or attribute. If empty, it means that the product was created. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)",
-          "type": "string"
-        },
-        "newValue": {
-          "type": "string",
-          "description": "The new value of the changed resource or attribute. If empty, it means that the product was deleted. Will have one of these values : (`approved`, `pending`, `disapproved`, ``)"
         }
       },
-      "id": "ProductChange",
-      "description": "The change that happened to the product including old value, new value, country code as the region code and reporting context."
-    },
-    "ProductStatusChangeMessage": {
-      "id": "ProductStatusChangeMessage",
-      "type": "object",
-      "properties": {
-        "expirationTime": {
-          "description": "Optional. The product expiration time. This field will not be set if the notification is sent for a product deletion event.",
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "changes": {
-          "items": {
-            "$ref": "ProductChange"
-          },
-          "type": "array",
-          "description": "A message to describe the change that happened to the product"
-        },
-        "attribute": {
-          "type": "string",
-          "enumDescriptions": [
-            "Unspecified attribute",
-            "Status of the changed entity"
-          ],
-          "enum": [
-            "ATTRIBUTE_UNSPECIFIED",
-            "STATUS"
-          ],
-          "description": "The attribute in the resource that changed, in this case it will be always `Status`."
-        },
-        "account": {
-          "type": "string",
-          "description": "The target account that owns the entity that changed. Format : `accounts/{merchant_id}`"
-        },
-        "resourceId": {
-          "description": "The product id.",
-          "type": "string"
-        },
-        "resource": {
-          "description": "The product name. Format: `accounts/{account}/products/{product}`",
-          "type": "string"
-        },
-        "resourceType": {
-          "enum": [
-            "RESOURCE_UNSPECIFIED",
-            "PRODUCT",
-            "ACCOUNT_SERVICE"
-          ],
-          "enumDescriptions": [
-            "Unspecified resource",
-            "Resource type : product",
-            "Account service"
-          ],
-          "type": "string",
-          "description": "The resource that changed, in this case it will always be `Product`."
-        },
-        "eventTime": {
-          "format": "google-datetime",
-          "type": "string",
-          "description": "The time at which the event was generated. If you want to order the notification messages you receive you should rely on this field not on the order of receiving the notifications."
-        },
-        "managingAccount": {
-          "type": "string",
-          "description": "The account that manages the merchant's account. can be the same as merchant id if it is standalone account. Format : `accounts/{service_provider_id}`"
-        }
-      },
-      "description": "The message that the merchant will receive to notify about product status change event"
-    },
-    "ListQuotaGroupsResponse": {
-      "type": "object",
-      "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no subsequent pages."
-        },
-        "quotaGroups": {
-          "items": {
-            "$ref": "QuotaGroup"
-          },
-          "type": "array",
-          "description": "The methods, current quota usage and limits per each group. The quota is shared between all methods in the group. The groups are sorted in descending order based on quota_usage."
-        }
-      },
-      "description": "Response message for the ListMethodGroups method.",
-      "id": "ListQuotaGroupsResponse"
-    },
-    "ProductLimit": {
-      "id": "ProductLimit",
-      "properties": {
-        "scope": {
-          "type": "string",
-          "enum": [
-            "SCOPE_UNSPECIFIED",
-            "ADS_NON_EEA",
-            "ADS_EEA"
-          ],
-          "enumDescriptions": [
-            "Default value. Should not be used.",
-            "Limit for products in non-EEA countries.",
-            "Limit for products in EEA countries."
-          ],
-          "description": "Required. The scope of the product limit."
-        },
-        "limit": {
-          "format": "int64",
-          "type": "string",
-          "description": "Required. The maximum number of products that are allowed in the account in the given scope."
-        }
-      },
-      "description": "The limit for products.",
       "type": "object"
     },
-    "MethodDetails": {
-      "type": "object",
-      "id": "MethodDetails",
-      "description": "The method details per method in the Merchant API.",
-      "properties": {
-        "path": {
-          "description": "Output only. The path for the method such as `products/v1/productInputs.insert`",
-          "readOnly": true,
-          "type": "string"
-        },
-        "version": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. The API version that the method belongs to."
-        },
-        "method": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The name of the method for example `products.list`."
-        },
-        "subapi": {
-          "type": "string",
-          "description": "Output only. The sub-API that the method belongs to.",
-          "readOnly": true
-        }
-      }
-    },
     "QuotaGroup": {
-      "type": "object",
       "id": "QuotaGroup",
+      "description": "The group information for methods in the Merchant API. The quota is shared between all methods in the group. Even if none of the methods within the group have usage the information for the group is returned.",
+      "type": "object",
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "Identifier. The resource name of the quota group. Format: accounts/{account}/quotas/{group} Note: There is no guarantee on the format of {group}"
-        },
         "quotaUsage": {
           "type": "string",
-          "readOnly": true,
           "format": "int64",
+          "readOnly": true,
           "description": "Output only. The current quota usage, meaning the number of calls already made on a given day to the methods in the group. The daily quota limits reset at 12:00 PM midday UTC."
         },
+        "name": {
+          "description": "Identifier. The resource name of the quota group. Format: accounts/{account}/quotas/{group} Note: There is no guarantee on the format of {group}",
+          "type": "string"
+        },
         "quotaMinuteLimit": {
-          "type": "string",
+          "readOnly": true,
           "description": "Output only. The maximum number of calls allowed per minute for the group.",
-          "format": "int64",
-          "readOnly": true
+          "type": "string",
+          "format": "int64"
         },
         "quotaLimit": {
-          "readOnly": true,
           "format": "int64",
           "type": "string",
+          "readOnly": true,
           "description": "Output only. The maximum number of calls allowed per day for the group."
         },
         "methodDetails": {
@@ -304,41 +298,173 @@
             "$ref": "MethodDetails"
           },
           "type": "array",
-          "readOnly": true,
-          "description": "Output only. List of all methods group quota applies to."
+          "description": "Output only. List of all methods group quota applies to.",
+          "readOnly": true
         }
-      },
-      "description": "The group information for methods in the Merchant API. The quota is shared between all methods in the group. Even if none of the methods within the group have usage the information for the group is returned."
+      }
     }
   },
-  "protocol": "rest",
+  "fullyEncodeReservedExpansion": true,
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "documentationLink": "https://developers.google.com/merchant/api",
+  "baseUrl": "https://merchantapi.googleapis.com/",
+  "version": "quota_v1",
+  "basePath": "",
+  "title": "Merchant API",
   "ownerDomain": "google.com",
+  "servicePath": "",
+  "resources": {
+    "accounts": {
+      "resources": {
+        "limits": {
+          "methods": {
+            "get": {
+              "flatPath": "quota/v1/accounts/{accountsId}/limits/{limitsId}",
+              "path": "quota/v1/{+name}",
+              "description": "Retrieves an account limit.",
+              "id": "merchantapi.accounts.limits.get",
+              "httpMethod": "GET",
+              "response": {
+                "$ref": "AccountLimit"
+              },
+              "parameterOrder": [
+                "name"
+              ],
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "parameters": {
+                "name": {
+                  "location": "path",
+                  "description": "Required. The name of the limit to retrieve. Format: `accounts/{account}/limits/{limit}` For example: `accounts/123/limits/products~ADS_NON_EEA`",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+/limits/[^/]+$",
+                  "type": "string"
+                }
+              }
+            },
+            "list": {
+              "response": {
+                "$ref": "ListAccountLimitsResponse"
+              },
+              "parameters": {
+                "pageToken": {
+                  "type": "string",
+                  "location": "query",
+                  "description": "Optional. A page token, received from a previous `ListAccountLimits` call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAccountLimits` must match the call that provided the page token."
+                },
+                "parent": {
+                  "type": "string",
+                  "location": "path",
+                  "pattern": "^accounts/[^/]+$",
+                  "description": "Required. The parent account. Format: `accounts/{account}`",
+                  "required": true
+                },
+                "filter": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "Required. A filter on the limit `type` is required, for example, `type = \"products\"`."
+                },
+                "pageSize": {
+                  "format": "int32",
+                  "description": "Optional. The maximum number of limits to return. The service may return fewer than this value. If unspecified, at most 100 limits will be returned. The maximum value is 100; values above 100 will be coerced to 100.",
+                  "type": "integer",
+                  "location": "query"
+                }
+              },
+              "description": "Lists the limits of an account.",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ],
+              "path": "quota/v1/{+parent}/limits",
+              "httpMethod": "GET",
+              "id": "merchantapi.accounts.limits.list",
+              "flatPath": "quota/v1/accounts/{accountsId}/limits",
+              "parameterOrder": [
+                "parent"
+              ]
+            }
+          }
+        },
+        "quotas": {
+          "methods": {
+            "list": {
+              "flatPath": "quota/v1/accounts/{accountsId}/quotas",
+              "parameterOrder": [
+                "parent"
+              ],
+              "parameters": {
+                "parent": {
+                  "location": "path",
+                  "description": "Required. The merchant account who owns the collection of method quotas Format: accounts/{account}",
+                  "required": true,
+                  "pattern": "^accounts/[^/]+$",
+                  "type": "string"
+                },
+                "pageSize": {
+                  "description": "Optional. The maximum number of quotas to return in the response, used for paging. Defaults to 500; values above 1000 will be coerced to 1000.",
+                  "location": "query",
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "pageToken": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "Optional. Token (if provided) to retrieve the subsequent page. All other parameters must match the original call that provided the page token."
+                }
+              },
+              "description": "Lists the daily call quota and usage per group for your Merchant Center account.",
+              "response": {
+                "$ref": "ListQuotaGroupsResponse"
+              },
+              "path": "quota/v1/{+parent}/quotas",
+              "id": "merchantapi.accounts.quotas.list",
+              "httpMethod": "GET",
+              "scopes": [
+                "https://www.googleapis.com/auth/content"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "kind": "discovery#restDescription",
+  "discoveryVersion": "v1",
+  "auth": {
+    "oauth2": {
+      "scopes": {
+        "https://www.googleapis.com/auth/content": {
+          "description": "Manage your product listings and accounts for Google Shopping"
+        }
+      }
+    }
+  },
+  "canonicalName": "Merchant",
+  "version_module": true,
+  "mtlsRootUrl": "https://merchantapi.mtls.googleapis.com/",
+  "revision": "20261006",
+  "protocol": "rest",
+  "description": "Programmatically manage your Merchant Center Accounts.",
   "parameters": {
-    "key": {
+    "alt": {
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "description": "Data format for response.",
       "type": "string",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
-      "location": "query"
-    },
-    "quotaUser": {
       "location": "query",
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "access_token": {
-      "location": "query",
-      "description": "OAuth access token.",
-      "type": "string"
-    },
-    "fields": {
-      "description": "Selector specifying which fields to include in a partial response.",
-      "type": "string",
-      "location": "query"
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "default": "true",
-      "location": "query",
-      "description": "Returns response with indentations and line breaks."
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "default": "json"
     },
     "$.xgafv": {
       "enum": [
@@ -349,182 +475,56 @@
         "v1 error format",
         "v2 error format"
       ],
+      "description": "V1 error format.",
       "location": "query",
-      "type": "string",
-      "description": "V1 error format."
+      "type": "string"
+    },
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "location": "query",
+      "type": "string"
     },
     "uploadType": {
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
       "type": "string",
+      "location": "query"
+    },
+    "oauth_token": {
+      "description": "OAuth 2.0 token for the current user.",
       "location": "query",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
+      "type": "string"
+    },
+    "fields": {
+      "type": "string",
+      "description": "Selector specifying which fields to include in a partial response.",
+      "location": "query"
+    },
+    "access_token": {
+      "description": "OAuth access token.",
+      "type": "string",
+      "location": "query"
+    },
+    "callback": {
+      "description": "JSONP",
+      "type": "string",
+      "location": "query"
+    },
+    "quotaUser": {
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "location": "query",
+      "type": "string"
+    },
+    "prettyPrint": {
+      "type": "boolean",
+      "description": "Returns response with indentations and line breaks.",
+      "location": "query",
+      "default": "true"
     },
     "upload_protocol": {
       "location": "query",
       "type": "string",
       "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    },
-    "alt": {
-      "description": "Data format for response.",
-      "default": "json",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "location": "query",
-      "type": "string",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ]
-    },
-    "callback": {
-      "description": "JSONP",
-      "location": "query",
-      "type": "string"
-    },
-    "oauth_token": {
-      "type": "string",
-      "description": "OAuth 2.0 token for the current user.",
-      "location": "query"
     }
   },
-  "servicePath": "",
-  "fullyEncodeReservedExpansion": true,
-  "kind": "discovery#restDescription",
-  "resources": {
-    "accounts": {
-      "resources": {
-        "limits": {
-          "methods": {
-            "list": {
-              "parameters": {
-                "parent": {
-                  "location": "path",
-                  "description": "Required. The parent account. Format: `accounts/{account}`",
-                  "type": "string",
-                  "required": true,
-                  "pattern": "^accounts/[^/]+$"
-                },
-                "pageSize": {
-                  "format": "int32",
-                  "location": "query",
-                  "type": "integer",
-                  "description": "Optional. The maximum number of limits to return. The service may return fewer than this value. If unspecified, at most 100 limits will be returned. The maximum value is 100; values above 100 will be coerced to 100."
-                },
-                "filter": {
-                  "location": "query",
-                  "description": "Required. A filter on the limit `type` is required, for example, `type = \"products\"`.",
-                  "type": "string"
-                },
-                "pageToken": {
-                  "type": "string",
-                  "location": "query",
-                  "description": "Optional. A page token, received from a previous `ListAccountLimits` call. Provide this to retrieve the subsequent page. When paginating, all other parameters provided to `ListAccountLimits` must match the call that provided the page token."
-                }
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "description": "Lists the limits of an account.",
-              "httpMethod": "GET",
-              "path": "quota/v1/{+parent}/limits",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "response": {
-                "$ref": "ListAccountLimitsResponse"
-              },
-              "flatPath": "quota/v1/accounts/{accountsId}/limits",
-              "id": "merchantapi.accounts.limits.list"
-            },
-            "get": {
-              "id": "merchantapi.accounts.limits.get",
-              "parameterOrder": [
-                "name"
-              ],
-              "description": "Retrieves an account limit.",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "flatPath": "quota/v1/accounts/{accountsId}/limits/{limitsId}",
-              "parameters": {
-                "name": {
-                  "location": "path",
-                  "type": "string",
-                  "required": true,
-                  "description": "Required. The name of the limit to retrieve. Format: `accounts/{account}/limits/{limit}` For example: `accounts/123/limits/products~ADS_NON_EEA`",
-                  "pattern": "^accounts/[^/]+/limits/[^/]+$"
-                }
-              },
-              "httpMethod": "GET",
-              "response": {
-                "$ref": "AccountLimit"
-              },
-              "path": "quota/v1/{+name}"
-            }
-          }
-        },
-        "quotas": {
-          "methods": {
-            "list": {
-              "description": "Lists the daily call quota and usage per group for your Merchant Center account.",
-              "flatPath": "quota/v1/accounts/{accountsId}/quotas",
-              "parameters": {
-                "pageToken": {
-                  "location": "query",
-                  "type": "string",
-                  "description": "Optional. Token (if provided) to retrieve the subsequent page. All other parameters must match the original call that provided the page token."
-                },
-                "parent": {
-                  "pattern": "^accounts/[^/]+$",
-                  "required": true,
-                  "location": "path",
-                  "description": "Required. The merchant account who owns the collection of method quotas Format: accounts/{account}",
-                  "type": "string"
-                },
-                "pageSize": {
-                  "format": "int32",
-                  "location": "query",
-                  "description": "Optional. The maximum number of quotas to return in the response, used for paging. Defaults to 500; values above 1000 will be coerced to 1000.",
-                  "type": "integer"
-                }
-              },
-              "path": "quota/v1/{+parent}/quotas",
-              "response": {
-                "$ref": "ListQuotaGroupsResponse"
-              },
-              "httpMethod": "GET",
-              "scopes": [
-                "https://www.googleapis.com/auth/content"
-              ],
-              "parameterOrder": [
-                "parent"
-              ],
-              "id": "merchantapi.accounts.quotas.list"
-            }
-          }
-        }
-      }
-    }
-  },
-  "title": "Merchant API",
-  "version_module": true,
-  "canonicalName": "Merchant",
-  "basePath": "",
-  "batchPath": "batch",
-  "rootUrl": "https://merchantapi.googleapis.com/",
-  "auth": {
-    "oauth2": {
-      "scopes": {
-        "https://www.googleapis.com/auth/content": {
-          "description": "Manage your product listings and accounts for Google Shopping"
-        }
-      }
-    }
-  },
-  "version": "quota_v1",
-  "discoveryVersion": "v1",
-  "documentationLink": "https://developers.google.com/merchant/api"
+  "ownerName": "Google"
 }
