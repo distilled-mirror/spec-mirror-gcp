@@ -1,21 +1,12 @@
 {
-  "rootUrl": "https://parallelstore.googleapis.com/",
-  "ownerDomain": "google.com",
-  "canonicalName": "Parallelstore",
-  "revision": "20251029",
   "documentationLink": "https://cloud.google.com/parallelstore",
-  "ownerName": "Google",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "batchPath": "batch",
-  "description": "",
-  "discoveryVersion": "v1",
-  "fullyEncodeReservedExpansion": true,
-  "basePath": "",
   "version": "v1",
-  "servicePath": "",
+  "basePath": "",
+  "protocol": "rest",
+  "title": "Parallelstore API",
+  "version_module": true,
+  "canonicalName": "Parallelstore",
+  "description": "",
   "auth": {
     "oauth2": {
       "scopes": {
@@ -25,19 +16,89 @@
       }
     }
   },
-  "mtlsRootUrl": "https://parallelstore.mtls.googleapis.com/",
-  "name": "parallelstore",
+  "batchPath": "batch",
   "schemas": {
-    "DestinationGcsBucket": {
+    "SourceParallelstore": {
       "properties": {
-        "uri": {
-          "description": "Required. URI to a Cloud Storage bucket in the format: `gs:///`. The path inside the bucket is optional.",
+        "path": {
+          "description": "Optional. Root directory path to the Paralellstore filesystem, starting with `/`. Defaults to `/` if unset.",
           "type": "string"
         }
       },
+      "id": "SourceParallelstore",
       "type": "object",
-      "id": "DestinationGcsBucket",
-      "description": "Cloud Storage as the destination of a data transfer."
+      "description": "Parallelstore as the source of a data transfer."
+    },
+    "ExportDataRequest": {
+      "type": "object",
+      "description": "Export data from Parallelstore to Cloud Storage.",
+      "id": "ExportDataRequest",
+      "properties": {
+        "requestId": {
+          "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+          "type": "string"
+        },
+        "serviceAccount": {
+          "description": "Optional. User-specified Service Account (SA) credentials to be used when performing the transfer. Use one of the following formats: * `{EMAIL_ADDRESS_OR_UNIQUE_ID}` * `projects/{PROJECT_ID_OR_NUMBER}/serviceAccounts/{EMAIL_ADDRESS_OR_UNIQUE_ID}` * `projects/-/serviceAccounts/{EMAIL_ADDRESS_OR_UNIQUE_ID}` If unspecified, the Parallelstore service agent is used: `service-@gcp-sa-parallelstore.iam.gserviceaccount.com`",
+          "type": "string"
+        },
+        "destinationGcsBucket": {
+          "$ref": "DestinationGcsBucket",
+          "description": "Cloud Storage destination."
+        },
+        "sourceParallelstore": {
+          "description": "Parallelstore source.",
+          "$ref": "SourceParallelstore"
+        },
+        "metadataOptions": {
+          "$ref": "TransferMetadataOptions",
+          "description": "Optional. The metadata options for the export data."
+        }
+      }
+    },
+    "OperationMetadata": {
+      "description": "Long-running operation metadata.",
+      "properties": {
+        "requestedCancellation": {
+          "type": "boolean",
+          "description": "Output only. Identifies whether the user has requested cancellation of the operation. Operations that have been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.",
+          "readOnly": true
+        },
+        "createTime": {
+          "description": "Output only. The time the operation was created.",
+          "type": "string",
+          "format": "google-datetime",
+          "readOnly": true
+        },
+        "statusMessage": {
+          "type": "string",
+          "description": "Output only. Human-readable status of the operation, if any.",
+          "readOnly": true
+        },
+        "verb": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Name of the verb executed by the operation."
+        },
+        "target": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Server-defined resource path for the target of the operation."
+        },
+        "endTime": {
+          "description": "Output only. The time the operation finished running.",
+          "readOnly": true,
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "apiVersion": {
+          "type": "string",
+          "description": "Output only. API version used to start the operation.",
+          "readOnly": true
+        }
+      },
+      "id": "OperationMetadata",
+      "type": "object"
     },
     "SourceGcsBucket": {
       "id": "SourceGcsBucket",
@@ -50,107 +111,80 @@
       "description": "Cloud Storage as the source of a data transfer.",
       "type": "object"
     },
-    "SourceParallelstore": {
-      "description": "Parallelstore as the source of a data transfer.",
-      "id": "SourceParallelstore",
+    "ListInstancesResponse": {
+      "description": "Response from ListInstances.",
       "type": "object",
+      "id": "ListInstancesResponse",
       "properties": {
-        "path": {
-          "description": "Optional. Root directory path to the Paralellstore filesystem, starting with `/`. Defaults to `/` if unset.",
+        "instances": {
+          "description": "The list of Parallelstore instances.",
+          "type": "array",
+          "items": {
+            "$ref": "Instance"
+          }
+        },
+        "unreachable": {
+          "type": "array",
+          "description": "Locations that could not be reached.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nextPageToken": {
+          "description": "A token identifying a page of results the server should return.",
           "type": "string"
         }
       }
     },
-    "ListInstancesResponse": {
+    "ListOperationsResponse": {
+      "id": "ListOperationsResponse",
       "properties": {
-        "instances": {
-          "description": "The list of Parallelstore instances.",
-          "items": {
-            "$ref": "Instance"
-          },
-          "type": "array"
-        },
         "unreachable": {
           "items": {
             "type": "string"
           },
-          "description": "Locations that could not be reached.",
+          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections e.g. when attempting to list all resources across all supported locations.",
           "type": "array"
         },
         "nextPageToken": {
-          "type": "string",
-          "description": "A token identifying a page of results the server should return."
+          "description": "The standard List next-page token.",
+          "type": "string"
+        },
+        "operations": {
+          "items": {
+            "$ref": "Operation"
+          },
+          "type": "array",
+          "description": "A list of operations that matches the specified filter in the request."
         }
       },
-      "description": "Response from ListInstances.",
-      "type": "object",
-      "id": "ListInstancesResponse"
+      "description": "The response message for Operations.ListOperations.",
+      "type": "object"
     },
     "Instance": {
-      "type": "object",
-      "id": "Instance",
       "description": "A Parallelstore instance.",
       "properties": {
-        "deploymentType": {
-          "description": "Optional. Immutable. The deployment type of the instance. Allowed values are: * `SCRATCH`: the instance is a scratch instance. * `PERSISTENT`: the instance is a persistent instance.",
-          "enum": [
-            "DEPLOYMENT_TYPE_UNSPECIFIED",
-            "SCRATCH",
-            "PERSISTENT"
-          ],
-          "type": "string",
-          "enumDescriptions": [
-            "Default Deployment Type It is equivalent to SCRATCH",
-            "Scratch",
-            "Persistent"
-          ]
+        "network": {
+          "description": "Optional. Immutable. The name of the Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc) to which the instance is connected.",
+          "type": "string"
         },
         "directoryStripeLevel": {
-          "enumDescriptions": [
-            "If not set, DirectoryStripeLevel will default to DIRECTORY_STRIPE_LEVEL_MAX",
-            "Minimum directory striping",
-            "Medium directory striping",
-            "Maximum directory striping"
-          ],
+          "description": "Optional. Immutable. Stripe level for directories. Allowed values are: * `DIRECTORY_STRIPE_LEVEL_MIN`: recommended when directories contain a small number of files. * `DIRECTORY_STRIPE_LEVEL_BALANCED`: balances performance for workloads involving a mix of small and large directories. * `DIRECTORY_STRIPE_LEVEL_MAX`: recommended for directories with a large number of files.",
           "enum": [
             "DIRECTORY_STRIPE_LEVEL_UNSPECIFIED",
             "DIRECTORY_STRIPE_LEVEL_MIN",
             "DIRECTORY_STRIPE_LEVEL_BALANCED",
             "DIRECTORY_STRIPE_LEVEL_MAX"
           ],
-          "type": "string",
-          "description": "Optional. Immutable. Stripe level for directories. Allowed values are: * `DIRECTORY_STRIPE_LEVEL_MIN`: recommended when directories contain a small number of files. * `DIRECTORY_STRIPE_LEVEL_BALANCED`: balances performance for workloads involving a mix of small and large directories. * `DIRECTORY_STRIPE_LEVEL_MAX`: recommended for directories with a large number of files."
-        },
-        "daosVersion": {
-          "deprecated": true,
-          "readOnly": true,
-          "description": "Output only. Deprecated: The version of DAOS software running in the instance.",
+          "enumDescriptions": [
+            "If not set, DirectoryStripeLevel will default to DIRECTORY_STRIPE_LEVEL_MAX",
+            "Minimum directory striping",
+            "Medium directory striping",
+            "Maximum directory striping"
+          ],
           "type": "string"
-        },
-        "labels": {
-          "description": "Optional. Cloud Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that reflect a customer's organizational needs and deployment strategies. See https://cloud.google.com/resource-manager/docs/labels-overview for details.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "reservedIpRange": {
-          "type": "string",
-          "description": "Optional. Immutable. The ID of the IP address range being used by the instance's VPC network. See [Configure a VPC network](https://cloud.google.com/parallelstore/docs/vpc#create_and_configure_the_vpc). If no ID is provided, all ranges are considered."
-        },
-        "description": {
-          "description": "Optional. The description of the instance. 2048 characters or less.",
-          "type": "string"
-        },
-        "createTime": {
-          "format": "google-datetime",
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. The time when the instance was created."
         },
         "state": {
-          "readOnly": true,
-          "type": "string",
           "enum": [
             "STATE_UNSPECIFIED",
             "CREATING",
@@ -160,6 +194,8 @@
             "UPGRADING",
             "REPAIRING"
           ],
+          "type": "string",
+          "readOnly": true,
           "description": "Output only. The instance state.",
           "enumDescriptions": [
             "Not set.",
@@ -171,193 +207,104 @@
             "The instance is being repaired. This should only be used by instances using the `PERSISTENT` deployment type."
           ]
         },
-        "name": {
-          "type": "string",
-          "description": "Identifier. The resource name of the instance, in the format `projects/{project}/locations/{location}/instances/{instance_id}`."
-        },
-        "fileStripeLevel": {
-          "enum": [
-            "FILE_STRIPE_LEVEL_UNSPECIFIED",
-            "FILE_STRIPE_LEVEL_MIN",
-            "FILE_STRIPE_LEVEL_BALANCED",
-            "FILE_STRIPE_LEVEL_MAX"
-          ],
-          "description": "Optional. Immutable. Stripe level for files. Allowed values are: * `FILE_STRIPE_LEVEL_MIN`: offers the best performance for small size files. * `FILE_STRIPE_LEVEL_BALANCED`: balances performance for workloads involving a mix of small and large files. * `FILE_STRIPE_LEVEL_MAX`: higher throughput performance for larger files.",
-          "type": "string",
-          "enumDescriptions": [
-            "If not set, FileStripeLevel will default to FILE_STRIPE_LEVEL_BALANCED",
-            "Minimum file striping",
-            "Medium file striping",
-            "Maximum file striping"
-          ]
-        },
-        "accessPoints": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Output only. A list of IPv4 addresses used for client side configuration.",
-          "type": "array",
-          "readOnly": true
-        },
-        "effectiveReservedIpRange": {
-          "type": "string",
+        "updateTime": {
+          "description": "Output only. The time when the instance was updated.",
           "readOnly": true,
-          "description": "Output only. Immutable. The ID of the IP address range being used by the instance's VPC network. This field is populated by the service and contains the value currently used by the service."
+          "type": "string",
+          "format": "google-datetime"
         },
         "capacityGib": {
           "type": "string",
           "description": "Required. Immutable. The instance's storage capacity in Gibibytes (GiB). Allowed values are between 12000 and 100000, in multiples of 4000; e.g., 12000, 16000, 20000, ...",
           "format": "int64"
         },
-        "updateTime": {
-          "description": "Output only. The time when the instance was updated.",
-          "readOnly": true,
-          "format": "google-datetime",
-          "type": "string"
-        },
-        "network": {
+        "deploymentType": {
           "type": "string",
-          "description": "Optional. Immutable. The name of the Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc) to which the instance is connected."
-        }
-      }
-    },
-    "CancelOperationRequest": {
-      "id": "CancelOperationRequest",
-      "properties": {},
-      "type": "object",
-      "description": "The request message for Operations.CancelOperation."
-    },
-    "TransferMetadataOptions": {
-      "id": "TransferMetadataOptions",
-      "type": "object",
-      "description": "Transfer metadata options for the instance.",
-      "properties": {
-        "mode": {
-          "enumDescriptions": [
-            "default is MODE_PRESERVE.",
-            "Do not preserve mode during a transfer job.",
-            "Preserve mode during a transfer job."
-          ],
+          "description": "Optional. Immutable. The deployment type of the instance. Allowed values are: * `SCRATCH`: the instance is a scratch instance. * `PERSISTENT`: the instance is a persistent instance.",
           "enum": [
-            "MODE_UNSPECIFIED",
-            "MODE_SKIP",
-            "MODE_PRESERVE"
+            "DEPLOYMENT_TYPE_UNSPECIFIED",
+            "SCRATCH",
+            "PERSISTENT"
           ],
-          "description": "Optional. The mode preservation behavior.",
-          "type": "string"
-        },
-        "uid": {
           "enumDescriptions": [
-            "default is UID_NUMBER_PRESERVE.",
-            "Do not preserve UID during a transfer job.",
-            "Preserve UID that is in number format during a transfer job."
-          ],
-          "enum": [
-            "UID_UNSPECIFIED",
-            "UID_SKIP",
-            "UID_NUMBER_PRESERVE"
-          ],
-          "description": "Optional. The UID preservation behavior.",
-          "type": "string"
-        },
-        "gid": {
-          "description": "Optional. The GID preservation behavior.",
-          "enumDescriptions": [
-            "default is GID_NUMBER_PRESERVE.",
-            "Do not preserve GID during a transfer job.",
-            "Preserve GID that is in number format during a transfer job."
-          ],
-          "type": "string",
-          "enum": [
-            "GID_UNSPECIFIED",
-            "GID_SKIP",
-            "GID_NUMBER_PRESERVE"
+            "Default Deployment Type It is equivalent to SCRATCH",
+            "Scratch",
+            "Persistent"
           ]
-        }
-      }
-    },
-    "ExportDataRequest": {
-      "description": "Export data from Parallelstore to Cloud Storage.",
-      "id": "ExportDataRequest",
-      "type": "object",
-      "properties": {
-        "serviceAccount": {
-          "type": "string",
-          "description": "Optional. User-specified Service Account (SA) credentials to be used when performing the transfer. Use one of the following formats: * `{EMAIL_ADDRESS_OR_UNIQUE_ID}` * `projects/{PROJECT_ID_OR_NUMBER}/serviceAccounts/{EMAIL_ADDRESS_OR_UNIQUE_ID}` * `projects/-/serviceAccounts/{EMAIL_ADDRESS_OR_UNIQUE_ID}` If unspecified, the Parallelstore service agent is used: `service-@gcp-sa-parallelstore.iam.gserviceaccount.com`"
         },
-        "sourceParallelstore": {
-          "$ref": "SourceParallelstore",
-          "description": "Parallelstore source."
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Optional. Cloud Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that reflect a customer's organizational needs and deployment strategies. See https://cloud.google.com/resource-manager/docs/labels-overview for details."
         },
-        "requestId": {
-          "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
-          "type": "string"
-        },
-        "destinationGcsBucket": {
-          "$ref": "DestinationGcsBucket",
-          "description": "Cloud Storage destination."
-        },
-        "metadataOptions": {
-          "description": "Optional. The metadata options for the export data.",
-          "$ref": "TransferMetadataOptions"
-        }
-      }
-    },
-    "OperationMetadata": {
-      "description": "Long-running operation metadata.",
-      "id": "OperationMetadata",
-      "type": "object",
-      "properties": {
-        "endTime": {
-          "format": "google-datetime",
+        "accessPoints": {
+          "type": "array",
           "readOnly": true,
-          "type": "string",
-          "description": "Output only. The time the operation finished running."
+          "items": {
+            "type": "string"
+          },
+          "description": "Output only. A list of IPv4 addresses used for client side configuration."
         },
         "createTime": {
-          "type": "string",
+          "description": "Output only. The time when the instance was created.",
           "format": "google-datetime",
-          "description": "Output only. The time the operation was created.",
-          "readOnly": true
-        },
-        "apiVersion": {
           "readOnly": true,
-          "description": "Output only. API version used to start the operation.",
           "type": "string"
         },
-        "verb": {
+        "fileStripeLevel": {
+          "enumDescriptions": [
+            "If not set, FileStripeLevel will default to FILE_STRIPE_LEVEL_BALANCED",
+            "Minimum file striping",
+            "Medium file striping",
+            "Maximum file striping"
+          ],
           "type": "string",
-          "readOnly": true,
-          "description": "Output only. Name of the verb executed by the operation."
+          "enum": [
+            "FILE_STRIPE_LEVEL_UNSPECIFIED",
+            "FILE_STRIPE_LEVEL_MIN",
+            "FILE_STRIPE_LEVEL_BALANCED",
+            "FILE_STRIPE_LEVEL_MAX"
+          ],
+          "description": "Optional. Immutable. Stripe level for files. Allowed values are: * `FILE_STRIPE_LEVEL_MIN`: offers the best performance for small size files. * `FILE_STRIPE_LEVEL_BALANCED`: balances performance for workloads involving a mix of small and large files. * `FILE_STRIPE_LEVEL_MAX`: higher throughput performance for larger files."
         },
-        "statusMessage": {
-          "type": "string",
+        "daosVersion": {
+          "deprecated": true,
+          "description": "Output only. Deprecated: The version of DAOS software running in the instance.",
           "readOnly": true,
-          "description": "Output only. Human-readable status of the operation, if any."
-        },
-        "target": {
-          "readOnly": true,
-          "description": "Output only. Server-defined resource path for the target of the operation.",
           "type": "string"
         },
-        "requestedCancellation": {
-          "type": "boolean",
-          "description": "Output only. Identifies whether the user has requested cancellation of the operation. Operations that have been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.",
-          "readOnly": true
+        "reservedIpRange": {
+          "description": "Optional. Immutable. The ID of the IP address range being used by the instance's VPC network. See [Configure a VPC network](https://cloud.google.com/parallelstore/docs/vpc#create_and_configure_the_vpc). If no ID is provided, all ranges are considered.",
+          "type": "string"
+        },
+        "effectiveReservedIpRange": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Immutable. The ID of the IP address range being used by the instance's VPC network. This field is populated by the service and contains the value currently used by the service."
+        },
+        "description": {
+          "description": "Optional. The description of the instance. 2048 characters or less.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Identifier. The resource name of the instance, in the format `projects/{project}/locations/{location}/instances/{instance_id}`.",
+          "type": "string"
         }
-      }
+      },
+      "id": "Instance",
+      "type": "object"
     },
     "ImportDataRequest": {
-      "type": "object",
-      "description": "Import data from Cloud Storage into a Parallelstore instance.",
       "properties": {
+        "destinationParallelstore": {
+          "description": "Parallelstore destination.",
+          "$ref": "DestinationParallelstore"
+        },
         "metadataOptions": {
           "$ref": "TransferMetadataOptions",
           "description": "Optional. The transfer metadata options for the import data."
-        },
-        "destinationParallelstore": {
-          "$ref": "DestinationParallelstore",
-          "description": "Parallelstore destination."
         },
         "requestId": {
           "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
@@ -372,69 +319,76 @@
           "type": "string"
         }
       },
-      "id": "ImportDataRequest"
-    },
-    "GoogleProtobufEmpty": {
-      "id": "GoogleProtobufEmpty",
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
-      "properties": {},
+      "description": "Import data from Cloud Storage into a Parallelstore instance.",
+      "id": "ImportDataRequest",
       "type": "object"
     },
-    "ListLocationsResponse": {
-      "description": "The response message for Locations.ListLocations.",
-      "type": "object",
+    "DestinationParallelstore": {
       "properties": {
-        "locations": {
-          "items": {
-            "$ref": "Location"
-          },
-          "type": "array",
-          "description": "A list of locations that matches the specified filter in the request."
+        "path": {
+          "type": "string",
+          "description": "Optional. Root directory path to the Paralellstore filesystem, starting with `/`. Defaults to `/` if unset."
+        }
+      },
+      "type": "object",
+      "description": "Parallelstore as the destination of a data transfer.",
+      "id": "DestinationParallelstore"
+    },
+    "Location": {
+      "description": "A resource that represents a Google Cloud location.",
+      "properties": {
+        "labels": {
+          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
-        "nextPageToken": {
-          "description": "The standard List next-page token.",
+        "locationId": {
+          "type": "string",
+          "description": "The canonical id for this location. For example: `\"us-east1\"`."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          },
+          "description": "Service-specific metadata. For example the available capacity at the given location."
+        },
+        "name": {
+          "type": "string",
+          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`"
+        },
+        "displayName": {
+          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\".",
           "type": "string"
         }
       },
-      "id": "ListLocationsResponse"
-    },
-    "Status": {
-      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
-      "properties": {
-        "message": {
-          "type": "string",
-          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client."
-        },
-        "details": {
-          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use.",
-          "type": "array",
-          "items": {
-            "additionalProperties": {
-              "description": "Properties of the object. Contains field @type with type URL.",
-              "type": "any"
-            },
-            "type": "object"
-          }
-        },
-        "code": {
-          "type": "integer",
-          "format": "int32",
-          "description": "The status code, which should be an enum value of google.rpc.Code."
-        }
-      },
       "type": "object",
-      "id": "Status"
+      "id": "Location"
+    },
+    "CancelOperationRequest": {
+      "description": "The request message for Operations.CancelOperation.",
+      "id": "CancelOperationRequest",
+      "properties": {},
+      "type": "object"
     },
     "ReconciliationOperationMetadata": {
       "properties": {
+        "deleteResource": {
+          "description": "DEPRECATED. Use exclusive_action instead.",
+          "deprecated": true,
+          "type": "boolean"
+        },
         "exclusiveAction": {
           "enumDeprecated": [
             false,
             true,
             false
           ],
-          "type": "string",
           "description": "Excluisive action returned by the CLH.",
+          "type": "string",
           "enumDescriptions": [
             "Unknown repair action.",
             "The resource has to be deleted. When using this bit, the CLH should fail the operation. DEPRECATED. Instead use DELETE_RESOURCE OperationSignal in SideChannel.",
@@ -445,96 +399,69 @@
             "DELETE",
             "RETRY"
           ]
-        },
-        "deleteResource": {
-          "deprecated": true,
-          "type": "boolean",
-          "description": "DEPRECATED. Use exclusive_action instead."
         }
       },
+      "description": "Operation metadata returned by the CLH during resource state reconciliation.",
       "type": "object",
-      "id": "ReconciliationOperationMetadata",
-      "description": "Operation metadata returned by the CLH during resource state reconciliation."
+      "id": "ReconciliationOperationMetadata"
     },
-    "ListOperationsResponse": {
-      "type": "object",
-      "description": "The response message for Operations.ListOperations.",
-      "id": "ListOperationsResponse",
+    "TransferMetadataOptions": {
+      "description": "Transfer metadata options for the instance.",
       "properties": {
-        "nextPageToken": {
+        "mode": {
+          "description": "Optional. The mode preservation behavior.",
           "type": "string",
-          "description": "The standard List next-page token."
+          "enumDescriptions": [
+            "default is MODE_PRESERVE.",
+            "Do not preserve mode during a transfer job.",
+            "Preserve mode during a transfer job."
+          ],
+          "enum": [
+            "MODE_UNSPECIFIED",
+            "MODE_SKIP",
+            "MODE_PRESERVE"
+          ]
         },
-        "operations": {
-          "type": "array",
-          "items": {
-            "$ref": "Operation"
-          },
-          "description": "A list of operations that matches the specified filter in the request."
-        },
-        "unreachable": {
-          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections e.g. when attempting to list all resources across all supported locations.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "Location": {
-      "description": "A resource that represents a Google Cloud location.",
-      "type": "object",
-      "properties": {
-        "labels": {
-          "description": "Cross-service attributes for the location. For example {\"cloud.googleapis.com/region\": \"us-east1\"}",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "locationId": {
-          "description": "The canonical id for this location. For example: `\"us-east1\"`.",
-          "type": "string"
-        },
-        "metadata": {
-          "description": "Service-specific metadata. For example the available capacity at the given location.",
-          "type": "object",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          }
-        },
-        "displayName": {
+        "uid": {
+          "enumDescriptions": [
+            "default is UID_NUMBER_PRESERVE.",
+            "Do not preserve UID during a transfer job.",
+            "Preserve UID that is in number format during a transfer job."
+          ],
+          "description": "Optional. The UID preservation behavior.",
           "type": "string",
-          "description": "The friendly name for this location, typically a nearby city name. For example, \"Tokyo\"."
+          "enum": [
+            "UID_UNSPECIFIED",
+            "UID_SKIP",
+            "UID_NUMBER_PRESERVE"
+          ]
         },
-        "name": {
-          "description": "Resource name for the location, which may vary between implementations. For example: `\"projects/example-project/locations/us-east1\"`",
-          "type": "string"
+        "gid": {
+          "description": "Optional. The GID preservation behavior.",
+          "type": "string",
+          "enumDescriptions": [
+            "default is GID_NUMBER_PRESERVE.",
+            "Do not preserve GID during a transfer job.",
+            "Preserve GID that is in number format during a transfer job."
+          ],
+          "enum": [
+            "GID_UNSPECIFIED",
+            "GID_SKIP",
+            "GID_NUMBER_PRESERVE"
+          ]
         }
       },
-      "id": "Location"
-    },
-    "DestinationParallelstore": {
-      "description": "Parallelstore as the destination of a data transfer.",
-      "id": "DestinationParallelstore",
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "Optional. Root directory path to the Paralellstore filesystem, starting with `/`. Defaults to `/` if unset."
-        }
-      },
+      "id": "TransferMetadataOptions",
       "type": "object"
     },
     "Operation": {
+      "id": "Operation",
+      "type": "object",
+      "description": "This resource represents a long-running operation that is the result of a network API call.",
       "properties": {
-        "response": {
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
-          "type": "object"
+        "name": {
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
+          "type": "string"
         },
         "done": {
           "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
@@ -544,123 +471,364 @@
           "description": "The error result of the operation in case of failure or cancellation.",
           "$ref": "Status"
         },
-        "name": {
-          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
-          "type": "string"
+        "response": {
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
+          }
         },
         "metadata": {
           "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
+            "type": "any",
+            "description": "Properties of the object. Contains field @type with type URL."
           },
-          "type": "object",
-          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any."
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
+          "type": "object"
+        }
+      }
+    },
+    "ListLocationsResponse": {
+      "id": "ListLocationsResponse",
+      "properties": {
+        "locations": {
+          "type": "array",
+          "description": "A list of locations that matches the specified filter in the request.",
+          "items": {
+            "$ref": "Location"
+          }
+        },
+        "nextPageToken": {
+          "description": "The standard List next-page token.",
+          "type": "string"
         }
       },
+      "description": "The response message for Locations.ListLocations.",
+      "type": "object"
+    },
+    "Status": {
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
+      "properties": {
+        "message": {
+          "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "additionalProperties": {
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
+            },
+            "type": "object"
+          },
+          "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use."
+        },
+        "code": {
+          "description": "The status code, which should be an enum value of google.rpc.Code.",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "id": "Status",
+      "type": "object"
+    },
+    "GoogleProtobufEmpty": {
+      "id": "GoogleProtobufEmpty",
       "type": "object",
-      "id": "Operation",
-      "description": "This resource represents a long-running operation that is the result of a network API call."
+      "properties": {},
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }"
+    },
+    "DestinationGcsBucket": {
+      "id": "DestinationGcsBucket",
+      "type": "object",
+      "description": "Cloud Storage as the destination of a data transfer.",
+      "properties": {
+        "uri": {
+          "description": "Required. URI to a Cloud Storage bucket in the format: `gs:///`. The path inside the bucket is optional.",
+          "type": "string"
+        }
+      }
     }
   },
+  "rootUrl": "https://parallelstore.googleapis.com/",
+  "ownerName": "Google",
+  "revision": "20251029",
+  "name": "parallelstore",
+  "fullyEncodeReservedExpansion": true,
   "parameters": {
-    "fields": {
-      "type": "string",
-      "location": "query",
-      "description": "Selector specifying which fields to include in a partial response."
-    },
     "callback": {
-      "type": "string",
-      "location": "query",
-      "description": "JSONP"
-    },
-    "quotaUser": {
-      "location": "query",
-      "type": "string",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "alt": {
-      "default": "json",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ],
-      "description": "Data format for response.",
+      "description": "JSONP",
       "location": "query",
       "type": "string"
+    },
+    "access_token": {
+      "type": "string",
+      "description": "OAuth access token.",
+      "location": "query"
     },
     "$.xgafv": {
       "enumDescriptions": [
         "v1 error format",
         "v2 error format"
       ],
-      "type": "string",
-      "description": "V1 error format.",
-      "location": "query",
       "enum": [
         "1",
         "2"
-      ]
+      ],
+      "description": "V1 error format.",
+      "location": "query",
+      "type": "string"
+    },
+    "upload_protocol": {
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "location": "query",
+      "type": "string"
+    },
+    "prettyPrint": {
+      "description": "Returns response with indentations and line breaks.",
+      "location": "query",
+      "type": "boolean",
+      "default": "true"
+    },
+    "oauth_token": {
+      "location": "query",
+      "type": "string",
+      "description": "OAuth 2.0 token for the current user."
+    },
+    "alt": {
+      "description": "Data format for response.",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "location": "query",
+      "default": "json",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "type": "string"
     },
     "key": {
       "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
       "location": "query",
       "type": "string"
     },
-    "upload_protocol": {
-      "type": "string",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
-      "location": "query"
+    "fields": {
+      "location": "query",
+      "description": "Selector specifying which fields to include in a partial response.",
+      "type": "string"
+    },
+    "quotaUser": {
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "location": "query",
+      "type": "string"
     },
     "uploadType": {
       "location": "query",
       "type": "string",
       "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
-    },
-    "access_token": {
-      "description": "OAuth access token.",
-      "type": "string",
-      "location": "query"
-    },
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "type": "string",
-      "location": "query"
-    },
-    "prettyPrint": {
-      "type": "boolean",
-      "description": "Returns response with indentations and line breaks.",
-      "location": "query",
-      "default": "true"
     }
   },
-  "version_module": true,
+  "discoveryVersion": "v1",
+  "id": "parallelstore:v1",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "servicePath": "",
   "resources": {
     "projects": {
       "resources": {
         "locations": {
+          "methods": {
+            "list": {
+              "parameters": {
+                "pageSize": {
+                  "description": "The maximum number of results to return. If not set, the service selects a default.",
+                  "format": "int32",
+                  "type": "integer",
+                  "location": "query"
+                },
+                "name": {
+                  "pattern": "^projects/[^/]+$",
+                  "type": "string",
+                  "description": "The resource that owns the locations collection, if applicable.",
+                  "location": "path",
+                  "required": true
+                },
+                "extraLocationTypes": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "Optional. Do not use this field. It is unsupported and is ignored unless explicitly documented otherwise. This is primarily for internal usage.",
+                  "repeated": true
+                },
+                "filter": {
+                  "location": "query",
+                  "type": "string",
+                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160)."
+                },
+                "pageToken": {
+                  "type": "string",
+                  "location": "query",
+                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page."
+                }
+              },
+              "flatPath": "v1/projects/{projectsId}/locations",
+              "description": "Lists information about the supported locations for this service.",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ],
+              "httpMethod": "GET",
+              "path": "v1/{+name}/locations",
+              "parameterOrder": [
+                "name"
+              ],
+              "response": {
+                "$ref": "ListLocationsResponse"
+              },
+              "id": "parallelstore.projects.locations.list"
+            },
+            "get": {
+              "parameterOrder": [
+                "name"
+              ],
+              "description": "Gets information about a location.",
+              "id": "parallelstore.projects.locations.get",
+              "parameters": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^projects/[^/]+/locations/[^/]+$",
+                  "location": "path",
+                  "required": true,
+                  "description": "Resource name for the location."
+                }
+              },
+              "response": {
+                "$ref": "Location"
+              },
+              "httpMethod": "GET",
+              "path": "v1/{+name}",
+              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}",
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform"
+              ]
+            }
+          },
           "resources": {
             "operations": {
               "methods": {
-                "list": {
+                "delete": {
+                  "response": {
+                    "$ref": "GoogleProtobufEmpty"
+                  },
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "path": "v1/{+name}",
+                  "httpMethod": "DELETE",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
                   "parameters": {
                     "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "description": "The name of the operation resource to be deleted.",
                       "location": "path",
+                      "required": true,
+                      "type": "string",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$"
+                    }
+                  },
+                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
+                  "id": "parallelstore.projects.locations.operations.delete",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ]
+                },
+                "cancel": {
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "type": "string",
+                      "description": "The name of the operation resource to be cancelled."
+                    }
+                  },
+                  "path": "v1/{+name}:cancel",
+                  "response": {
+                    "$ref": "GoogleProtobufEmpty"
+                  },
+                  "httpMethod": "POST",
+                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
+                  "request": {
+                    "$ref": "CancelOperationRequest"
+                  },
+                  "id": "parallelstore.projects.locations.operations.cancel"
+                },
+                "get": {
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "httpMethod": "GET",
+                  "parameters": {
+                    "name": {
+                      "description": "The name of the operation resource.",
+                      "location": "path",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                      "type": "string"
+                    }
+                  },
+                  "path": "v1/{+name}",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "id": "parallelstore.projects.locations.operations.get",
+                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}"
+                },
+                "list": {
+                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations",
+                  "response": {
+                    "$ref": "ListOperationsResponse"
+                  },
+                  "path": "v1/{+name}/operations",
+                  "httpMethod": "GET",
+                  "parameters": {
+                    "name": {
                       "type": "string",
                       "description": "The name of the operation's parent resource.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "location": "path",
                       "required": true
                     },
                     "pageSize": {
-                      "location": "query",
                       "description": "The standard list page size.",
+                      "location": "query",
                       "format": "int32",
                       "type": "integer"
+                    },
+                    "filter": {
+                      "type": "string",
+                      "description": "The standard list filter.",
+                      "location": "query"
                     },
                     "returnPartialSuccess": {
                       "type": "boolean",
@@ -671,428 +839,260 @@
                       "type": "string",
                       "location": "query",
                       "description": "The standard list page token."
-                    },
-                    "filter": {
-                      "description": "The standard list filter.",
-                      "type": "string",
-                      "location": "query"
                     }
                   },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations",
                   "id": "parallelstore.projects.locations.operations.list",
-                  "response": {
-                    "$ref": "ListOperationsResponse"
-                  },
-                  "path": "v1/{+name}/operations",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "httpMethod": "GET",
                   "parameterOrder": [
                     "name"
-                  ],
-                  "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`."
-                },
-                "get": {
-                  "path": "v1/{+name}",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "description": "The name of the operation resource.",
-                      "type": "string",
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "required": true
-                    }
-                  },
-                  "id": "parallelstore.projects.locations.operations.get",
-                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "httpMethod": "GET"
-                },
-                "delete": {
-                  "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
-                  "path": "v1/{+name}",
-                  "httpMethod": "DELETE",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "parameters": {
-                    "name": {
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "location": "path",
-                      "required": true,
-                      "type": "string",
-                      "description": "The name of the operation resource to be deleted."
-                    }
-                  },
-                  "response": {
-                    "$ref": "GoogleProtobufEmpty"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "id": "parallelstore.projects.locations.operations.delete"
-                },
-                "cancel": {
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "required": true,
-                      "pattern": "^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
-                      "description": "The name of the operation resource to be cancelled.",
-                      "location": "path"
-                    }
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/operations/{operationsId}:cancel",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "id": "parallelstore.projects.locations.operations.cancel",
-                  "response": {
-                    "$ref": "GoogleProtobufEmpty"
-                  },
-                  "path": "v1/{+name}:cancel",
-                  "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
-                  "httpMethod": "POST",
-                  "request": {
-                    "$ref": "CancelOperationRequest"
-                  }
+                  ]
                 }
               }
             },
             "instances": {
               "methods": {
-                "create": {
-                  "path": "v1/{+parent}/instances",
-                  "id": "parallelstore.projects.locations.instances.create",
-                  "httpMethod": "POST",
-                  "response": {
-                    "$ref": "Operation"
+                "get": {
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
+                  "path": "v1/{+name}",
+                  "parameters": {
+                    "name": {
+                      "location": "path",
+                      "required": true,
+                      "description": "Required. The instance resource name, in the format `projects/{project_id}/locations/{location}/instances/{instance_id}`.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "type": "string"
+                    }
                   },
-                  "parameterOrder": [
-                    "parent"
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
                   ],
-                  "request": {
+                  "response": {
                     "$ref": "Instance"
                   },
-                  "description": "Creates a Parallelstore instance in a given project and location.",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
+                  "httpMethod": "GET",
+                  "description": "Gets details of a single instance.",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "id": "parallelstore.projects.locations.instances.get"
+                },
+                "create": {
+                  "httpMethod": "POST",
+                  "path": "v1/{+parent}/instances",
                   "parameters": {
-                    "requestId": {
-                      "type": "string",
-                      "location": "query",
-                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000)."
-                    },
                     "instanceId": {
                       "description": "Required. The name of the Parallelstore instance. * Must contain only lowercase letters, numbers, and hyphens. * Must start with a letter. * Must be between 1-63 characters. * Must end with a number or a letter. * Must be unique within the customer project / location",
                       "location": "query",
                       "type": "string"
                     },
                     "parent": {
+                      "location": "path",
+                      "required": true,
+                      "type": "string",
                       "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "required": true,
-                      "type": "string",
-                      "description": "Required. The instance's project and location, in the format `projects/{project}/locations/{location}`. Locations map to Google Cloud zones; for example, `us-west1-b`.",
-                      "location": "path"
-                    }
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ]
-                },
-                "importData": {
-                  "httpMethod": "POST",
-                  "request": {
-                    "$ref": "ImportDataRequest"
-                  },
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:importData",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "id": "parallelstore.projects.locations.instances.importData",
-                  "description": "Copies data from Cloud Storage to Parallelstore.",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "type": "string",
-                      "description": "Required. Name of the resource.",
-                      "required": true
-                    }
-                  },
-                  "path": "v1/{+name}:importData"
-                },
-                "exportData": {
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:exportData",
-                  "description": "Copies data from Parallelstore to Cloud Storage.",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "path": "v1/{+name}:exportData",
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "id": "parallelstore.projects.locations.instances.exportData",
-                  "parameters": {
-                    "name": {
-                      "type": "string",
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
-                      "required": true,
-                      "description": "Required. Name of the resource."
-                    }
-                  },
-                  "httpMethod": "POST",
-                  "request": {
-                    "$ref": "ExportDataRequest"
-                  },
-                  "response": {
-                    "$ref": "Operation"
-                  }
-                },
-                "list": {
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
-                  "response": {
-                    "$ref": "ListInstancesResponse"
-                  },
-                  "description": "Lists all instances in a given project and location.",
-                  "parameters": {
-                    "pageToken": {
-                      "description": "Optional. A token identifying a page of results the server should return.",
-                      "location": "query",
-                      "type": "string"
+                      "description": "Required. The instance's project and location, in the format `projects/{project}/locations/{location}`. Locations map to Google Cloud zones; for example, `us-west1-b`."
                     },
-                    "orderBy": {
-                      "description": "Optional. Hint for how to order the results.",
-                      "location": "query",
-                      "type": "string"
-                    },
-                    "filter": {
+                    "requestId": {
                       "type": "string",
-                      "description": "Optional. Filtering results.",
+                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
                       "location": "query"
-                    },
-                    "parent": {
-                      "description": "Required. The project and location for which to retrieve instance information, in the format `projects/{project_id}/locations/{location}`. To retrieve instance information for all locations, use \"-\" as the value of `{location}`.",
-                      "required": true,
-                      "location": "path",
-                      "pattern": "^projects/[^/]+/locations/[^/]+$",
-                      "type": "string"
-                    },
-                    "pageSize": {
-                      "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, the server will pick an appropriate default.",
-                      "type": "integer",
-                      "location": "query",
-                      "format": "int32"
                     }
                   },
-                  "id": "parallelstore.projects.locations.instances.list",
-                  "httpMethod": "GET",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "description": "Creates a Parallelstore instance in a given project and location.",
                   "parameterOrder": [
                     "parent"
                   ],
-                  "path": "v1/{+parent}/instances"
+                  "id": "parallelstore.projects.locations.instances.create",
+                  "request": {
+                    "$ref": "Instance"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances"
                 },
                 "patch": {
-                  "path": "v1/{+name}",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "parameters": {
-                    "name": {
-                      "description": "Identifier. The resource name of the instance, in the format `projects/{project}/locations/{location}/instances/{instance_id}`.",
-                      "required": true,
-                      "location": "path",
-                      "type": "string",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    },
-                    "requestId": {
-                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
-                      "location": "query",
-                      "type": "string"
-                    },
-                    "updateMask": {
-                      "location": "query",
-                      "type": "string",
-                      "description": "Required. Mask of fields to update. Field mask is used to specify the fields to be overwritten in the Instance resource by the update. At least one path must be supplied in this field. The fields specified in the update_mask are relative to the resource, not the full request.",
-                      "format": "google-fieldmask"
-                    }
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform"
-                  ],
                   "parameterOrder": [
                     "name"
                   ],
-                  "id": "parallelstore.projects.locations.instances.patch",
-                  "httpMethod": "PATCH",
+                  "path": "v1/{+name}",
                   "response": {
                     "$ref": "Operation"
                   },
-                  "description": "Updates the parameters of a single instance.",
                   "request": {
                     "$ref": "Instance"
-                  }
-                },
-                "get": {
+                  },
                   "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "httpMethod": "GET",
-                  "description": "Gets details of a single instance.",
                   "scopes": [
                     "https://www.googleapis.com/auth/cloud-platform"
                   ],
-                  "id": "parallelstore.projects.locations.instances.get",
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "response": {
-                    "$ref": "Instance"
-                  },
+                  "id": "parallelstore.projects.locations.instances.patch",
+                  "description": "Updates the parameters of a single instance.",
                   "parameters": {
-                    "name": {
-                      "required": true,
-                      "location": "path",
-                      "type": "string",
-                      "description": "Required. The instance resource name, in the format `projects/{project_id}/locations/{location}/instances/{instance_id}`.",
-                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
-                    }
-                  },
-                  "path": "v1/{+name}"
-                },
-                "delete": {
-                  "parameters": {
-                    "requestId": {
+                    "updateMask": {
                       "location": "query",
-                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes after the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+                      "format": "google-fieldmask",
+                      "description": "Required. Mask of fields to update. Field mask is used to specify the fields to be overwritten in the Instance resource by the update. At least one path must be supplied in this field. The fields specified in the update_mask are relative to the resource, not the full request.",
                       "type": "string"
                     },
+                    "name": {
+                      "type": "string",
+                      "description": "Identifier. The resource name of the instance, in the format `projects/{project}/locations/{location}/instances/{instance_id}`.",
+                      "location": "path",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "location": "query",
+                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes since the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000)."
+                    }
+                  },
+                  "httpMethod": "PATCH"
+                },
+                "delete": {
+                  "description": "Deletes a single instance.",
+                  "httpMethod": "DELETE",
+                  "id": "parallelstore.projects.locations.instances.delete",
+                  "parameters": {
                     "name": {
                       "description": "Required. Name of the resource",
                       "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
                       "location": "path",
                       "required": true,
                       "type": "string"
+                    },
+                    "requestId": {
+                      "location": "query",
+                      "description": "Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed. The server will guarantee that for at least 60 minutes after the first request. For example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+                      "type": "string"
                     }
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "path": "v1/{+name}",
+                  "parameterOrder": [
+                    "name"
+                  ]
+                },
+                "importData": {
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:importData",
+                  "request": {
+                    "$ref": "ImportDataRequest"
                   },
                   "response": {
                     "$ref": "Operation"
                   },
-                  "path": "v1/{+name}",
                   "parameterOrder": [
                     "name"
                   ],
-                  "id": "parallelstore.projects.locations.instances.delete",
-                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}",
-                  "description": "Deletes a single instance.",
-                  "httpMethod": "DELETE",
+                  "description": "Copies data from Cloud Storage to Parallelstore.",
+                  "path": "v1/{+name}:importData",
+                  "id": "parallelstore.projects.locations.instances.importData",
+                  "httpMethod": "POST",
                   "scopes": [
                     "https://www.googleapis.com/auth/cloud-platform"
-                  ]
+                  ],
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "location": "path",
+                      "required": true,
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "description": "Required. Name of the resource."
+                    }
+                  }
+                },
+                "list": {
+                  "id": "parallelstore.projects.locations.instances.list",
+                  "path": "v1/{+parent}/instances",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "parameterOrder": [
+                    "parent"
+                  ],
+                  "response": {
+                    "$ref": "ListInstancesResponse"
+                  },
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances",
+                  "httpMethod": "GET",
+                  "description": "Lists all instances in a given project and location.",
+                  "parameters": {
+                    "pageSize": {
+                      "type": "integer",
+                      "format": "int32",
+                      "location": "query",
+                      "description": "Optional. Requested page size. Server may return fewer items than requested. If unspecified, the server will pick an appropriate default."
+                    },
+                    "pageToken": {
+                      "type": "string",
+                      "location": "query",
+                      "description": "Optional. A token identifying a page of results the server should return."
+                    },
+                    "parent": {
+                      "description": "Required. The project and location for which to retrieve instance information, in the format `projects/{project_id}/locations/{location}`. To retrieve instance information for all locations, use \"-\" as the value of `{location}`.",
+                      "pattern": "^projects/[^/]+/locations/[^/]+$",
+                      "type": "string",
+                      "location": "path",
+                      "required": true
+                    },
+                    "filter": {
+                      "location": "query",
+                      "description": "Optional. Filtering results.",
+                      "type": "string"
+                    },
+                    "orderBy": {
+                      "type": "string",
+                      "location": "query",
+                      "description": "Optional. Hint for how to order the results."
+                    }
+                  }
+                },
+                "exportData": {
+                  "description": "Copies data from Parallelstore to Cloud Storage.",
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "request": {
+                    "$ref": "ExportDataRequest"
+                  },
+                  "httpMethod": "POST",
+                  "parameters": {
+                    "name": {
+                      "pattern": "^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                      "type": "string",
+                      "description": "Required. Name of the resource.",
+                      "location": "path",
+                      "required": true
+                    }
+                  },
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform"
+                  ],
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "id": "parallelstore.projects.locations.instances.exportData",
+                  "path": "v1/{+name}:exportData",
+                  "flatPath": "v1/projects/{projectsId}/locations/{locationsId}/instances/{instancesId}:exportData"
                 }
               }
-            }
-          },
-          "methods": {
-            "get": {
-              "id": "parallelstore.projects.locations.get",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ],
-              "httpMethod": "GET",
-              "parameterOrder": [
-                "name"
-              ],
-              "flatPath": "v1/projects/{projectsId}/locations/{locationsId}",
-              "description": "Gets information about a location.",
-              "parameters": {
-                "name": {
-                  "description": "Resource name for the location.",
-                  "pattern": "^projects/[^/]+/locations/[^/]+$",
-                  "required": true,
-                  "type": "string",
-                  "location": "path"
-                }
-              },
-              "response": {
-                "$ref": "Location"
-              },
-              "path": "v1/{+name}"
-            },
-            "list": {
-              "path": "v1/{+name}/locations",
-              "id": "parallelstore.projects.locations.list",
-              "httpMethod": "GET",
-              "response": {
-                "$ref": "ListLocationsResponse"
-              },
-              "parameters": {
-                "filter": {
-                  "description": "A filter to narrow down results to a preferred subset. The filtering language accepts strings like `\"displayName=tokyo\"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).",
-                  "location": "query",
-                  "type": "string"
-                },
-                "pageSize": {
-                  "location": "query",
-                  "format": "int32",
-                  "description": "The maximum number of results to return. If not set, the service selects a default.",
-                  "type": "integer"
-                },
-                "pageToken": {
-                  "location": "query",
-                  "type": "string",
-                  "description": "A page token received from the `next_page_token` field in the response. Send that page token to receive the subsequent page."
-                },
-                "extraLocationTypes": {
-                  "description": "Optional. Do not use this field. It is unsupported and is ignored unless explicitly documented otherwise. This is primarily for internal usage.",
-                  "type": "string",
-                  "location": "query",
-                  "repeated": true
-                },
-                "name": {
-                  "location": "path",
-                  "type": "string",
-                  "pattern": "^projects/[^/]+$",
-                  "description": "The resource that owns the locations collection, if applicable.",
-                  "required": true
-                }
-              },
-              "description": "Lists information about the supported locations for this service.",
-              "flatPath": "v1/projects/{projectsId}/locations",
-              "parameterOrder": [
-                "name"
-              ],
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform"
-              ]
             }
           }
         }
       }
     }
   },
-  "protocol": "rest",
+  "mtlsRootUrl": "https://parallelstore.mtls.googleapis.com/",
   "baseUrl": "https://parallelstore.googleapis.com/",
-  "kind": "discovery#restDescription",
-  "id": "parallelstore:v1",
-  "title": "Parallelstore API"
+  "ownerDomain": "google.com",
+  "kind": "discovery#restDescription"
 }
