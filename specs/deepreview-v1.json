@@ -1,73 +1,674 @@
 {
-  "canonicalName": "DeepReview",
-  "description": "Deep Review API for automated, in-depth document reviews.",
-  "version": "v1",
-  "protocol": "rest",
-  "version_module": true,
-  "schemas": {
-    "ReviewSummary": {
-      "id": "ReviewSummary",
-      "description": "Lightweight summary of a Review execution run for display in Document views.",
-      "type": "object",
-      "properties": {
-        "state": {
-          "enum": [
-            "STATE_UNSPECIFIED",
-            "PENDING",
-            "RUNNING",
-            "SUCCEEDED",
-            "FAILED"
-          ],
-          "type": "string",
-          "description": "Output only. Current review lifecycle state.",
-          "enumDescriptions": [
-            "Default unspecified state.",
-            "Review created and queued, awaiting worker scheduling.",
-            "Review worker is actively evaluating the document.",
-            "Review succeeded with generated report.",
-            "Review failed after exhausting retry attempts."
-          ],
-          "readOnly": true
+  "auth": {
+    "oauth2": {
+      "scopes": {
+        "https://www.googleapis.com/auth/cloud-platform": {
+          "description": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
         },
-        "review": {
-          "type": "string",
-          "description": "Output only. Resource name of the Review. Format: `documents/{document}/reviews/{review}`",
-          "readOnly": true
-        },
-        "createTime": {
-          "readOnly": true,
-          "format": "google-datetime",
-          "description": "Output only. Timestamp when this review attempt was initiated.",
-          "type": "string"
+        "https://www.googleapis.com/auth/drive.file": {
+          "description": "See, edit, create, and delete only the specific Google Drive files you use with this app"
+        }
+      }
+    }
+  },
+  "documentationLink": "https://research.google/deepreview",
+  "discoveryVersion": "v1",
+  "resources": {
+    "operations": {
+      "resources": {
+        "documents": {
+          "resources": {
+            "reviews": {
+              "methods": {
+                "get": {
+                  "parameterOrder": [
+                    "name"
+                  ],
+                  "parameters": {
+                    "name": {
+                      "required": true,
+                      "location": "path",
+                      "description": "The name of the operation resource.",
+                      "type": "string",
+                      "pattern": "^operations/documents/[^/]+/reviews/[^/]+$"
+                    }
+                  },
+                  "response": {
+                    "$ref": "Operation"
+                  },
+                  "path": "v1/{+name}",
+                  "id": "deepreview.operations.documents.reviews.get",
+                  "scopes": [
+                    "https://www.googleapis.com/auth/cloud-platform",
+                    "https://www.googleapis.com/auth/drive.file"
+                  ],
+                  "httpMethod": "GET",
+                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
+                  "flatPath": "v1/operations/documents/{documentsId}/reviews/{reviewsId}"
+                }
+              }
+            }
+          }
         }
       }
     },
-    "DeepReviewRunConfig": {
-      "description": "Configuration options for the multi-agent document review execution pipeline.",
-      "id": "DeepReviewRunConfig",
-      "properties": {
-        "topology": {
-          "type": "string",
-          "description": "Optional. Review execution topology profile to use.",
-          "enumDescriptions": [
-            "Default unspecified topology. The backend defaults to standard high quality.",
-            "Extra high quality topology with exhaustive evaluation passes.",
-            "Standard high quality conference review topology.",
-            "Medium quality topology balancing review latency and depth.",
-            "Low latency / fast turnaround topology."
+    "v1": {
+      "methods": {
+        "getUserQuota": {
+          "response": {
+            "$ref": "UserQuota"
+          },
+          "description": "Retrieves the review quota limits and sliding-window usage for the authenticated caller.",
+          "parameters": {
+            "name": {
+              "required": true,
+              "pattern": "^userQuota$",
+              "description": "Required. The resource name of the singleton user quota to retrieve.",
+              "type": "string",
+              "location": "path"
+            }
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
           ],
-          "enum": [
-            "TOPOLOGY_UNSPECIFIED",
-            "EXTRA_HIGH",
-            "HIGH",
-            "MID",
-            "LOW"
+          "id": "deepreview.getUserQuota",
+          "flatPath": "v1/userQuota",
+          "path": "v1/{+name}",
+          "httpMethod": "GET",
+          "parameterOrder": [
+            "name"
+          ]
+        }
+      }
+    },
+    "media": {
+      "methods": {
+        "download": {
+          "path": "v1/{+name}:download",
+          "response": {
+            "$ref": "DownloadDocumentResponse"
+          },
+          "supportsMediaDownload": true,
+          "useMediaDownloadService": true,
+          "httpMethod": "GET",
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "id": "deepreview.media.download",
+          "description": "Downloads the original document content (PDF binary) using media streaming. Pass `alt=media` as a query parameter to stream the binary PDF bytes. Without `alt=media`, a JSON response is returned.",
+          "flatPath": "v1/documents/{documentsId}:download",
+          "parameters": {
+            "name": {
+              "pattern": "^documents/[^/]+$",
+              "description": "Required. The resource name of the document to download.",
+              "required": true,
+              "type": "string",
+              "location": "path"
+            }
+          },
+          "parameterOrder": [
+            "name"
           ]
         },
-        "model": {
-          "description": "Optional. The Gemini model name/version to use (e.g., \"gemini-1.5-pro\", \"gemini-2.0-flash\").",
+        "upload": {
+          "httpMethod": "POST",
+          "flatPath": "v1/documents",
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "path": "v1/documents",
+          "description": "Creates a new Document resource and ingests the manuscript using media upload or Google Drive.",
+          "parameters": {
+            "requestId": {
+              "description": "Optional. Idempotency identifier for network retry safety (AIP-155). Must be a valid UUID4 string.",
+              "type": "string",
+              "location": "query"
+            },
+            "documentId": {
+              "description": "Optional. The ID to use for the document, which will become the final component of the document's resource name. If not provided, a unique server-generated UUID will be assigned.",
+              "type": "string",
+              "location": "query"
+            }
+          },
+          "response": {
+            "$ref": "Document"
+          },
+          "mediaUpload": {
+            "maxSize": "20971520",
+            "protocols": {
+              "resumable": {
+                "path": "/resumable/upload/v1/documents",
+                "multipart": true
+              },
+              "simple": {
+                "multipart": true,
+                "path": "/upload/v1/documents"
+              }
+            },
+            "accept": [
+              "*/*"
+            ]
+          },
+          "id": "deepreview.media.upload",
+          "request": {
+            "$ref": "Document"
+          },
+          "supportsMediaUpload": true,
+          "parameterOrder": []
+        }
+      }
+    },
+    "documents": {
+      "methods": {
+        "estimateReviewCost": {
+          "path": "v1/{+document}:estimateReviewCost",
+          "flatPath": "v1/documents/{documentsId}:estimateReviewCost",
+          "id": "deepreview.documents.estimateReviewCost",
+          "request": {
+            "$ref": "EstimateReviewCostRequest"
+          },
+          "description": "Estimates what a review of a document would cost on the caller's Gemini API key. The estimate comes from what past reviews with the same model and depth cost, adjusted to this document's size and repriced at the Gemini API's current list prices. It covers one review attempt that runs to completion, and doesn't include retries after errors.",
+          "httpMethod": "POST",
+          "response": {
+            "$ref": "EstimateReviewCostResponse"
+          },
+          "parameterOrder": [
+            "document"
+          ],
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "parameters": {
+            "document": {
+              "description": "Required. The document to review.",
+              "pattern": "^documents/[^/]+$",
+              "location": "path",
+              "type": "string",
+              "required": true
+            }
+          }
+        },
+        "delete": {
+          "response": {
+            "$ref": "Empty"
+          },
+          "httpMethod": "DELETE",
+          "path": "v1/{+name}",
+          "id": "deepreview.documents.delete",
+          "flatPath": "v1/documents/{documentsId}",
+          "parameterOrder": [
+            "name"
+          ],
+          "parameters": {
+            "allowMissing": {
+              "type": "boolean",
+              "description": "Optional. If set to `true`, and the document is not found, the request succeeds.",
+              "location": "query"
+            },
+            "force": {
+              "type": "boolean",
+              "location": "query",
+              "description": "Optional. If set to `true`, any child resources (e.g. review resources) are also deleted. If `false` and the document has existing reviews, the request fails with `FAILED_PRECONDITION`."
+            },
+            "name": {
+              "location": "path",
+              "type": "string",
+              "pattern": "^documents/[^/]+$",
+              "required": true,
+              "description": "Required. The resource name of the document to delete."
+            }
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "description": "Deletes a document and its stored content. If `force` is set to `true`, any associated reviews are also deleted."
+        },
+        "get": {
+          "parameters": {
+            "name": {
+              "pattern": "^documents/[^/]+$",
+              "location": "path",
+              "type": "string",
+              "description": "Required. The resource name of the document to retrieve.",
+              "required": true
+            }
+          },
+          "response": {
+            "$ref": "Document"
+          },
+          "id": "deepreview.documents.get",
+          "description": "Retrieves document metadata. The returned document includes its `latest_review_summary` when a review exists.",
+          "httpMethod": "GET",
+          "flatPath": "v1/documents/{documentsId}",
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "path": "v1/{+name}",
+          "parameterOrder": [
+            "name"
+          ]
+        },
+        "list": {
+          "parameterOrder": [],
+          "path": "v1/documents",
+          "httpMethod": "GET",
+          "id": "deepreview.documents.list",
+          "flatPath": "v1/documents",
+          "description": "Lists documents for the authenticated caller with cursor pagination. Each returned document includes its `latest_review_summary` when a review exists.",
+          "scopes": [
+            "https://www.googleapis.com/auth/cloud-platform",
+            "https://www.googleapis.com/auth/drive.file"
+          ],
+          "response": {
+            "$ref": "ListDocumentsResponse"
+          },
+          "parameters": {
+            "pageSize": {
+              "format": "int32",
+              "description": "Optional. The maximum number of documents to return in a single page. The server may return fewer than this value. If unspecified, at most 50 documents will be returned. The maximum value is 100; values above 100 will be coerced to 100.",
+              "type": "integer",
+              "location": "query"
+            },
+            "filter": {
+              "location": "query",
+              "type": "string",
+              "description": "Optional. Custom filter expressions are not currently supported; non-empty values return INVALID_ARGUMENT."
+            },
+            "orderBy": {
+              "description": "Optional. Custom order_by expressions are not currently supported; non-empty values return INVALID_ARGUMENT.",
+              "location": "query",
+              "type": "string"
+            },
+            "pageToken": {
+              "type": "string",
+              "description": "Optional. A page token received from a previous `ListDocuments` call.",
+              "location": "query"
+            }
+          }
+        }
+      },
+      "resources": {
+        "reviews": {
+          "methods": {
+            "get": {
+              "parameters": {
+                "name": {
+                  "required": true,
+                  "description": "Required. The resource name of the review to retrieve.",
+                  "pattern": "^documents/[^/]+/reviews/[^/]+$",
+                  "type": "string",
+                  "location": "path"
+                }
+              },
+              "parameterOrder": [
+                "name"
+              ],
+              "path": "v1/{+name}",
+              "response": {
+                "$ref": "Review"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/drive.file"
+              ],
+              "httpMethod": "GET",
+              "id": "deepreview.documents.reviews.get",
+              "description": "Retrieves a specific review execution result.",
+              "flatPath": "v1/documents/{documentsId}/reviews/{reviewsId}"
+            },
+            "create": {
+              "path": "v1/{+parent}/reviews",
+              "response": {
+                "$ref": "Operation"
+              },
+              "description": "Creates and initiates an asynchronous multi-agent review for a document. Returns a google.longrunning.Operation. When the operation completes, the `response` field contains a `Review` and the `metadata` field contains `CreateReviewMetadata`.",
+              "request": {
+                "$ref": "Review"
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/drive.file"
+              ],
+              "id": "deepreview.documents.reviews.create",
+              "httpMethod": "POST",
+              "flatPath": "v1/documents/{documentsId}/reviews",
+              "parameterOrder": [
+                "parent"
+              ],
+              "parameters": {
+                "parent": {
+                  "pattern": "^documents/[^/]+$",
+                  "type": "string",
+                  "required": true,
+                  "location": "path",
+                  "description": "Required. The parent Document resource name where this review will be created."
+                },
+                "reviewId": {
+                  "type": "string",
+                  "location": "query",
+                  "description": "Optional. The ID to use for the review, which will become the final component of the review's resource name. If not provided, a unique server-generated UUID will be assigned."
+                },
+                "requestId": {
+                  "type": "string",
+                  "description": "Optional. Idempotency identifier for network retry safety (AIP-155). Must be a valid UUID4 string.",
+                  "location": "query"
+                }
+              }
+            },
+            "list": {
+              "httpMethod": "GET",
+              "description": "Lists all review execution runs for a document.",
+              "response": {
+                "$ref": "ListReviewsResponse"
+              },
+              "id": "deepreview.documents.reviews.list",
+              "path": "v1/{+parent}/reviews",
+              "parameters": {
+                "pageToken": {
+                  "description": "Optional. A page token received from a previous `ListReviews` call.",
+                  "location": "query",
+                  "type": "string"
+                },
+                "parent": {
+                  "description": "Required. The parent Document resource name.",
+                  "location": "path",
+                  "pattern": "^documents/[^/]+$",
+                  "required": true,
+                  "type": "string"
+                },
+                "filter": {
+                  "description": "Optional. Custom filter expressions are not currently supported; non-empty values return INVALID_ARGUMENT.",
+                  "type": "string",
+                  "location": "query"
+                },
+                "orderBy": {
+                  "type": "string",
+                  "location": "query",
+                  "description": "Optional. Custom order_by expressions are not currently supported; non-empty values return INVALID_ARGUMENT."
+                },
+                "pageSize": {
+                  "description": "Optional. The maximum number of reviews to return in a single page. The server may return fewer than this value. If unspecified, at most 50 reviews will be returned. The maximum value is 100; values above 100 will be coerced to 100.",
+                  "location": "query",
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "scopes": [
+                "https://www.googleapis.com/auth/cloud-platform",
+                "https://www.googleapis.com/auth/drive.file"
+              ],
+              "flatPath": "v1/documents/{documentsId}/reviews",
+              "parameterOrder": [
+                "parent"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "version_module": true,
+  "servicePath": "",
+  "ownerName": "Google",
+  "revision": "20261028",
+  "name": "deepreview",
+  "protocol": "rest",
+  "mtlsRootUrl": "https://deepreview.mtls.googleapis.com/",
+  "batchPath": "batch",
+  "ownerDomain": "google.com",
+  "title": "Deep Review API",
+  "id": "deepreview:v1",
+  "rootUrl": "https://deepreview.googleapis.com/",
+  "description": "Deep Review API for automated, in-depth document reviews.",
+  "schemas": {
+    "Date": {
+      "properties": {
+        "day": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant."
+        },
+        "year": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year."
+        },
+        "month": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day."
+        }
+      },
+      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp",
+      "type": "object",
+      "id": "Date"
+    },
+    "Operation": {
+      "id": "Operation",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`."
+        },
+        "metadata": {
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          },
+          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any.",
+          "type": "object"
+        },
+        "response": {
+          "additionalProperties": {
+            "description": "Properties of the object. Contains field @type with type URL.",
+            "type": "any"
+          },
+          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
+          "type": "object"
+        },
+        "done": {
+          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
+          "type": "boolean"
+        },
+        "error": {
+          "description": "The error result of the operation in case of failure or cancellation.",
+          "$ref": "Status"
+        }
+      },
+      "description": "This resource represents a long-running operation that is the result of a network API call."
+    },
+    "EstimateReviewCostRequest": {
+      "properties": {
+        "review": {
+          "description": "Required. The review to estimate, as it would be passed to `CreateReview`. Only its `run_config` is read, and `gemini_api_key` is ignored.",
+          "$ref": "Review"
+        }
+      },
+      "description": "Request message for estimating what a review would cost.",
+      "id": "EstimateReviewCostRequest",
+      "type": "object"
+    },
+    "EstimateReviewCostResponse": {
+      "id": "EstimateReviewCostResponse",
+      "description": "Response message for estimating what a review would cost. When the cost can't be estimated, for example because too few past reviews used the same model and depth, the costs are unset and `past_review_count` is 0.",
+      "type": "object",
+      "properties": {
+        "medianCost": {
+          "$ref": "Money",
+          "description": "The median of what comparable past reviews would cost for this document."
+        },
+        "lowCost": {
+          "description": "The 20th percentile of what comparable past reviews would cost for this document.",
+          "$ref": "Money"
+        },
+        "pastReviewCount": {
+          "format": "int32",
+          "type": "integer",
+          "description": "Number of past reviews the estimate is based on."
+        },
+        "highCost": {
+          "$ref": "Money",
+          "description": "The 95th percentile of what comparable past reviews would cost for this document."
+        }
+      }
+    },
+    "Document": {
+      "properties": {
+        "createTime": {
+          "readOnly": true,
+          "description": "Output only. Timestamp when the document was initially created.",
+          "type": "string",
+          "format": "google-datetime"
+        },
+        "name": {
+          "description": "Identifier. Resource name in format `documents/{document}`.",
           "type": "string"
         },
+        "displayName": {
+          "type": "string",
+          "description": "Optional. User-provided display title or filename for the document."
+        },
+        "driveSource": {
+          "$ref": "DriveSource",
+          "description": "Optional. Reference to a Google Drive file to import."
+        },
+        "latestReviewSummary": {
+          "description": "Output only. Summary of the most recent review run for this document, if any. Populated by `GetDocument` and `ListDocuments`; unset on the document returned by `CreateDocument`, which has no reviews yet.",
+          "readOnly": true,
+          "$ref": "ReviewSummary"
+        }
+      },
+      "description": "A document uploaded for automated review. Documents are immutable post-creation; to review a new version, create a new Document.",
+      "type": "object",
+      "id": "Document"
+    },
+    "FieldComparison": {
+      "type": "object",
+      "id": "FieldComparison",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "description": "Output only. Human-readable comparison detail (e.g., \"extracted=2023, found=2024 (diff=1)\").",
+          "readOnly": true
+        },
+        "fieldKey": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Field key (\"title\", \"authors\", \"year\", \"journal\", \"volume\", \"pages\", \"doi\")."
+        },
+        "match": {
+          "description": "Output only. Whether the extracted and retrieved values matched.",
+          "type": "boolean",
+          "readOnly": true
+        }
+      },
+      "description": "Per-field comparison result between extracted and retrieved metadata."
+    },
+    "DownloadDocumentResponse": {
+      "properties": {},
+      "description": "Response message for downloading a Document's raw content using media download.",
+      "id": "DownloadDocumentResponse",
+      "type": "object"
+    },
+    "Author": {
+      "id": "Author",
+      "properties": {
+        "familyName": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Author family name / surname (or organization name)."
+        },
+        "givenName": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Author given name / initials."
+        }
+      },
+      "description": "Author name components.",
+      "type": "object"
+    },
+    "GroundingUrl": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Source URL."
+        },
+        "title": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Source page title or domain."
+        }
+      },
+      "description": "Web source URL surfaced during Google Search grounding verification.",
+      "id": "GroundingUrl"
+    },
+    "DriveSource": {
+      "properties": {
+        "fileId": {
+          "type": "string",
+          "description": "Required. Immutable. The Google Drive file ID (e.g. \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms\"). For Google Drive shortcuts, callers must pass the resolved target file's `file_id` and `resource_key`."
+        },
+        "revisionId": {
+          "description": "Optional. Input only. Immutable. Importing a specific revision is not currently supported; non-empty values return INVALID_ARGUMENT.",
+          "type": "string"
+        },
+        "resourceKeySet": {
+          "type": "boolean",
+          "description": "Output only. Indicates whether a resource key was provided for this Drive source.",
+          "readOnly": true
+        },
+        "resourceKey": {
+          "type": "string",
+          "description": "Optional. Input only. Immutable. Resource key (`^[a-zA-Z0-9_-]{1,128}$`) required to access certain older link-shared Google Drive files returned by the Google Drive Picker (for shortcuts, pass the resolved target file's resource key). Never persisted in database records or returned in Document resources (see companion field `resource_key_set`, AIP-147)."
+        }
+      },
+      "id": "DriveSource",
+      "description": "Configuration for importing a document directly from Google Drive.",
+      "type": "object"
+    },
+    "NormalizedBoundingBox": {
+      "properties": {
+        "right": {
+          "readOnly": true,
+          "description": "Output only. Right coordinate in [0.0, 1.0].",
+          "format": "float",
+          "type": "number"
+        },
+        "left": {
+          "type": "number",
+          "format": "float",
+          "readOnly": true,
+          "description": "Output only. Left coordinate in [0.0, 1.0]."
+        },
+        "top": {
+          "type": "number",
+          "readOnly": true,
+          "format": "float",
+          "description": "Output only. Top coordinate in [0.0, 1.0]."
+        },
+        "bottom": {
+          "format": "float",
+          "description": "Output only. Bottom coordinate in [0.0, 1.0].",
+          "type": "number",
+          "readOnly": true
+        }
+      },
+      "id": "NormalizedBoundingBox",
+      "description": "Bounding box in normalized [0.0, 1.0] page coordinates (origin top-left).",
+      "type": "object"
+    },
+    "DeepReviewRunConfig": {
+      "type": "object",
+      "properties": {
         "userPrompt": {
           "type": "string",
           "description": "Optional. User-provided guidance, focus areas, or custom evaluation instructions passed to the review agents."
@@ -80,171 +681,138 @@
           "type": "boolean",
           "description": "Output only. Indicates whether a developer Bring-Your-Own-Key Gemini API key was provided for this review run.",
           "readOnly": true
+        },
+        "topology": {
+          "enumDescriptions": [
+            "Default unspecified topology. The server uses its default topology (`MID`).",
+            "Extra high quality topology with exhaustive evaluation passes.",
+            "Standard high quality conference review topology.",
+            "Medium quality topology balancing review latency and depth.",
+            "Low latency / fast turnaround topology."
+          ],
+          "type": "string",
+          "enum": [
+            "TOPOLOGY_UNSPECIFIED",
+            "EXTRA_HIGH",
+            "HIGH",
+            "MID",
+            "LOW"
+          ],
+          "description": "Optional. Review execution topology profile to use."
+        },
+        "model": {
+          "type": "string",
+          "description": "Optional. The Gemini model identifier to use for the review. If omitted, the server uses its default model. Unsupported values return INVALID_ARGUMENT."
         }
       },
-      "type": "object"
+      "id": "DeepReviewRunConfig",
+      "description": "Configuration options for the multi-agent document review execution pipeline."
     },
-    "ListDocumentsResponse": {
-      "description": "Response message for listing Document resources.",
-      "id": "ListDocumentsResponse",
+    "DocumentLocation": {
+      "id": "DocumentLocation",
       "type": "object",
+      "description": "A location targeting either a PDF page region/quote or text lines in the document.",
       "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "A token to retrieve the next page of results, or empty if no further pages exist."
+        "pdf": {
+          "$ref": "PdfLocation",
+          "readOnly": true,
+          "description": "Output only. Location within a rendered PDF document."
         },
-        "documents": {
-          "type": "array",
-          "description": "The list of Document resources.",
-          "items": {
-            "$ref": "Document"
-          }
+        "text": {
+          "description": "Output only. Location within a plain-text, Markdown, or LaTeX source document.",
+          "readOnly": true,
+          "$ref": "TextLocation"
         }
       }
     },
-    "Date": {
-      "id": "Date",
+    "CitationMetadata": {
       "properties": {
-        "month": {
-          "description": "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day.",
-          "type": "integer",
-          "format": "int32"
+        "urls": {
+          "items": {
+            "type": "string"
+          },
+          "description": "Output only. URLs associated with the reference.",
+          "readOnly": true,
+          "type": "array"
         },
-        "year": {
-          "type": "integer",
-          "description": "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year.",
-          "format": "int32"
-        },
-        "day": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant."
-        }
-      },
-      "description": "Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay * google.type.DateTime * google.protobuf.Timestamp",
-      "type": "object"
-    },
-    "DownloadDocumentResponse": {
-      "id": "DownloadDocumentResponse",
-      "type": "object",
-      "description": "Response message for downloading a Document's raw content via Scotty media.",
-      "properties": {}
-    },
-    "Money": {
-      "type": "object",
-      "id": "Money",
-      "properties": {
-        "currencyCode": {
-          "type": "string",
-          "description": "The three-letter currency code defined in ISO 4217."
-        },
-        "units": {
-          "format": "int64",
-          "description": "The whole units of the amount. For example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar.",
+        "pages": {
+          "description": "Output only. Page range or article number.",
+          "readOnly": true,
           "type": "string"
         },
-        "nanos": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Number of nano (10^-9) units of the amount. The value must be between -999,999,999 and +999,999,999 inclusive. If `units` is positive, `nanos` must be positive or zero. If `units` is zero, `nanos` can be positive, zero, or negative. If `units` is negative, `nanos` must be negative or zero. For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000."
-        }
-      },
-      "description": "Represents an amount of money with its currency type."
-    },
-    "PdfLocation": {
-      "type": "object",
-      "id": "PdfLocation",
-      "description": "Location anchor within a PDF document.",
-      "properties": {
-        "quoteSelector": {
-          "description": "Output only. W3C Web Annotation TextQuoteSelector (https://www.w3.org/TR/annotation-model/#text-quote-selector) for exact text span highlighting.",
-          "readOnly": true,
-          "$ref": "TextQuoteSelector"
-        },
-        "boundingBoxes": {
-          "type": "array",
-          "readOnly": true,
-          "description": "Output only. Normalized bounding boxes [0.0, 1.0] relative to page width and height. At most 50 bounding boxes are returned per anchored span.",
+        "authors": {
           "items": {
-            "$ref": "NormalizedBoundingBox"
-          }
-        },
-        "pageNumber": {
-          "description": "Output only. 1-indexed page number within the PDF document.",
-          "format": "int32",
-          "type": "integer",
+            "$ref": "Author"
+          },
+          "description": "Output only. Ordered list of authors.",
+          "type": "array",
           "readOnly": true
-        }
-      }
-    },
-    "TextQuoteSelector": {
-      "properties": {
-        "prefix": {
-          "description": "Output only. Characters immediately preceding `exact` for disambiguation.",
+        },
+        "publicationDate": {
+          "$ref": "Date",
+          "description": "Output only. Publication date (month and day left as 0 if just year).",
+          "readOnly": true
+        },
+        "volume": {
+          "readOnly": true,
+          "description": "Output only. Volume identifier.",
+          "type": "string"
+        },
+        "doi": {
+          "description": "Output only. Digital Object Identifier (DOI).",
           "readOnly": true,
           "type": "string"
         },
-        "suffix": {
-          "readOnly": true,
+        "journal": {
           "type": "string",
-          "description": "Output only. Characters immediately following `exact` for disambiguation."
+          "readOnly": true,
+          "description": "Output only. Journal, conference, or venue name."
         },
-        "exact": {
+        "source": {
+          "description": "Output only. Source database for retrieved metadata (e.g., \"openalex\", \"crossref\"). Empty on `extracted_metadata`.",
           "type": "string",
+          "readOnly": true
+        },
+        "title": {
+          "description": "Output only. Work title.",
           "readOnly": true,
-          "description": "Output only. Verbatim substring extracted from the document character stream."
+          "type": "string"
         }
       },
-      "type": "object",
-      "description": "W3C Web Annotation TextQuoteSelector for resilient text anchoring (https://www.w3.org/TR/annotation-model/#text-quote-selector).",
-      "id": "TextQuoteSelector"
-    },
-    "ListReviewsResponse": {
-      "description": "Response message for listing Review resources.",
-      "type": "object",
-      "id": "ListReviewsResponse",
-      "properties": {
-        "reviews": {
-          "type": "array",
-          "description": "The list of Review resources.",
-          "items": {
-            "$ref": "Review"
-          }
-        },
-        "nextPageToken": {
-          "description": "A token to retrieve the next page of results, or empty if no further pages exist.",
-          "type": "string"
-        }
-      }
+      "id": "CitationMetadata",
+      "description": "Structured bibliographic metadata for an extracted or retrieved work.",
+      "type": "object"
     },
     "AnchoredReviewComment": {
+      "description": "A structured review comment anchored to a specific location in the document.",
       "properties": {
         "location": {
-          "readOnly": true,
           "description": "Output only. Polymorphic location in the document where this comment is anchored.",
+          "readOnly": true,
           "$ref": "DocumentLocation"
         },
         "suggestedEdit": {
-          "type": "string",
           "readOnly": true,
-          "description": "Output only. Optional suggested replacement text or edit for the anchored span."
+          "description": "Output only. Optional suggested replacement text or edit for the anchored span.",
+          "type": "string"
         },
-        "commentId": {
-          "type": "string",
-          "readOnly": true,
-          "description": "Output only. Unique identifier for the comment within the review."
-        },
-        "summary": {
-          "description": "Output only. Short one-line summary of the review comment.",
-          "type": "string",
+        "citationReport": {
+          "$ref": "CitationReport",
+          "description": "Output only. Optional structured citation verification report when this comment corresponds to a bibliography reference.",
           "readOnly": true
         },
         "bodyMarkdown": {
           "readOnly": true,
+          "description": "Output only. Detailed markdown explanation of the review comment.",
+          "type": "string"
+        },
+        "commentId": {
           "type": "string",
-          "description": "Output only. Detailed markdown explanation of the review comment."
+          "description": "Output only. Unique identifier for the comment within the review.",
+          "readOnly": true
         },
         "severity": {
+          "readOnly": true,
           "enumDescriptions": [
             "Default unspecified severity.",
             "Critical flaw in proofs, methodology, or empirical claims.",
@@ -252,6 +820,7 @@
             "Minor issue, presentation clarity, or missing detail.",
             "Constructive suggestion or optional improvement."
           ],
+          "type": "string",
           "enum": [
             "SEVERITY_UNSPECIFIED",
             "CRITICAL",
@@ -259,26 +828,89 @@
             "MINOR",
             "SUGGESTION"
           ],
-          "type": "string",
-          "readOnly": true,
           "description": "Output only. Severity classification of the comment."
         },
-        "citationReport": {
-          "$ref": "CitationReport",
+        "summary": {
+          "description": "Output only. Short one-line summary of the review comment.",
           "readOnly": true,
-          "description": "Output only. Optional structured citation verification report when this comment corresponds to a bibliography reference."
+          "type": "string"
         }
       },
       "id": "AnchoredReviewComment",
+      "type": "object"
+    },
+    "PdfLocation": {
+      "description": "Location anchor within a PDF document.",
+      "properties": {
+        "pageNumber": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true,
+          "description": "Output only. 1-indexed page number within the PDF document."
+        },
+        "quoteSelector": {
+          "$ref": "TextQuoteSelector",
+          "readOnly": true,
+          "description": "Output only. W3C Web Annotation TextQuoteSelector (https://www.w3.org/TR/annotation-model/#text-quote-selector) for exact text span highlighting."
+        },
+        "boundingBoxes": {
+          "description": "Output only. Normalized bounding boxes [0.0, 1.0] relative to page width and height. At most 50 bounding boxes are returned per anchored span.",
+          "readOnly": true,
+          "items": {
+            "$ref": "NormalizedBoundingBox"
+          },
+          "type": "array"
+        }
+      },
+      "id": "PdfLocation",
+      "type": "object"
+    },
+    "Money": {
+      "properties": {
+        "units": {
+          "format": "int64",
+          "type": "string",
+          "description": "The whole units of the amount. For example if `currencyCode` is `\"USD\"`, then 1 unit is one US dollar."
+        },
+        "nanos": {
+          "type": "integer",
+          "description": "Number of nano (10^-9) units of the amount. The value must be between -999,999,999 and +999,999,999 inclusive. If `units` is positive, `nanos` must be positive or zero. If `units` is zero, `nanos` can be positive, zero, or negative. If `units` is negative, `nanos` must be negative or zero. For example $-1.75 is represented as `units`=-1 and `nanos`=-750,000,000.",
+          "format": "int32"
+        },
+        "currencyCode": {
+          "type": "string",
+          "description": "The three-letter currency code defined in ISO 4217."
+        }
+      },
+      "description": "Represents an amount of money with its currency type.",
       "type": "object",
-      "description": "A structured review comment anchored to a specific location in the document."
+      "id": "Money"
     },
     "UserQuota": {
-      "id": "UserQuota",
+      "type": "object",
+      "description": "Singleton resource representing the authenticated caller's review quota limits and sliding-window usage.",
       "properties": {
-        "maxReviewCountPerWeek": {
+        "nextAvailableTime": {
+          "description": "Output only. Timestamp when the next review quota slot becomes available if `remaining_review_count` is 0; unset when quota is currently available.",
+          "type": "string",
+          "format": "google-datetime",
+          "readOnly": true
+        },
+        "remainingReviewCount": {
           "format": "int32",
+          "readOnly": true,
+          "description": "Output only. Remaining free-tier reviews available in the current rolling 7-day window (`max(0, max_review_count_per_week - used_review_count)`).",
+          "type": "integer"
+        },
+        "usedReviewCount": {
           "type": "integer",
+          "readOnly": true,
+          "description": "Output only. Number of free-tier reviews used in the past 7 days.",
+          "format": "int32"
+        },
+        "maxReviewCountPerWeek": {
+          "type": "integer",
+          "format": "int32",
           "description": "Output only. Maximum free-tier reviews allowed per rolling 7-day window.",
           "readOnly": true
         },
@@ -286,235 +918,80 @@
           "type": "string",
           "description": "Identifier. Resource name of the singleton user quota (`userQuota`)."
         },
-        "remainingReviewCount": {
-          "readOnly": true,
-          "type": "integer",
-          "description": "Output only. Remaining free-tier reviews available in the current rolling 7-day window (`max(0, max_review_count_per_week - used_review_count)`).",
-          "format": "int32"
-        },
         "customLimitEnabled": {
-          "type": "boolean",
+          "description": "Output only. Whether a custom per-user quota override is active for this user.",
           "readOnly": true,
-          "description": "Output only. Whether a custom per-user quota override is active for this user."
-        },
-        "usedReviewCount": {
-          "description": "Output only. Number of free-tier reviews used in the past 7 days.",
-          "readOnly": true,
-          "format": "int32",
-          "type": "integer"
-        },
-        "nextAvailableTime": {
-          "description": "Output only. Timestamp when the next review quota slot becomes available if `remaining_review_count` is 0; unset when quota is currently available.",
-          "type": "string",
-          "format": "google-datetime",
-          "readOnly": true
+          "type": "boolean"
         }
       },
-      "description": "Singleton resource representing the authenticated caller's review quota limits and sliding-window usage.",
+      "id": "UserQuota"
+    },
+    "ListDocumentsResponse": {
+      "id": "ListDocumentsResponse",
+      "properties": {
+        "nextPageToken": {
+          "description": "A token to retrieve the next page of results, or empty if no further pages exist.",
+          "type": "string"
+        },
+        "documents": {
+          "description": "The list of Document resources.",
+          "type": "array",
+          "items": {
+            "$ref": "Document"
+          }
+        }
+      },
+      "description": "Response message for listing Document resources.",
       "type": "object"
     },
-    "DocumentLocation": {
+    "TextLocation": {
       "properties": {
-        "pdf": {
-          "description": "Output only. Location within a rendered PDF document.",
-          "$ref": "PdfLocation",
-          "readOnly": true
-        },
-        "text": {
-          "description": "Output only. Location within a plain-text, Markdown, or LaTeX source document.",
+        "quotedLinePreview": {
           "readOnly": true,
-          "$ref": "TextLocation"
-        }
-      },
-      "type": "object",
-      "description": "Polymorphic location targeting either a PDF page region/quote or text lines.",
-      "id": "DocumentLocation"
-    },
-    "Operation": {
-      "type": "object",
-      "description": "This resource represents a long-running operation that is the result of a network API call.",
-      "id": "Operation",
-      "properties": {
-        "name": {
-          "description": "The server-assigned name, which is only unique within the same service that originally returns it. If you use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.",
+          "description": "Output only. Verbatim snippet of the anchored source line(s).",
           "type": "string"
         },
-        "done": {
-          "description": "If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed, and either `error` or `response` is available.",
-          "type": "boolean"
-        },
-        "metadata": {
-          "additionalProperties": {
-            "description": "Properties of the object. Contains field @type with type URL.",
-            "type": "any"
-          },
-          "type": "object",
-          "description": "Service-specific metadata associated with the operation. It typically contains progress information and common metadata such as create time. Some services might not provide such metadata. Any method that returns a long-running operation should document the metadata type, if any."
-        },
-        "response": {
-          "description": "The normal, successful response of the operation. If the original method returns no data on success, such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.",
-          "additionalProperties": {
-            "type": "any",
-            "description": "Properties of the object. Contains field @type with type URL."
-          },
-          "type": "object"
-        },
-        "error": {
-          "description": "The error result of the operation in case of failure or cancellation.",
-          "$ref": "Status"
-        }
-      }
-    },
-    "EstimateReviewCostRequest": {
-      "type": "object",
-      "description": "Request message for estimating what a review would cost.",
-      "id": "EstimateReviewCostRequest",
-      "properties": {
-        "review": {
-          "description": "Required. The review to estimate, as it would be passed to `CreateReview`. Only its `run_config` is read, and `run_config.gemini_api_key` is ignored.",
-          "$ref": "Review"
-        }
-      }
-    },
-    "Result": {
-      "properties": {
-        "reviewMarkdown": {
-          "description": "Output only. Synthesized review report markdown.",
-          "type": "string",
-          "readOnly": true
-        },
-        "anchoredComments": {
-          "items": {
-            "$ref": "AnchoredReviewComment"
-          },
-          "description": "Output only. Structured review comments anchored to specific locations in the document. At most 300 anchored comments are returned per review.",
-          "type": "array",
-          "readOnly": true
-        },
-        "error": {
-          "$ref": "Status",
-          "description": "Output only. Failure status details if review execution failed.",
-          "readOnly": true
-        }
-      },
-      "type": "object",
-      "id": "Result",
-      "description": "Encapsulates the synthesized output or failure details of a single review execution."
-    },
-    "EstimateReviewCostResponse": {
-      "properties": {
-        "pastReviewCount": {
-          "description": "Number of past reviews the estimate is based on.",
+        "firstLine": {
+          "readOnly": true,
           "format": "int32",
+          "type": "integer",
+          "description": "Output only. 1-indexed inclusive first line number."
+        },
+        "lastColumn": {
+          "readOnly": true,
+          "format": "int32",
+          "description": "Output only. Optional 1-indexed inclusive last column offset within `last_line`.",
           "type": "integer"
         },
-        "medianCost": {
-          "description": "The median of what comparable past reviews would cost for this document.",
-          "$ref": "Money"
+        "lastLine": {
+          "readOnly": true,
+          "type": "integer",
+          "description": "Output only. 1-indexed inclusive last line number.",
+          "format": "int32"
         },
-        "highCost": {
-          "$ref": "Money",
-          "description": "The 95th percentile of what comparable past reviews would cost for this document."
-        },
-        "lowCost": {
-          "$ref": "Money",
-          "description": "The 20th percentile of what comparable past reviews would cost for this document."
+        "firstColumn": {
+          "readOnly": true,
+          "description": "Output only. Optional 1-indexed inclusive first column offset within `first_line`.",
+          "format": "int32",
+          "type": "integer"
         }
       },
-      "type": "object",
-      "id": "EstimateReviewCostResponse",
-      "description": "Response message for estimating what a review would cost. When the cost can't be estimated, for example because too few past reviews used the same model and depth, the costs are unset and `past_review_count` is 0."
+      "id": "TextLocation",
+      "description": "Location anchor within a plain-text, Markdown, or LaTeX source document.",
+      "type": "object"
     },
-    "NormalizedBoundingBox": {
-      "type": "object",
+    "ReviewSummary": {
+      "id": "ReviewSummary",
+      "description": "Lightweight summary of a Review execution run for display in Document views.",
       "properties": {
-        "bottom": {
-          "format": "float",
-          "description": "Output only. Bottom coordinate in [0.0, 1.0].",
-          "readOnly": true,
-          "type": "number"
-        },
-        "left": {
-          "readOnly": true,
-          "format": "float",
-          "type": "number",
-          "description": "Output only. Left coordinate in [0.0, 1.0]."
-        },
-        "right": {
-          "description": "Output only. Right coordinate in [0.0, 1.0].",
-          "type": "number",
-          "readOnly": true,
-          "format": "float"
-        },
-        "top": {
-          "format": "float",
-          "readOnly": true,
-          "type": "number",
-          "description": "Output only. Top coordinate in [0.0, 1.0]."
-        }
-      },
-      "id": "NormalizedBoundingBox",
-      "description": "Bounding box in normalized [0.0, 1.0] page coordinates (origin top-left)."
-    },
-    "DriveSource": {
-      "description": "Configuration for importing a document directly from Google Drive.",
-      "type": "object",
-      "id": "DriveSource",
-      "properties": {
-        "fileId": {
-          "description": "Required. Immutable. The Google Drive file ID (e.g. \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms\"). For Google Drive shortcuts, callers must pass the resolved target file's `file_id` and `resource_key`.",
-          "type": "string"
-        },
-        "resourceKeySet": {
-          "type": "boolean",
-          "readOnly": true,
-          "description": "Output only. Indicates whether a resource key was provided for this Drive source."
-        },
-        "resourceKey": {
+        "createTime": {
           "type": "string",
-          "description": "Optional. Input only. Immutable. Resource key (`^[a-zA-Z0-9_-]{1,128}$`) required to access certain older link-shared Google Drive files returned by the Google Drive Picker (for shortcuts, pass the resolved target file's resource key). Never persisted in database records or returned in Document resources (see companion field `resource_key_set`, AIP-147)."
-        },
-        "revisionId": {
-          "description": "Optional. Input only. Immutable. Specific revision ID to import (defaults to latest head revision).",
-          "type": "string"
-        }
-      }
-    },
-    "CancelOperationRequest": {
-      "id": "CancelOperationRequest",
-      "description": "The request message for Operations.CancelOperation.",
-      "type": "object",
-      "properties": {}
-    },
-    "FieldComparison": {
-      "id": "FieldComparison",
-      "type": "object",
-      "description": "Per-field comparison result between extracted and retrieved metadata.",
-      "properties": {
-        "detail": {
           "readOnly": true,
-          "description": "Output only. Human-readable comparison detail (e.g., \"extracted=2023, found=2024 (diff=1)\").",
-          "type": "string"
+          "format": "google-datetime",
+          "description": "Output only. Timestamp when this review attempt was initiated."
         },
-        "match": {
-          "readOnly": true,
-          "description": "Output only. Whether the extracted and retrieved values matched.",
-          "type": "boolean"
-        },
-        "fieldKey": {
-          "description": "Output only. Field key (\"title\", \"authors\", \"year\", \"journal\", \"volume\", \"pages\", \"doi\").",
-          "readOnly": true,
-          "type": "string"
-        }
-      }
-    },
-    "Review": {
-      "description": "Review Sub-Resource Model representing an evaluation run of a document.",
-      "type": "object",
-      "id": "Review",
-      "properties": {
         "state": {
-          "readOnly": true,
+          "type": "string",
           "enumDescriptions": [
             "Default unspecified state.",
             "Review created and queued, awaiting worker scheduling.",
@@ -529,125 +1006,65 @@
             "SUCCEEDED",
             "FAILED"
           ],
-          "description": "Output only. Current review lifecycle state.",
-          "type": "string"
-        },
-        "endTime": {
           "readOnly": true,
-          "description": "Output only. Timestamp when the review reached a terminal state.",
-          "format": "google-datetime",
-          "type": "string"
+          "description": "Output only. Current review lifecycle state."
         },
-        "progressPercent": {
-          "format": "int32",
-          "description": "Output only. Estimated completion progress percentage of the review in [0, 100].",
-          "type": "integer",
-          "readOnly": true
-        },
-        "result": {
-          "$ref": "Result",
+        "review": {
+          "type": "string",
           "readOnly": true,
-          "description": "Output only. Review output (markdown, errors, and future modalities)."
-        },
-        "runConfig": {
-          "description": "Optional. Run configuration parameters used for this review.",
-          "$ref": "DeepReviewRunConfig"
-        },
-        "createTime": {
-          "description": "Output only. Timestamp when this review attempt was initiated.",
-          "format": "google-datetime",
-          "type": "string",
-          "readOnly": true
-        },
-        "name": {
-          "type": "string",
-          "description": "Identifier. Resource name in format `documents/{document}/reviews/{review}`."
-        },
-        "startTime": {
-          "readOnly": true,
-          "description": "Output only. Timestamp when the worker started evaluation.",
-          "type": "string",
-          "format": "google-datetime"
+          "description": "Output only. Resource name of the Review."
         }
-      }
+      },
+      "type": "object"
     },
-    "GroundingUrl": {
-      "description": "Web source URL surfaced during Google Search grounding verification.",
-      "id": "GroundingUrl",
+    "TextQuoteSelector": {
+      "id": "TextQuoteSelector",
       "type": "object",
+      "description": "W3C Web Annotation TextQuoteSelector for resilient text anchoring (see https://www.w3.org/TR/annotation-model/#text-quote-selector for details).",
       "properties": {
-        "title": {
-          "description": "Output only. Source page title or domain.",
+        "suffix": {
+          "readOnly": true,
           "type": "string",
-          "readOnly": true
+          "description": "Output only. Characters immediately following `exact` for disambiguation."
         },
-        "url": {
+        "exact": {
           "type": "string",
-          "description": "Output only. Source URL.",
-          "readOnly": true
+          "readOnly": true,
+          "description": "Output only. Verbatim substring extracted from the document character stream."
+        },
+        "prefix": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Output only. Characters immediately preceding `exact` for disambiguation."
         }
       }
     },
     "CitationReport": {
-      "id": "CitationReport",
-      "description": "Structured citation verification report for a single bibliography reference.",
+      "type": "object",
       "properties": {
-        "lookupVerdict": {
+        "refNum": {
+          "format": "int32",
+          "description": "Output only. 1-indexed bibliography reference number in the paper.",
+          "type": "integer",
+          "readOnly": true
+        },
+        "rawReference": {
           "readOnly": true,
           "type": "string",
-          "description": "Output only. Verdict from scholarly database lookup (OpenAlex / Crossref) before search grounding.",
-          "enum": [
-            "VERDICT_UNSPECIFIED",
-            "OK",
-            "MINOR_MISMATCH",
-            "MAJOR_MISMATCH",
-            "VERIFIED_BY_SEARCH",
-            "NOT_FOUND",
-            "HALLUCINATED",
-            "SKIPPED"
-          ],
-          "enumDescriptions": [
-            "Default unspecified verdict.",
-            "Reference metadata matches scholarly database record.",
-            "Minor discrepancy (e.g., publication year off by 1 or venue variation).",
-            "Major discrepancy in authors, year, or venue.",
-            "Reference verified via Google Search grounding.",
-            "Reference not found in scholarly databases and unverified by search.",
-            "Reference flagged as likely hallucinated by Google Search grounding.",
-            "Non-paper entry (e.g., software package or URL) skipped during lookup."
-          ]
+          "description": "Output only. Verbatim reference string extracted from the paper's bibliography."
         },
-        "groundingUrls": {
-          "type": "array",
-          "items": {
-            "$ref": "GroundingUrl"
-          },
-          "readOnly": true,
-          "description": "Output only. Web sources surfaced during Google Search grounding."
-        },
-        "retrievedBibtex": {
-          "description": "Output only. Formatted BibTeX entry for the verified `retrieved_metadata` when present. Empty when `retrieved_metadata` is absent.",
+        "entryType": {
+          "description": "Output only. BibTeX entry type (e.g., \"article\", \"inproceedings\", \"misc\").",
           "type": "string",
           "readOnly": true
         },
-        "firstAuthorFamilyNameMatch": {
-          "description": "Output only. Whether the first author's family name matched between extracted and retrieved metadata.",
+        "citationKey": {
+          "type": "string",
           "readOnly": true,
-          "type": "boolean"
-        },
-        "searchMethod": {
-          "description": "Output only. Strategy that produced the scholarly database match (e.g., \"doi\", \"title\", \"title_author\", \"autocomplete\"). Empty when no title-matching candidate was found.",
-          "readOnly": true,
-          "type": "string"
+          "description": "Output only. Generated BibTeX citation key (e.g., \"smith2023deep\")."
         },
         "searchVerdict": {
-          "enumDescriptions": [
-            "Default unspecified search verdict (search grounding not run).",
-            "Google Search grounding confirmed the work exists.",
-            "Google Search grounding determined the reference is likely hallucinated.",
-            "Google Search grounding encountered an execution or parsing error."
-          ],
-          "description": "Output only. Verdict from Google Search grounding verification (when run).",
+          "type": "string",
           "enum": [
             "SEARCH_VERDICT_UNSPECIFIED",
             "NOT_HALLUCINATED",
@@ -655,26 +1072,66 @@
             "SEARCH_ERROR"
           ],
           "readOnly": true,
-          "type": "string"
+          "description": "Output only. Verdict from Google Search grounding verification (when run).",
+          "enumDescriptions": [
+            "Default unspecified search verdict (search grounding not run).",
+            "Google Search grounding confirmed the work exists.",
+            "Google Search grounding determined the reference is likely hallucinated.",
+            "Google Search grounding encountered an execution or parsing error."
+          ]
         },
-        "retrievedMetadata": {
-          "$ref": "CitationMetadata",
-          "description": "Output only. Metadata retrieved from OpenAlex / Crossref. Populated only when the retrieved work's title matches the extracted title. Omitted when no candidate matches the title so unrelated papers are never displayed as candidates.",
+        "fieldComparisons": {
+          "type": "array",
+          "description": "Output only. Per-field comparisons (populated only when `retrieved_metadata` is present).",
+          "items": {
+            "$ref": "FieldComparison"
+          },
           "readOnly": true
         },
-        "entryType": {
+        "extractedMetadata": {
+          "$ref": "CitationMetadata",
           "readOnly": true,
-          "description": "Output only. BibTeX entry type (e.g., \"article\", \"inproceedings\", \"misc\").",
+          "description": "Output only. Metadata parsed from the paper's bibliography entry."
+        },
+        "groundingUrls": {
+          "type": "array",
+          "description": "Output only. Web sources surfaced during Google Search grounding.",
+          "readOnly": true,
+          "items": {
+            "$ref": "GroundingUrl"
+          }
+        },
+        "retrievedMetadata": {
+          "readOnly": true,
+          "$ref": "CitationMetadata",
+          "description": "Output only. Metadata retrieved from OpenAlex / Crossref. Populated only when the retrieved work's title matches the extracted title. Omitted when no candidate matches the title so unrelated papers are never displayed as candidates."
+        },
+        "searchRationale": {
+          "type": "string",
+          "description": "Output only. Explanation from the Google Search grounding verification step (when run).",
+          "readOnly": true
+        },
+        "retrievedBibtex": {
+          "description": "Output only. Formatted BibTeX entry for the verified `retrieved_metadata` when present. Empty when `retrieved_metadata` is absent.",
+          "readOnly": true,
           "type": "string"
         },
-        "refNum": {
-          "description": "Output only. 1-indexed bibliography reference number in the paper.",
-          "format": "int32",
+        "searchMethod": {
           "readOnly": true,
-          "type": "integer"
+          "description": "Output only. Strategy that produced the scholarly database match (e.g., \"doi\", \"title\", \"title_author\", \"autocomplete\"). Empty when no title-matching candidate was found.",
+          "type": "string"
         },
         "finalVerdict": {
-          "description": "Output only. Final combined verdict after database lookup and search grounding.",
+          "enumDescriptions": [
+            "Default unspecified verdict.",
+            "Reference metadata matches scholarly database record.",
+            "Minor discrepancy (e.g., publication year off by 1 or venue variation).",
+            "Major discrepancy in authors, year, or venue.",
+            "Reference verified using Google Search grounding.",
+            "Reference not found in scholarly databases and unverified by search.",
+            "Reference flagged as likely hallucinated by Google Search grounding.",
+            "Non-paper entry (e.g., software package or URL) skipped during lookup."
+          ],
           "enum": [
             "VERDICT_UNSPECIFIED",
             "OK",
@@ -686,139 +1143,45 @@
             "SKIPPED"
           ],
           "type": "string",
+          "readOnly": true,
+          "description": "Output only. Final combined verdict after database lookup and search grounding."
+        },
+        "lookupVerdict": {
+          "readOnly": true,
+          "enum": [
+            "VERDICT_UNSPECIFIED",
+            "OK",
+            "MINOR_MISMATCH",
+            "MAJOR_MISMATCH",
+            "VERIFIED_BY_SEARCH",
+            "NOT_FOUND",
+            "HALLUCINATED",
+            "SKIPPED"
+          ],
+          "description": "Output only. Verdict from scholarly database lookup (OpenAlex / Crossref) before search grounding.",
           "enumDescriptions": [
             "Default unspecified verdict.",
             "Reference metadata matches scholarly database record.",
             "Minor discrepancy (e.g., publication year off by 1 or venue variation).",
             "Major discrepancy in authors, year, or venue.",
-            "Reference verified via Google Search grounding.",
+            "Reference verified using Google Search grounding.",
             "Reference not found in scholarly databases and unverified by search.",
             "Reference flagged as likely hallucinated by Google Search grounding.",
             "Non-paper entry (e.g., software package or URL) skipped during lookup."
           ],
-          "readOnly": true
-        },
-        "citationKey": {
-          "type": "string",
-          "description": "Output only. Generated BibTeX citation key (e.g., \"smith2023deep\").",
-          "readOnly": true
-        },
-        "rawReference": {
-          "description": "Output only. Verbatim reference string extracted from the paper's bibliography.",
-          "readOnly": true,
           "type": "string"
         },
-        "extractedMetadata": {
-          "$ref": "CitationMetadata",
+        "firstAuthorFamilyNameMatch": {
+          "type": "boolean",
           "readOnly": true,
-          "description": "Output only. Metadata parsed from the paper's bibliography entry."
-        },
-        "fieldComparisons": {
-          "description": "Output only. Per-field comparisons (populated only when `retrieved_metadata` is present).",
-          "readOnly": true,
-          "items": {
-            "$ref": "FieldComparison"
-          },
-          "type": "array"
-        },
-        "searchRationale": {
-          "type": "string",
-          "description": "Output only. Explanation from the Google Search grounding verification step (when run).",
-          "readOnly": true
+          "description": "Output only. Whether the first author's family name matched between extracted and retrieved metadata."
         }
       },
-      "type": "object"
-    },
-    "Empty": {
-      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
-      "properties": {},
-      "type": "object",
-      "id": "Empty"
-    },
-    "CitationMetadata": {
-      "properties": {
-        "journal": {
-          "type": "string",
-          "description": "Output only. Journal, conference, or venue name.",
-          "readOnly": true
-        },
-        "title": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. Work title."
-        },
-        "publicationDate": {
-          "description": "Output only. Publication date (month and day left as 0 if just year).",
-          "$ref": "Date",
-          "readOnly": true
-        },
-        "authors": {
-          "description": "Output only. Ordered list of authors.",
-          "items": {
-            "$ref": "Author"
-          },
-          "readOnly": true,
-          "type": "array"
-        },
-        "urls": {
-          "items": {
-            "type": "string"
-          },
-          "description": "Output only. URLs associated with the reference.",
-          "type": "array",
-          "readOnly": true
-        },
-        "source": {
-          "readOnly": true,
-          "type": "string",
-          "description": "Output only. Source database for retrieved metadata (e.g., \"openalex\", \"crossref\"). Empty on `extracted_metadata`."
-        },
-        "pages": {
-          "description": "Output only. Page range or article number.",
-          "type": "string",
-          "readOnly": true
-        },
-        "volume": {
-          "readOnly": true,
-          "description": "Output only. Volume identifier.",
-          "type": "string"
-        },
-        "doi": {
-          "type": "string",
-          "description": "Output only. Digital Object Identifier (DOI).",
-          "readOnly": true
-        }
-      },
-      "description": "Structured bibliographic metadata for an extracted or retrieved work.",
-      "type": "object",
-      "id": "CitationMetadata"
-    },
-    "ListOperationsResponse": {
-      "properties": {
-        "nextPageToken": {
-          "type": "string",
-          "description": "The standard List next-page token."
-        },
-        "operations": {
-          "items": {
-            "$ref": "Operation"
-          },
-          "type": "array",
-          "description": "A list of operations that matches the specified filter in the request."
-        },
-        "unreachable": {
-          "description": "Unordered list. Unreachable resources. Populated when the request sets `ListOperationsRequest.return_partial_success` and reads across collections. For example, when attempting to list all resources across all supported locations.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "id": "ListOperationsResponse",
-      "description": "The response message for Operations.ListOperations.",
-      "type": "object"
+      "id": "CitationReport",
+      "description": "Structured citation verification report for a single bibliography reference."
     },
     "Status": {
+      "id": "Status",
       "properties": {
         "message": {
           "description": "A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the google.rpc.Status.details field, or localized by the client.",
@@ -829,8 +1192,8 @@
           "items": {
             "type": "object",
             "additionalProperties": {
-              "description": "Properties of the object. Contains field @type with type URL.",
-              "type": "any"
+              "type": "any",
+              "description": "Properties of the object. Contains field @type with type URL."
             }
           },
           "description": "A list of messages that carry the error details. There is a common set of message types for APIs to use."
@@ -842,704 +1205,206 @@
         }
       },
       "type": "object",
-      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).",
-      "id": "Status"
+      "description": "The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors)."
     },
-    "Author": {
-      "type": "object",
+    "ListReviewsResponse": {
       "properties": {
-        "familyName": {
+        "nextPageToken": {
           "type": "string",
-          "readOnly": true,
-          "description": "Output only. Author family name / surname (or organization name)."
+          "description": "A token to retrieve the next page of results, or empty if no further pages exist."
         },
-        "givenName": {
-          "readOnly": true,
-          "description": "Output only. Author given name / initials.",
-          "type": "string"
+        "reviews": {
+          "type": "array",
+          "description": "The list of Review resources.",
+          "items": {
+            "$ref": "Review"
+          }
         }
       },
-      "id": "Author",
-      "description": "Author name components."
-    },
-    "Document": {
-      "id": "Document",
-      "description": "Document Resource Model representing an uploaded document for review. Documents are immutable post-creation; to review a new version, create a new Document.",
-      "properties": {
-        "displayName": {
-          "type": "string",
-          "description": "Optional. User-provided display title or filename for the document."
-        },
-        "driveSource": {
-          "description": "Optional. Reference to a Google Drive file to import.",
-          "$ref": "DriveSource"
-        },
-        "latestReviewSummary": {
-          "description": "Output only. Summary of the most recent review run for this document, if any.",
-          "readOnly": true,
-          "$ref": "ReviewSummary"
-        },
-        "createTime": {
-          "readOnly": true,
-          "format": "google-datetime",
-          "description": "Output only. Timestamp when the document was initially created.",
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "description": "Identifier. Resource name in format `documents/{document}`."
-        }
-      },
+      "id": "ListReviewsResponse",
+      "description": "Response message for listing Review resources.",
       "type": "object"
     },
-    "TextLocation": {
+    "Review": {
       "properties": {
-        "lastColumn": {
-          "readOnly": true,
-          "type": "integer",
-          "description": "Output only. Optional 1-indexed inclusive last column offset within `last_line`.",
-          "format": "int32"
+        "runConfig": {
+          "description": "Optional. Run configuration parameters used for this review.",
+          "$ref": "DeepReviewRunConfig"
         },
-        "firstColumn": {
+        "name": {
+          "description": "Identifier. Resource name in format `documents/{document}/reviews/{review}`.",
+          "type": "string"
+        },
+        "createTime": {
+          "description": "Output only. Timestamp when this review attempt was initiated.",
+          "format": "google-datetime",
           "readOnly": true,
+          "type": "string"
+        },
+        "endTime": {
+          "description": "Output only. Timestamp when the review reached a terminal state.",
+          "format": "google-datetime",
+          "type": "string",
+          "readOnly": true
+        },
+        "result": {
+          "description": "Output only. Review output (markdown, errors, and future modalities).",
+          "$ref": "Result",
+          "readOnly": true
+        },
+        "startTime": {
+          "readOnly": true,
+          "description": "Output only. Timestamp when the worker started evaluation.",
+          "format": "google-datetime",
+          "type": "string"
+        },
+        "progressPercent": {
+          "description": "Output only. Estimated completion progress percentage of the review in [0, 100].",
           "type": "integer",
           "format": "int32",
-          "description": "Output only. Optional 1-indexed inclusive first column offset within `first_line`."
+          "readOnly": true
         },
-        "lastLine": {
-          "type": "integer",
+        "state": {
+          "enum": [
+            "STATE_UNSPECIFIED",
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED"
+          ],
+          "enumDescriptions": [
+            "Default unspecified state.",
+            "Review created and queued, awaiting worker scheduling.",
+            "Review worker is actively evaluating the document.",
+            "Review succeeded with generated report.",
+            "Review failed after exhausting retry attempts."
+          ],
+          "description": "Output only. Current review lifecycle state.",
           "readOnly": true,
-          "format": "int32",
-          "description": "Output only. 1-indexed inclusive last line number."
-        },
-        "firstLine": {
-          "readOnly": true,
-          "type": "integer",
-          "format": "int32",
-          "description": "Output only. 1-indexed inclusive first line number."
-        },
-        "quotedLinePreview": {
-          "readOnly": true,
-          "description": "Output only. Verbatim snippet of the anchored source line(s).",
           "type": "string"
         }
       },
+      "description": "An evaluation run of a document.",
       "type": "object",
-      "id": "TextLocation",
-      "description": "Location anchor within a plain-text, Markdown, or LaTeX source document."
-    }
-  },
-  "ownerName": "Google",
-  "title": "Deep Review API",
-  "id": "deepreview:v1",
-  "revision": "20261027",
-  "ownerDomain": "google.com",
-  "name": "deepreview",
-  "basePath": "",
-  "servicePath": "",
-  "rootUrl": "https://deepreview.googleapis.com/",
-  "resources": {
-    "media": {
-      "methods": {
-        "upload": {
-          "request": {
-            "$ref": "Document"
-          },
-          "flatPath": "v1/documents",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "parameters": {
-            "requestId": {
-              "description": "Optional. Idempotency identifier for network retry safety (AIP-155). Must be a valid UUID4 string.",
-              "location": "query",
-              "type": "string"
-            },
-            "documentId": {
-              "location": "query",
-              "description": "Optional. The ID to use for the document, which will become the final component of the document's resource name. If not provided, a unique server-generated UUID will be assigned.",
-              "type": "string"
-            }
-          },
-          "id": "deepreview.media.upload",
-          "response": {
-            "$ref": "Document"
-          },
-          "path": "v1/documents",
-          "supportsMediaUpload": true,
-          "parameterOrder": [],
-          "description": "Creates a new Document resource and ingests the manuscript via Scotty or Google Drive.",
-          "mediaUpload": {
-            "protocols": {
-              "simple": {
-                "multipart": true,
-                "path": "/upload/v1/documents"
-              },
-              "resumable": {
-                "path": "/resumable/upload/v1/documents",
-                "multipart": true
-              }
-            },
-            "maxSize": "20971520",
-            "accept": [
-              "*/*"
-            ]
-          },
-          "httpMethod": "POST"
-        },
-        "download": {
-          "description": "Downloads the original document content (PDF binary) via Scotty media streaming (AIP-136 custom method).",
-          "parameterOrder": [
-            "name"
-          ],
-          "httpMethod": "GET",
-          "supportsMediaDownload": true,
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "useMediaDownloadService": true,
-          "flatPath": "v1/documents/{documentsId}:download",
-          "id": "deepreview.media.download",
-          "parameters": {
-            "name": {
-              "description": "Required. The resource name of the document to download. Format: `documents/{document}`",
-              "type": "string",
-              "location": "path",
-              "pattern": "^documents/[^/]+$",
-              "required": true
-            }
-          },
-          "path": "v1/{+name}:download",
-          "response": {
-            "$ref": "DownloadDocumentResponse"
-          }
-        }
-      }
+      "id": "Review"
     },
-    "documents": {
-      "resources": {
-        "reviews": {
-          "methods": {
-            "get": {
-              "description": "Retrieves a specific review execution result.",
-              "response": {
-                "$ref": "Review"
-              },
-              "path": "v1/{+name}",
-              "parameters": {
-                "name": {
-                  "type": "string",
-                  "required": true,
-                  "pattern": "^documents/[^/]+/reviews/[^/]+$",
-                  "location": "path",
-                  "description": "Required. The resource name of the review to retrieve. Format: `documents/{document}/reviews/{review}`"
-                }
-              },
-              "flatPath": "v1/documents/{documentsId}/reviews/{reviewsId}",
-              "httpMethod": "GET",
-              "id": "deepreview.documents.reviews.get",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/drive.file"
-              ],
-              "parameterOrder": [
-                "name"
-              ]
-            },
-            "create": {
-              "httpMethod": "POST",
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/drive.file"
-              ],
-              "request": {
-                "$ref": "Review"
-              },
-              "parameterOrder": [
-                "parent"
-              ],
-              "description": "Creates and initiates an asynchronous multi-agent review for a document.",
-              "id": "deepreview.documents.reviews.create",
-              "response": {
-                "$ref": "Operation"
-              },
-              "flatPath": "v1/documents/{documentsId}/reviews",
-              "parameters": {
-                "reviewId": {
-                  "type": "string",
-                  "location": "query",
-                  "description": "Optional. The ID to use for the review, which will become the final component of the review's resource name. If not provided, a unique server-generated UUID will be assigned."
-                },
-                "requestId": {
-                  "type": "string",
-                  "location": "query",
-                  "description": "Optional. Idempotency identifier for network retry safety (AIP-155). Must be a valid UUID4 string."
-                },
-                "parent": {
-                  "description": "Required. The parent Document resource name where this review will be created. Format: `documents/{document}`",
-                  "required": true,
-                  "pattern": "^documents/[^/]+$",
-                  "type": "string",
-                  "location": "path"
-                }
-              },
-              "path": "v1/{+parent}/reviews"
-            },
-            "list": {
-              "path": "v1/{+parent}/reviews",
-              "parameterOrder": [
-                "parent"
-              ],
-              "httpMethod": "GET",
-              "flatPath": "v1/documents/{documentsId}/reviews",
-              "parameters": {
-                "filter": {
-                  "location": "query",
-                  "description": "Optional. Supported AIP-160 filter expressions.",
-                  "type": "string"
-                },
-                "orderBy": {
-                  "location": "query",
-                  "type": "string",
-                  "description": "Optional. Supported AIP-132 order_by field."
-                },
-                "parent": {
-                  "type": "string",
-                  "required": true,
-                  "pattern": "^documents/[^/]+$",
-                  "description": "Required. The parent Document resource name. Format: `documents/{document}`",
-                  "location": "path"
-                },
-                "pageSize": {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "Optional. The maximum number of reviews to return in a single page. The server may return fewer than this value. If unspecified, at most 50 reviews will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000.",
-                  "location": "query"
-                },
-                "pageToken": {
-                  "type": "string",
-                  "description": "Optional. A page token received from a previous `ListReviews` call.",
-                  "location": "query"
-                }
-              },
-              "description": "Lists all review execution runs for a document.",
-              "response": {
-                "$ref": "ListReviewsResponse"
-              },
-              "scopes": [
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/drive.file"
-              ],
-              "id": "deepreview.documents.reviews.list"
-            }
+    "Result": {
+      "properties": {
+        "anchoredComments": {
+          "type": "array",
+          "readOnly": true,
+          "description": "Output only. Structured review comments anchored to specific locations in the document. At most 300 anchored comments are returned per review.",
+          "items": {
+            "$ref": "AnchoredReviewComment"
           }
+        },
+        "error": {
+          "description": "Output only. Failure status details if review execution failed.",
+          "readOnly": true,
+          "$ref": "Status"
+        },
+        "reviewMarkdown": {
+          "readOnly": true,
+          "type": "string",
+          "description": "Output only. Synthesized review report markdown."
         }
       },
-      "methods": {
-        "delete": {
-          "parameters": {
-            "name": {
-              "required": true,
-              "pattern": "^documents/[^/]+$",
-              "type": "string",
-              "location": "path",
-              "description": "Required. The resource name of the document to delete. Format: `documents/{document}`"
-            },
-            "force": {
-              "description": "Optional. If set to true, any child resources (e.g. review resources) are also deleted.",
-              "location": "query",
-              "type": "boolean"
-            },
-            "allowMissing": {
-              "location": "query",
-              "description": "Optional. If set to true, and the document is not found, the request succeeds.",
-              "type": "boolean"
-            }
-          },
-          "id": "deepreview.documents.delete",
-          "description": "Deletes a document and all associated reviews and stored blobs.",
-          "response": {
-            "$ref": "Empty"
-          },
-          "parameterOrder": [
-            "name"
-          ],
-          "path": "v1/{+name}",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "httpMethod": "DELETE",
-          "flatPath": "v1/documents/{documentsId}"
-        },
-        "list": {
-          "response": {
-            "$ref": "ListDocumentsResponse"
-          },
-          "flatPath": "v1/documents",
-          "httpMethod": "GET",
-          "parameterOrder": [],
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "parameters": {
-            "filter": {
-              "type": "string",
-              "description": "Optional. Supported AIP-160 filter expressions (e.g., `display_name = \"...\"`).",
-              "location": "query"
-            },
-            "pageToken": {
-              "location": "query",
-              "description": "Optional. A page token received from a previous `ListDocuments` call.",
-              "type": "string"
-            },
-            "pageSize": {
-              "type": "integer",
-              "location": "query",
-              "format": "int32",
-              "description": "Optional. The maximum number of documents to return in a single page. The server may return fewer than this value. If unspecified, at most 50 documents will be returned. The maximum value is 1000; values above 1000 will be coerced to 1000."
-            },
-            "orderBy": {
-              "type": "string",
-              "location": "query",
-              "description": "Optional. Supported AIP-132 order_by field."
-            }
-          },
-          "path": "v1/documents",
-          "description": "Lists documents for the authenticated caller with cursor pagination.",
-          "id": "deepreview.documents.list"
-        },
-        "get": {
-          "parameters": {
-            "name": {
-              "location": "path",
-              "pattern": "^documents/[^/]+$",
-              "description": "Required. The resource name of the document to retrieve. Format: `documents/{document}`",
-              "type": "string",
-              "required": true
-            }
-          },
-          "id": "deepreview.documents.get",
-          "description": "Retrieves document metadata and review history.",
-          "httpMethod": "GET",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "flatPath": "v1/documents/{documentsId}",
-          "path": "v1/{+name}",
-          "parameterOrder": [
-            "name"
-          ],
-          "response": {
-            "$ref": "Document"
-          }
-        },
-        "estimateReviewCost": {
-          "parameters": {
-            "document": {
-              "location": "path",
-              "description": "Required. The document to review. Format: `documents/{document}`",
-              "pattern": "^documents/[^/]+$",
-              "required": true,
-              "type": "string"
-            }
-          },
-          "parameterOrder": [
-            "document"
-          ],
-          "httpMethod": "POST",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "flatPath": "v1/documents/{documentsId}:estimateReviewCost",
-          "description": "Estimates what a review of a document would cost on the caller's Gemini API key. The estimate comes from what past reviews with the same model and depth cost, adjusted to this document's size and repriced at the Gemini API's current list prices. It covers one review attempt that runs to completion, and doesn't include retries after errors.",
-          "id": "deepreview.documents.estimateReviewCost",
-          "request": {
-            "$ref": "EstimateReviewCostRequest"
-          },
-          "path": "v1/{+document}:estimateReviewCost",
-          "response": {
-            "$ref": "EstimateReviewCostResponse"
-          }
-        }
-      }
+      "id": "Result",
+      "description": "Encapsulates the synthesized output or failure details of a single review execution.",
+      "type": "object"
     },
-    "v1": {
-      "methods": {
-        "getUserQuota": {
-          "response": {
-            "$ref": "UserQuota"
-          },
-          "parameters": {
-            "name": {
-              "location": "path",
-              "description": "Required. The resource name of the singleton user quota to retrieve. Format: `userQuota`",
-              "pattern": "^userQuota$",
-              "type": "string",
-              "required": true
-            }
-          },
-          "path": "v1/{+name}",
-          "flatPath": "v1/userQuota",
-          "description": "Retrieves the review quota limits and sliding-window usage for the authenticated caller.",
-          "httpMethod": "GET",
-          "parameterOrder": [
-            "name"
-          ],
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "id": "deepreview.getUserQuota"
-        }
-      }
-    },
-    "operations": {
-      "methods": {
-        "cancel": {
-          "flatPath": "v1/operations/{operationsId}:cancel",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "request": {
-            "$ref": "CancelOperationRequest"
-          },
-          "description": "Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the operation, but success is not guaranteed. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether the cancellation succeeded or whether the operation completed despite cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.",
-          "httpMethod": "POST",
-          "parameterOrder": [
-            "name"
-          ],
-          "path": "v1/{+name}:cancel",
-          "response": {
-            "$ref": "Empty"
-          },
-          "id": "deepreview.operations.cancel",
-          "parameters": {
-            "name": {
-              "type": "string",
-              "required": true,
-              "pattern": "^operations/.*$",
-              "description": "The name of the operation resource to be cancelled.",
-              "location": "path"
-            }
-          }
-        },
-        "list": {
-          "parameterOrder": [
-            "name"
-          ],
-          "id": "deepreview.operations.list",
-          "httpMethod": "GET",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "flatPath": "v1/operations",
-          "path": "v1/{+name}",
-          "parameters": {
-            "pageSize": {
-              "description": "The standard list page size.",
-              "location": "query",
-              "type": "integer",
-              "format": "int32"
-            },
-            "pageToken": {
-              "type": "string",
-              "description": "The standard list page token.",
-              "location": "query"
-            },
-            "returnPartialSuccess": {
-              "location": "query",
-              "description": "When set to `true`, operations that are reachable are returned as normal, and those that are unreachable are returned in the ListOperationsResponse.unreachable field. This can only be `true` when reading across collections. For example, when `parent` is set to `\"projects/example/locations/-\"`. This field is not supported by default and will result in an `UNIMPLEMENTED` error if set unless explicitly documented otherwise in service or product specific documentation.",
-              "type": "boolean"
-            },
-            "filter": {
-              "type": "string",
-              "description": "The standard list filter.",
-              "location": "query"
-            },
-            "name": {
-              "required": true,
-              "pattern": "^operations$",
-              "location": "path",
-              "description": "The name of the operation's parent resource.",
-              "type": "string"
-            }
-          },
-          "description": "Lists operations that match the specified filter in the request. If the server doesn't support this method, it returns `UNIMPLEMENTED`.",
-          "response": {
-            "$ref": "ListOperationsResponse"
-          }
-        },
-        "delete": {
-          "flatPath": "v1/operations/{operationsId}",
-          "scopes": [
-            "https://www.googleapis.com/auth/cloud-platform",
-            "https://www.googleapis.com/auth/drive.file"
-          ],
-          "path": "v1/{+name}",
-          "httpMethod": "DELETE",
-          "response": {
-            "$ref": "Empty"
-          },
-          "parameters": {
-            "name": {
-              "location": "path",
-              "description": "The name of the operation resource to be deleted.",
-              "pattern": "^operations/.*$",
-              "type": "string",
-              "required": true
-            }
-          },
-          "parameterOrder": [
-            "name"
-          ],
-          "description": "Deletes a long-running operation. This method indicates that the client is no longer interested in the operation result. It does not cancel the operation. If the server doesn't support this method, it returns `google.rpc.Code.UNIMPLEMENTED`.",
-          "id": "deepreview.operations.delete"
-        }
-      },
-      "resources": {
-        "documents": {
-          "resources": {
-            "reviews": {
-              "methods": {
-                "get": {
-                  "flatPath": "v1/operations/documents/{documentsId}/reviews/{reviewsId}",
-                  "httpMethod": "GET",
-                  "path": "v1/{+name}",
-                  "response": {
-                    "$ref": "Operation"
-                  },
-                  "scopes": [
-                    "https://www.googleapis.com/auth/cloud-platform",
-                    "https://www.googleapis.com/auth/drive.file"
-                  ],
-                  "parameterOrder": [
-                    "name"
-                  ],
-                  "description": "Gets the latest state of a long-running operation. Clients can use this method to poll the operation result at intervals as recommended by the API service.",
-                  "id": "deepreview.operations.documents.reviews.get",
-                  "parameters": {
-                    "name": {
-                      "location": "path",
-                      "description": "The name of the operation resource.",
-                      "pattern": "^operations/documents/[^/]+/reviews/[^/]+$",
-                      "type": "string",
-                      "required": true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    "Empty": {
+      "description": "A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical example is to use it as the request or the response type of an API method. For instance: service Foo { rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }",
+      "type": "object",
+      "id": "Empty",
+      "properties": {}
     }
   },
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "documentationLink": "https://research.google/deepreview",
-  "mtlsRootUrl": "https://deepreview.mtls.googleapis.com/",
-  "discoveryVersion": "v1",
-  "kind": "discovery#restDescription",
-  "auth": {
-    "oauth2": {
-      "scopes": {
-        "https://www.googleapis.com/auth/drive.file": {
-          "description": "See, edit, create, and delete only the specific Google Drive files you use with this app"
-        },
-        "https://www.googleapis.com/auth/cloud-platform": {
-          "description": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account."
-        }
-      }
-    }
-  },
-  "fullyEncodeReservedExpansion": true,
-  "baseUrl": "https://deepreview.googleapis.com/",
   "parameters": {
-    "oauth_token": {
-      "description": "OAuth 2.0 token for the current user.",
-      "type": "string",
-      "location": "query"
-    },
     "access_token": {
-      "type": "string",
+      "location": "query",
       "description": "OAuth access token.",
-      "location": "query"
-    },
-    "quotaUser": {
-      "type": "string",
-      "location": "query",
-      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters."
-    },
-    "prettyPrint": {
-      "default": "true",
-      "type": "boolean",
-      "description": "Returns response with indentations and line breaks.",
-      "location": "query"
-    },
-    "uploadType": {
-      "location": "query",
-      "type": "string",
-      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\")."
-    },
-    "upload_protocol": {
-      "type": "string",
-      "location": "query",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    },
-    "alt": {
-      "description": "Data format for response.",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "location": "query",
-      "type": "string",
-      "default": "json",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ]
+      "type": "string"
     },
     "fields": {
       "type": "string",
       "location": "query",
       "description": "Selector specifying which fields to include in a partial response."
     },
+    "oauth_token": {
+      "type": "string",
+      "location": "query",
+      "description": "OAuth 2.0 token for the current user."
+    },
+    "$.xgafv": {
+      "description": "V1 error format.",
+      "type": "string",
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "location": "query",
+      "enum": [
+        "1",
+        "2"
+      ]
+    },
+    "key": {
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "type": "string",
+      "location": "query"
+    },
+    "upload_protocol": {
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\").",
+      "location": "query",
+      "type": "string"
+    },
+    "uploadType": {
+      "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
+      "location": "query",
+      "type": "string"
+    },
     "callback": {
       "description": "JSONP",
       "type": "string",
       "location": "query"
     },
-    "$.xgafv": {
+    "quotaUser": {
+      "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "type": "string",
+      "location": "query"
+    },
+    "alt": {
       "location": "query",
-      "description": "V1 error format.",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "description": "Data format for response.",
       "enum": [
-        "1",
-        "2"
+        "json",
+        "media",
+        "proto"
       ],
       "type": "string",
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ]
+      "default": "json"
     },
-    "key": {
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
-      "location": "query",
-      "type": "string"
+    "prettyPrint": {
+      "description": "Returns response with indentations and line breaks.",
+      "default": "true",
+      "type": "boolean",
+      "location": "query"
     }
   },
-  "batchPath": "batch"
+  "version": "v1",
+  "canonicalName": "DeepReview",
+  "basePath": "",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "fullyEncodeReservedExpansion": true,
+  "baseUrl": "https://deepreview.googleapis.com/",
+  "kind": "discovery#restDescription"
 }
