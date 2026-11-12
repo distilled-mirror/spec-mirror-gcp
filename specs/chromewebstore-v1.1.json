@@ -1,167 +1,105 @@
 {
-  "protocol": "rest",
-  "resources": {
-    "items": {
-      "methods": {
-        "update": {
-          "response": {
-            "$ref": "Item"
-          },
-          "path": "chromewebstore/v1.1/items/{itemId}",
-          "description": "Updates an existing item.",
-          "supportsMediaUpload": true,
-          "parameterOrder": [
-            "itemId"
-          ],
-          "flatPath": "chromewebstore/v1.1/items/{itemId}",
-          "scopes": [
-            "https://www.googleapis.com/auth/chromewebstore"
-          ],
-          "httpMethod": "PUT",
-          "mediaUpload": {
-            "maxSize": "2147483648",
-            "accept": [
-              "*/*"
-            ],
-            "protocols": {
-              "simple": {
-                "path": "/upload/chromewebstore/v1.1/items/{itemId}",
-                "multipart": true
-              }
-            }
-          },
-          "id": "chromewebstore.items.update",
-          "request": {
-            "$ref": "Item"
-          },
-          "parameters": {
-            "itemId": {
-              "location": "path",
-              "description": "The ID of the item to upload.",
-              "type": "string",
-              "required": true
-            }
+  "schemas": {
+    "Item": {
+      "id": "Item",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique ID of the item."
+        },
+        "kind": {
+          "type": "string",
+          "description": "Identifies this resource as an Item. Value: the fixed string \"chromewebstore#item\"."
+        },
+        "itemError": {
+          "description": "Detail human-readable status of the operation, in English only. Same error messages are displayed when you upload your app to the Chrome Web Store.",
+          "type": "array",
+          "items": {
+            "$ref": "ItemError"
           }
         },
-        "publish": {
-          "id": "chromewebstore.items.publish",
-          "path": "chromewebstore/v1.1/items/{itemId}/publish",
-          "flatPath": "chromewebstore/v1.1/items/{itemId}/publish",
-          "httpMethod": "POST",
-          "request": {
-            "$ref": "PublishRequest"
-          },
-          "parameterOrder": [
-            "itemId"
-          ],
-          "response": {
-            "$ref": "Item2"
-          },
-          "scopes": [
-            "https://www.googleapis.com/auth/chromewebstore"
-          ],
-          "description": "Publishes an item.",
-          "parameters": {
-            "reviewExemption": {
-              "type": "boolean",
-              "description": "Optional. The caller request to exempt the review and directly publish because the update is within the list that we can automatically validate. The API will check if the exemption can be granted using real time data.",
-              "location": "query"
-            },
-            "publishTarget": {
-              "description": "Provide defined publishTarget in URL (case sensitive): publishTarget=\"trustedTesters\" or publishTarget=\"default\". Defaults to publishTarget=\"default\".",
-              "location": "query",
-              "type": "string"
-            },
-            "itemId": {
-              "required": true,
-              "location": "path",
-              "type": "string",
-              "description": "The ID of the item to publish."
-            },
-            "deployPercentage": {
-              "location": "query",
-              "format": "int32",
-              "description": "The deploy percentage you want to set for your item. Valid values are [0, 100]. If set to any number less than 100, only that many percentage of users will be allowed to get the update.",
-              "type": "integer"
-            }
+        "uploadState": {
+          "description": "Status of the operation. Possible values are: - \\\"FAILURE\\\" - \\\"IN_PROGRESS\\\" - \\\"NOT_FOUND\\\" - \\\"SUCCESS\\\" ",
+          "type": "string"
+        },
+        "crxVersion": {
+          "description": "The CRX version of the item. If the projection is draft, then it is the draft's CRX version.",
+          "type": "string"
+        },
+        "publicKey": {
+          "description": "Public key of this item.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PublishRequest": {
+      "properties": {
+        "reviewExemption": {
+          "type": "boolean",
+          "description": "Optional. The caller request to exempt the review and directly publish because the update is within the list that we can automatically validate. The API will check if the exemption can be granted using real time data."
+        },
+        "target": {
+          "type": "string",
+          "description": "The publish target of this publish operation. This is the same as using publishTarget as a URL query parameter. The string value can either be target=\"trustedTesters\" or target=\"default\". The default value, if none is supplied, is target=\"default\". Recommended usage is to use the URL query parameter to specificy the value."
+        },
+        "deployPercentage": {
+          "format": "int32",
+          "description": "The target deploy percentage of the item. It's only useful for items with big user base.",
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "id": "PublishRequest"
+    },
+    "Item2": {
+      "id": "Item2",
+      "properties": {
+        "item_id": {
+          "description": "The ID of this item.",
+          "type": "string"
+        },
+        "status": {
+          "type": "array",
+          "description": "The status code of this publish operation. It may contain multiple elements from the following list: NOT_AUTHORIZED, INVALID_DEVELOPER, DEVELOPER_NO_OWNERSHIP, DEVELOPER_SUSPENDED, ITEM_NOT_FOUND, ITEM_PENDING_REVIEW, ITEM_TAKEN_DOWN, PUBLISHER_SUSPENDED.",
+          "items": {
+            "type": "string"
           }
         },
-        "get": {
-          "flatPath": "chromewebstore/v1.1/items/{itemId}",
-          "path": "chromewebstore/v1.1/items/{itemId}",
-          "parameterOrder": [
-            "itemId"
-          ],
-          "id": "chromewebstore.items.get",
-          "response": {
-            "$ref": "Item"
-          },
-          "scopes": [
-            "https://www.googleapis.com/auth/chromewebstore",
-            "https://www.googleapis.com/auth/chromewebstore.readonly"
-          ],
-          "parameters": {
-            "itemId": {
-              "required": true,
-              "location": "path",
-              "description": "Unique identifier representing the Chrome App, Chrome Extension, or the Chrome Theme.",
-              "type": "string"
-            },
-            "projection": {
-              "location": "query",
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "PUBLISHED"
-              ],
-              "enumDescriptions": [
-                "Return information extracted from the current draft.",
-                "Return information extracted from the published item draft."
-              ],
-              "description": "Determines which subset of the item information to return."
-            }
-          },
-          "httpMethod": "GET",
-          "description": "Gets your own Chrome Web Store item."
+        "kind": {
+          "type": "string",
+          "description": "Static string value is always \"chromewebstore#item\"."
         },
-        "insert": {
-          "mediaUpload": {
-            "protocols": {
-              "simple": {
-                "multipart": true,
-                "path": "/upload/chromewebstore/v1.1/items"
-              }
-            },
-            "accept": [
-              "*/*"
-            ],
-            "maxSize": "2147483648"
-          },
-          "parameterOrder": [],
-          "parameters": {
-            "publisherEmail": {
-              "location": "query",
-              "description": "The email of the publisher who owns the items. Defaults to the caller's email address.",
-              "type": "string"
-            }
-          },
-          "description": "Inserts a new item.",
-          "path": "chromewebstore/v1.1/items",
-          "supportsMediaUpload": true,
-          "id": "chromewebstore.items.insert",
-          "httpMethod": "POST",
-          "flatPath": "chromewebstore/v1.1/items",
-          "scopes": [
-            "https://www.googleapis.com/auth/chromewebstore"
-          ],
-          "response": {
-            "$ref": "Item"
+        "statusDetail": {
+          "type": "array",
+          "description": "Detailed human-comprehensible explanation of the status code above.",
+          "items": {
+            "type": "string"
           }
+        }
+      },
+      "type": "object"
+    },
+    "ItemError": {
+      "id": "ItemError",
+      "type": "object",
+      "description": "Error of the item",
+      "properties": {
+        "error_code": {
+          "type": "string",
+          "description": "The error code."
+        },
+        "error_detail": {
+          "description": "The human-readable detail message of the error.",
+          "type": "string"
         }
       }
     }
   },
   "ownerDomain": "google.com",
+  "batchPath": "batch",
+  "baseUrl": "https://chromewebstore.googleapis.com/",
+  "version_module": true,
   "auth": {
     "oauth2": {
       "scopes": {
@@ -174,32 +112,206 @@
       }
     }
   },
+  "fullyEncodeReservedExpansion": true,
   "kind": "discovery#restDescription",
-  "version": "v1.1",
   "canonicalName": "Chromewebstore",
-  "ownerName": "Google",
-  "version_module": true,
-  "rootUrl": "https://chromewebstore.googleapis.com/",
-  "title": "Chrome Web Store API",
-  "mtlsRootUrl": "https://chromewebstore.mtls.googleapis.com/",
-  "servicePath": "",
   "name": "chromewebstore",
-  "id": "chromewebstore:v1.1",
-  "batchPath": "batch",
-  "baseUrl": "https://chromewebstore.googleapis.com/",
-  "revision": "20261109",
-  "basePath": "",
+  "version": "v1.1",
   "documentationLink": "https://developer.chrome.com/docs/webstore/api",
+  "description": "The Chrome Web Store API provides access to data about apps and extensions, as well as developer tools for managing them.",
+  "id": "chromewebstore:v1.1",
+  "servicePath": "",
+  "protocol": "rest",
+  "discoveryVersion": "v1",
+  "icons": {
+    "x16": "http://www.google.com/images/icons/product/search-16.gif",
+    "x32": "http://www.google.com/images/icons/product/search-32.gif"
+  },
+  "resources": {
+    "items": {
+      "methods": {
+        "insert": {
+          "mediaUpload": {
+            "accept": [
+              "*/*"
+            ],
+            "protocols": {
+              "simple": {
+                "multipart": true,
+                "path": "/upload/chromewebstore/v1.1/items"
+              }
+            },
+            "maxSize": "2147483648"
+          },
+          "id": "chromewebstore.items.insert",
+          "supportsMediaUpload": true,
+          "response": {
+            "$ref": "Item"
+          },
+          "path": "chromewebstore/v1.1/items",
+          "scopes": [
+            "https://www.googleapis.com/auth/chromewebstore"
+          ],
+          "parameters": {
+            "publisherEmail": {
+              "location": "query",
+              "description": "The email of the publisher who owns the items. Defaults to the caller's email address.",
+              "type": "string"
+            }
+          },
+          "flatPath": "chromewebstore/v1.1/items",
+          "httpMethod": "POST",
+          "parameterOrder": [],
+          "description": "Inserts a new item."
+        },
+        "update": {
+          "description": "Updates an existing item.",
+          "flatPath": "chromewebstore/v1.1/items/{itemId}",
+          "httpMethod": "PUT",
+          "parameterOrder": [
+            "itemId"
+          ],
+          "parameters": {
+            "itemId": {
+              "location": "path",
+              "type": "string",
+              "description": "The ID of the item to upload.",
+              "required": true
+            }
+          },
+          "id": "chromewebstore.items.update",
+          "mediaUpload": {
+            "protocols": {
+              "simple": {
+                "multipart": true,
+                "path": "/upload/chromewebstore/v1.1/items/{itemId}"
+              }
+            },
+            "accept": [
+              "*/*"
+            ],
+            "maxSize": "2147483648"
+          },
+          "path": "chromewebstore/v1.1/items/{itemId}",
+          "supportsMediaUpload": true,
+          "scopes": [
+            "https://www.googleapis.com/auth/chromewebstore"
+          ],
+          "request": {
+            "$ref": "Item"
+          },
+          "response": {
+            "$ref": "Item"
+          }
+        },
+        "publish": {
+          "parameterOrder": [
+            "itemId"
+          ],
+          "parameters": {
+            "publishTarget": {
+              "location": "query",
+              "type": "string",
+              "description": "Provide defined publishTarget in URL (case sensitive): publishTarget=\"trustedTesters\" or publishTarget=\"default\". Defaults to publishTarget=\"default\"."
+            },
+            "itemId": {
+              "description": "The ID of the item to publish.",
+              "location": "path",
+              "type": "string",
+              "required": true
+            },
+            "deployPercentage": {
+              "format": "int32",
+              "location": "query",
+              "description": "The deploy percentage you want to set for your item. Valid values are [0, 100]. If set to any number less than 100, only that many percentage of users will be allowed to get the update.",
+              "type": "integer"
+            },
+            "reviewExemption": {
+              "type": "boolean",
+              "location": "query",
+              "description": "Optional. The caller request to exempt the review and directly publish because the update is within the list that we can automatically validate. The API will check if the exemption can be granted using real time data."
+            }
+          },
+          "path": "chromewebstore/v1.1/items/{itemId}/publish",
+          "httpMethod": "POST",
+          "request": {
+            "$ref": "PublishRequest"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/chromewebstore"
+          ],
+          "response": {
+            "$ref": "Item2"
+          },
+          "description": "Publishes an item.",
+          "flatPath": "chromewebstore/v1.1/items/{itemId}/publish",
+          "id": "chromewebstore.items.publish"
+        },
+        "get": {
+          "id": "chromewebstore.items.get",
+          "flatPath": "chromewebstore/v1.1/items/{itemId}",
+          "parameterOrder": [
+            "itemId"
+          ],
+          "scopes": [
+            "https://www.googleapis.com/auth/chromewebstore",
+            "https://www.googleapis.com/auth/chromewebstore.readonly"
+          ],
+          "response": {
+            "$ref": "Item"
+          },
+          "httpMethod": "GET",
+          "path": "chromewebstore/v1.1/items/{itemId}",
+          "parameters": {
+            "itemId": {
+              "description": "Unique identifier representing the Chrome App, Chrome Extension, or the Chrome Theme.",
+              "location": "path",
+              "type": "string",
+              "required": true
+            },
+            "projection": {
+              "type": "string",
+              "enumDescriptions": [
+                "Return information extracted from the current draft.",
+                "Return information extracted from the published item draft."
+              ],
+              "location": "query",
+              "enum": [
+                "DRAFT",
+                "PUBLISHED"
+              ],
+              "description": "Determines which subset of the item information to return."
+            }
+          },
+          "description": "Gets your own Chrome Web Store item."
+        }
+      }
+    }
+  },
+  "rootUrl": "https://chromewebstore.googleapis.com/",
+  "basePath": "",
+  "mtlsRootUrl": "https://chromewebstore.mtls.googleapis.com/",
+  "ownerName": "Google",
+  "title": "Chrome Web Store API",
+  "revision": "20261110",
   "parameters": {
-    "callback": {
+    "upload_protocol": {
       "type": "string",
       "location": "query",
-      "description": "JSONP"
+      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
     },
-    "key": {
-      "type": "string",
+    "$.xgafv": {
+      "description": "V1 error format.",
       "location": "query",
-      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token."
+      "enumDescriptions": [
+        "v1 error format",
+        "v2 error format"
+      ],
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
     },
     "prettyPrint": {
       "location": "query",
@@ -207,168 +319,56 @@
       "type": "boolean",
       "description": "Returns response with indentations and line breaks."
     },
-    "alt": {
-      "default": "json",
-      "type": "string",
-      "enum": [
-        "json",
-        "media",
-        "proto"
-      ],
-      "description": "Data format for response.",
+    "key": {
       "location": "query",
-      "enumDescriptions": [
-        "Responses with Content-Type of application/json",
-        "Media download with context-dependent Content-Type",
-        "Responses with Content-Type of application/x-protobuf"
-      ]
-    },
-    "access_token": {
-      "description": "OAuth access token.",
-      "type": "string",
-      "location": "query"
-    },
-    "fields": {
-      "type": "string",
-      "location": "query",
-      "description": "Selector specifying which fields to include in a partial response."
+      "description": "API key. Your API key identifies your project and provides you with API access, quota, and reports. Required unless you provide an OAuth 2.0 token.",
+      "type": "string"
     },
     "uploadType": {
       "type": "string",
       "description": "Legacy upload protocol for media (e.g. \"media\", \"multipart\").",
       "location": "query"
     },
-    "$.xgafv": {
-      "location": "query",
+    "callback": {
       "type": "string",
-      "enum": [
-        "1",
-        "2"
-      ],
-      "enumDescriptions": [
-        "v1 error format",
-        "v2 error format"
-      ],
-      "description": "V1 error format."
+      "location": "query",
+      "description": "JSONP"
     },
-    "oauth_token": {
+    "alt": {
       "location": "query",
-      "type": "string",
-      "description": "OAuth 2.0 token for the current user."
+      "description": "Data format for response.",
+      "enumDescriptions": [
+        "Responses with Content-Type of application/json",
+        "Media download with context-dependent Content-Type",
+        "Responses with Content-Type of application/x-protobuf"
+      ],
+      "default": "json",
+      "enum": [
+        "json",
+        "media",
+        "proto"
+      ],
+      "type": "string"
     },
     "quotaUser": {
-      "type": "string",
+      "location": "query",
       "description": "Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a user, but should not exceed 40 characters.",
+      "type": "string"
+    },
+    "oauth_token": {
+      "type": "string",
+      "description": "OAuth 2.0 token for the current user.",
       "location": "query"
     },
-    "upload_protocol": {
-      "type": "string",
+    "access_token": {
       "location": "query",
-      "description": "Upload protocol for media (e.g. \"raw\", \"multipart\")."
-    }
-  },
-  "discoveryVersion": "v1",
-  "icons": {
-    "x16": "http://www.google.com/images/icons/product/search-16.gif",
-    "x32": "http://www.google.com/images/icons/product/search-32.gif"
-  },
-  "fullyEncodeReservedExpansion": true,
-  "description": "The Chrome Web Store API provides access to data about apps and extensions, as well as developer tools for managing them.",
-  "schemas": {
-    "PublishRequest": {
-      "properties": {
-        "reviewExemption": {
-          "description": "Optional. The caller request to exempt the review and directly publish because the update is within the list that we can automatically validate. The API will check if the exemption can be granted using real time data.",
-          "type": "boolean"
-        },
-        "deployPercentage": {
-          "format": "int32",
-          "description": "The target deploy percentage of the item. It's only useful for items with big user base.",
-          "type": "integer"
-        },
-        "target": {
-          "type": "string",
-          "description": "The publish target of this publish operation. This is the same as using publishTarget as a URL query parameter. The string value can either be target=\"trustedTesters\" or target=\"default\". The default value, if none is supplied, is target=\"default\". Recommended usage is to use the URL query parameter to specificy the value."
-        }
-      },
-      "id": "PublishRequest",
-      "type": "object"
+      "description": "OAuth access token.",
+      "type": "string"
     },
-    "ItemError": {
-      "properties": {
-        "error_detail": {
-          "description": "The human-readable detail message of the error.",
-          "type": "string"
-        },
-        "error_code": {
-          "type": "string",
-          "description": "The error code."
-        }
-      },
-      "description": "Error of the item",
-      "id": "ItemError",
-      "type": "object"
-    },
-    "Item2": {
-      "properties": {
-        "status": {
-          "description": "The status code of this publish operation. It may contain multiple elements from the following list: NOT_AUTHORIZED, INVALID_DEVELOPER, DEVELOPER_NO_OWNERSHIP, DEVELOPER_SUSPENDED, ITEM_NOT_FOUND, ITEM_PENDING_REVIEW, ITEM_TAKEN_DOWN, PUBLISHER_SUSPENDED.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "item_id": {
-          "description": "The ID of this item.",
-          "type": "string"
-        },
-        "kind": {
-          "type": "string",
-          "description": "Static string value is always \"chromewebstore#item\"."
-        },
-        "statusDetail": {
-          "description": "Detailed human-comprehensible explanation of the status code above.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "id": "Item2",
-      "type": "object"
-    },
-    "Item": {
-      "id": "Item",
-      "properties": {
-        "kind": {
-          "type": "string",
-          "description": "Identifies this resource as an Item. Value: the fixed string \"chromewebstore#item\"."
-        },
-        "publicKey": {
-          "description": "Public key of this item.",
-          "type": "string"
-        },
-        "itemError": {
-          "type": "array",
-          "description": "Detail human-readable status of the operation, in English only. Same error messages are displayed when you upload your app to the Chrome Web Store.",
-          "items": {
-            "$ref": "ItemError"
-          }
-        },
-        "uploadState": {
-          "description": "Status of the operation. Possible values are: - \\\"FAILURE\\\" - \\\"IN_PROGRESS\\\" - \\\"NOT_FOUND\\\" - \\\"SUCCESS\\\" ",
-          "type": "string"
-        },
-        "id": {
-          "description": "Unique ID of the item.",
-          "type": "string"
-        },
-        "crxVersion": {
-          "type": "string",
-          "description": "The CRX version of the item. If the projection is draft, then it is the draft's CRX version."
-        }
-      },
-      "type": "object"
+    "fields": {
+      "type": "string",
+      "description": "Selector specifying which fields to include in a partial response.",
+      "location": "query"
     }
   }
 }
